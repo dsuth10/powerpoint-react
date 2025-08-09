@@ -29,6 +29,16 @@ class Settings(BaseSettings):
     IMAGE_CACHE_MAX_ENTRIES: int = 256
     IMAGE_MAX_CONCURRENCY: int = 4
 
+    # PPTX builder settings
+    PPTX_TEMPLATE_PATH: str | None = None
+    PPTX_TEMP_DIR: str = "/tmp"
+    PPTX_FONT_NAME: str = "Calibri"
+    PPTX_TITLE_FONT_SIZE_PT: int = 32
+    PPTX_BODY_FONT_SIZE_PT: int = 18
+    PPTX_IMAGE_MAX_WIDTH_IN: float = 8.0
+    PPTX_IMAGE_MAX_HEIGHT_IN: float = 4.5
+    PPTX_IMAGE_HTTP_TIMEOUT_SECONDS: int = 10
+
     class Config:
         env_file = ".env"
 

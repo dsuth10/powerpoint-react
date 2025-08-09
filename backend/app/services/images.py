@@ -1,6 +1,6 @@
 import httpx
 from typing import Any, Dict, List, Optional
-from tenacity import retry, stop_after_attempt, wait_exponential, wait_random_jitter
+from tenacity import retry, stop_after_attempt, wait_exponential, wait_random
 from app.core.config import settings
 from app.models.slides import SlidePlan, ImageMeta
 from app.models.stability import StabilityGenerationRequest, StabilityGenerationResponse
@@ -57,7 +57,7 @@ def _cache_set(key: str, value: ImageMeta) -> None:
     _cache[key] = (time.time(), value)
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random_jitter(0.5))
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5))
 async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None) -> ImageMeta:
     async with get_async_client() as client:
         try:

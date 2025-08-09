@@ -13,7 +13,7 @@ def raise_http():
 def raise_generic():
     raise ValueError("Unexpected error")
 
-client = TestClient(app)
+client = TestClient(app, raise_server_exceptions=False)
 
 def test_http_exception_handler():
     resp = client.get("/raise-http")

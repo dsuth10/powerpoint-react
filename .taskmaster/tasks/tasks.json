@@ -445,7 +445,7 @@
             "description": "Create utility to generate image prompts from slide content",
             "dependencies": [],
             "details": "Implement a `build_prompt` function that derives an image generation prompt from a SlidePlan object using title and bullet points. Include normalization logic for creating consistent cache keys. Support pluggable style presets through an optional style parameter. Ensure prompts are properly formatted for Stability AI API.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test prompt generation with various slide contents, verify normalization logic, and test different style presets."
           },
           {
@@ -456,7 +456,7 @@
               "5.2"
             ],
             "details": "Define Pydantic models in `backend/app/models/stability.py` for Stability AI API payloads and responses. Include models for generation parameters, request body, and response structure. Ensure models are decoupled from provider specifics to allow for future provider changes. Include URL response handling for image results.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test model validation with sample payloads, verify serialization/deserialization works correctly."
           },
           {
@@ -480,7 +480,7 @@
               "5.5"
             ],
             "details": "Implement `generate_images(slides: List[SlidePlan]) -> List[ImageMeta]` function using asyncio.gather to process multiple slides concurrently. Include bounded concurrency to prevent overwhelming the API. Ensure ordering guarantees so returned images match input slide order. Handle partial failures gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test batch processing with various input sizes, verify concurrency limits, test ordering guarantees, and validate error handling during partial failures."
           },
           {
@@ -492,7 +492,7 @@
               "5.5"
             ],
             "details": "Implement an in-memory cache for generated images keyed by normalized prompt and style. Include TTL (time-to-live) and size cap for cache entries. Add cache hit metrics for monitoring. Modify the generate_image_for_slide function to check cache before making API calls.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test cache hits and misses, verify TTL functionality, test size cap enforcement, and validate metrics recording."
           },
           {
@@ -516,7 +516,7 @@
               "5.7"
             ],
             "details": "Add counters and histograms for requests, latency, retries, rate limits, and cache hits. Implement structured logging throughout the service. Ensure prompts are redacted in logs unless explicitly enabled. Create helper functions for consistent metric recording.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test metric recording for various scenarios, verify log redaction works correctly, and validate all key events are properly logged."
           },
           {
@@ -535,7 +535,7 @@
               "5.9"
             ],
             "details": "Implement respx-mocked tests for all service functions covering success cases, 4xx/5xx errors, timeouts, rate limits, batching behavior, cache reuse, and fallback paths. Verify ImageMeta validation works correctly. Test that batch results maintain correct ordering. Create test fixtures for common test scenarios.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run tests with various mocked API responses, verify all edge cases are covered, and ensure tests are isolated and repeatable."
           }
         ]
@@ -550,8 +550,127 @@
         "dependencies": [
           3
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PPTX Template and Layout Manager",
+            "description": "Implement a template manager that loads or creates a base PowerPoint template with consistent layouts for title and content slides.",
+            "dependencies": [],
+            "details": "Create a `PPTXTemplateManager` class in `backend/app/services/pptx.py` that handles template loading from a .potx file if available or creates a default template with consistent layouts. Define standard slide layouts (title slide, content with image, bullet points only). Implement methods to access these layouts and apply them to new slides. Configure font families, sizes, and colors for consistency.",
+            "status": "done",
+            "testStrategy": "Test template loading with both valid and missing template files. Verify the default template creation works correctly. Check that all required layouts are available."
+          },
+          {
+            "id": 2,
+            "title": "Implement Text Rendering for Slides",
+            "description": "Create functionality to add formatted titles and bullet points to slides with proper text formatting and handling of long text.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Implement a `TextRenderer` class that handles adding text elements to slides. Create methods for adding slide titles with consistent formatting. Implement bullet point rendering with support for multiple levels. Add text wrapping and truncation logic for long text. Document the rules for text handling (character limits, wrapping behavior). Handle font, size, and formatting consistently.",
+            "status": "done",
+            "testStrategy": "Test with various text lengths including very long titles and bullet points. Verify proper wrapping and formatting. Test with special characters and Unicode text."
+          },
+          {
+            "id": 3,
+            "title": "Implement Image Processing and Placement",
+            "description": "Create functionality to download, process, and place images on slides with proper sizing and positioning.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Implement an `ImageProcessor` class that handles image fetching from URLs in `ImageMeta`. Add methods to download images with proper timeout handling. Implement image placement on slides with consistent positioning. Maintain aspect ratios and implement fit/contain strategy. Add center alignment for images. Implement fallback to placeholder image if fetch fails or on error.",
+            "status": "done",
+            "testStrategy": "Test image downloading with valid and invalid URLs. Verify image placement and sizing. Test timeout handling and fallback to placeholder."
+          },
+          {
+            "id": 4,
+            "title": "Add Speaker Notes Support",
+            "description": "Implement functionality to add speaker notes to slides when provided.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Add methods to the slide generation process to attach speaker notes when provided in the slide plan. Ensure notes are properly formatted and visible in the notes pane when viewing the presentation. Handle long notes with proper formatting.",
+            "status": "done",
+            "testStrategy": "Test adding notes of various lengths. Verify notes appear correctly when opening the generated PPTX file."
+          },
+          {
+            "id": 5,
+            "title": "Implement Accessibility Features",
+            "description": "Ensure generated presentations include accessibility features like alt text for images.",
+            "dependencies": [
+              "6.3"
+            ],
+            "details": "Extend the `ImageProcessor` to add alt text to images using the `altText` field from `ImageMeta`. Document any limitations of python-pptx for accessibility features. Implement best practices for accessible PowerPoint generation. Add methods to verify and report on accessibility compliance of generated slides.",
+            "status": "done",
+            "testStrategy": "Test that alt text is correctly added to images. Verify accessibility features work when opening the file in PowerPoint."
+          },
+          {
+            "id": 6,
+            "title": "Create File Output and Management System",
+            "description": "Implement functionality to save generated PPTX files to a temporary location with unique identifiers.",
+            "dependencies": [],
+            "details": "Create a `FileManager` class that handles saving PPTX files to a configurable temporary directory. Generate UUID-based filenames for uniqueness. Implement methods to return file paths or optionally file bytes. Document cleanup strategy for temporary files. Add configuration options for temp directory location.",
+            "status": "done",
+            "testStrategy": "Test file saving with various output options. Verify unique filenames are generated. Test cleanup functionality."
+          },
+          {
+            "id": 7,
+            "title": "Implement Progress Tracking and Callbacks",
+            "description": "Add support for progress tracking during PPTX generation to enable frontend progress updates.",
+            "dependencies": [
+              "6.2",
+              "6.3",
+              "6.4"
+            ],
+            "details": "Implement a progress tracking system that can report on the status of PPTX generation. Add support for optional callback functions that can be called at various stages (per slide, on completion, etc.). Design the callback system to work with WebSockets without creating a hard dependency. Track percentage complete and current operation.",
+            "status": "done",
+            "testStrategy": "Test progress reporting with and without callbacks. Verify accurate progress percentage calculation."
+          },
+          {
+            "id": 8,
+            "title": "Implement Robust Error Handling",
+            "description": "Create comprehensive error handling for the PPTX generation process with detailed error reporting.",
+            "dependencies": [
+              "6.2",
+              "6.3",
+              "6.4",
+              "6.6"
+            ],
+            "details": "Implement exception handling throughout the PPTX generation process. Create custom exception classes for different error types (TemplateError, ImageError, etc.). Implement continue-on-error functionality for individual slides. Add detailed error logging. Create a results summary object that includes successes and failures. Implement graceful degradation for non-critical errors.",
+            "status": "done",
+            "testStrategy": "Test error handling with various failure scenarios (missing template, bad image URLs, invalid content). Verify the service continues processing when appropriate and returns useful error information."
+          },
+          {
+            "id": 9,
+            "title": "Create Main PPTX Builder Service",
+            "description": "Implement the main service class that orchestrates the entire PPTX generation process.",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3",
+              "6.4",
+              "6.5",
+              "6.6",
+              "6.7",
+              "6.8"
+            ],
+            "details": "Create the main `PPTXBuilder` class that integrates all components. Implement the primary `generate_presentation` method that takes a list of `SlidePlan` objects and generates a complete PPTX file. Add configuration options for HTTP timeouts, temp directory, max image size, and font defaults. Implement proper initialization and cleanup. Create a simple API for the service that can be called from other parts of the application.",
+            "status": "done",
+            "testStrategy": "Test end-to-end PPTX generation with various inputs. Verify all components work together correctly. Test with edge cases like empty slide plans or missing data."
+          },
+          {
+            "id": 10,
+            "title": "Write Comprehensive Unit Tests",
+            "description": "Create a suite of unit tests for the PPTX Builder service and its components.",
+            "dependencies": [
+              "6.9"
+            ],
+            "details": "Implement unit tests for all PPTX Builder components. Create test fixtures with sample slide plans and image metadata. Implement mocks for external dependencies like HTTP requests for images. Write tests that verify slide count, content presence, and file integrity. Create tests for error conditions and edge cases. Implement integration tests that verify the generated files can be opened in PowerPoint.",
+            "status": "done",
+            "testStrategy": "Run tests with pytest. Use mocks for external dependencies. Verify test coverage meets project standards. Include both unit tests for individual components and integration tests for the complete service."
+          }
+        ]
       },
       {
         "id": 7,
@@ -821,7 +940,7 @@
     ],
     "metadata": {
       "created": "2025-08-09T09:35:23.960Z",
-      "updated": "2025-08-09T11:02:59.725Z",
+      "updated": "2025-08-09T11:39:40.057Z",
       "description": "Tasks for master context"
     }
   }

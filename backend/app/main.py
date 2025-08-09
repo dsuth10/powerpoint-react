@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
@@ -33,11 +33,12 @@ app.mount("/ws", socketio_ws_app)
 
 add_error_handlers(app)
 
-# Patch routers to add rate limit to public POST routes
+# Patch routers to add rate limit to public POST routes using proper Depends
 for router in [auth_router, chat_router, slides_router]:
     for route in router.routes:
         if getattr(route, "methods", None) and "POST" in route.methods:
-            route.dependencies = getattr(route, "dependencies", []) + [rate_limit_dependency]
+            existing = getattr(route, "dependencies", []) or []
+            route.dependencies = [*existing, Depends(rate_limit_dependency)]
 
 setup_logging()
 setup_metrics(app)

@@ -1,6 +1,6 @@
 import httpx
 from typing import Any, Dict, Optional
-from tenacity import retry, stop_after_attempt, wait_exponential, wait_random_jitter
+from tenacity import retry, stop_after_attempt, wait_exponential, wait_random
 from app.core.config import settings
 from app.models.chat import ChatRequest, ChatResponse
 from app.models.slides import SlidePlan
@@ -50,7 +50,7 @@ def _parse_response(data: Dict[str, Any]) -> ChatResponse:
     slides = [SlidePlan(**s) for s in slides_raw]
     return ChatResponse(slides=slides, sessionId=data.get("sessionId"))
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random_jitter(0.5))
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5))
 async def generate_outline(request: ChatRequest) -> ChatResponse:
     """
     Calls the OpenRouter LLM API to generate a slide outline.

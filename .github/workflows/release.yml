@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+      - name: Build images
+        run: |
+          docker build -t pptx-backend:${{ github.ref_name }} -f backend/Dockerfile .
+          docker build -t pptx-frontend:${{ github.ref_name }} -f frontend/Dockerfile ./frontend
+      - name: Login to registry (placeholder)
+        run: echo "docker login ..."
+      - name: Push and sign images (placeholder)
+        run: |
+          echo "docker push ..."
+          echo "cosign sign ..."
+

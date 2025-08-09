@@ -1,0 +1,51 @@
+---
+alwaysApply: true
+---
+description:apply the relevant planning documents when working on any area of the AI-PowerPoint-Generator
+# planning-docs-reference: Mandatory Use of Planning Documents
+
+This rule requires that all contributors—including AI—consult and apply the relevant planning documents when working on any area of the AI-PowerPoint-Generator monorepo. This ensures consistency, accuracy, and alignment with project standards.
+
+## 1. Reference Requirements
+- **Dependency Management:**
+  - Always consult [versions.md](mdc:planning_documents/versions.md) before adding, updating, or removing any software package or library.
+  - Never introduce a dependency not listed in versions.md without updating and reviewing that file first.
+- **Module Development:**
+  - When building, refactoring, or extending a module, always review the relevant section in [module-specs.md](mdc:planning_documents/module-specs.md).
+  - Follow all API contracts, input/output types, and error handling strategies defined there.
+- **High-Level or Architectural Tasks:**
+  - For any work affecting system structure, cross-cutting concerns, or major features, begin by reviewing [architecture-overview.md](mdc:planning_documents/architecture-overview.md).
+  - Ensure all changes align with the current architecture and update the overview if the architecture evolves.
+
+## 2. Actionable Steps
+1. **Start every new task by identifying which planning documents are relevant.**
+2. **Explicitly reference the appropriate document(s) in PR descriptions, commit messages, or AI prompts.**
+3. **If a document is missing required information, update it before proceeding.**
+4. **For AI-assisted work, always load and parse the relevant planning document(s) before generating code or suggestions.**
+
+## 3. Good / Bad Examples
+```markdown
+// ✅ Good: Adding a new dependency
+- Checked versions.md for existing version
+- Updated versions.md with new package and rationale
+- Referenced versions.md in PR description
+
+// ❌ Bad: Adding a dependency without consulting versions.md
+- Installed package directly with npm install
+- Did not update or reference versions.md
+```
+
+```markdown
+// ✅ Good: Building a new module
+- Reviewed module-specs.md for API and data contracts
+- Followed input/output and error handling patterns
+- Linked module-specs.md in commit message
+
+// ❌ Bad: Implementing a module without checking module-specs.md
+- Guessed API shape or types
+- Missed required error handling
+```
+
+## 4. Maintenance
+- Review this rule quarterly and update references if planning document structure changes.
+- Add new planning documents to this rule as the project evolves.

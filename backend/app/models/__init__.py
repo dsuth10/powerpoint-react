@@ -1,0 +1,1 @@
+# Models package for domain entities (chat, slides, common, etc.) 

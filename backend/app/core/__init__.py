@@ -1,0 +1,1 @@
+# Core package for config, logging, error handlers, and auth dependencies 

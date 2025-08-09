@@ -1,0 +1,84 @@
+---
+alwaysApply: true
+---
+description: This rule codifies the architecture, style, quality, and operational standards for the AI-PowerPoint-Generator monorepo. It is derived from the canonical planning documents and is enforced across all code, configuration, and documentation.
+
+## 1. Directory & File Structure
+- **Monorepo layout:**
+  - `frontend/` (React 18 + TS)
+  - `backend/` (FastAPI)
+  - `docs/`, `.github/`, `.cursor/`
+- **Frontend:**
+  - `src/components/`, `hooks/`, `stores/`, `routes/`, `types/`
+- **Backend:**
+  - `app/main.py` (entry), `api/`, `models/`, `services/`, `core/`
+- **No sibling folders** at root except those listed above.
+- **Reference:** [architecture-overview.md](mdc:planning_documents/architecture-overview.md)
+
+## 2. Tooling & Versions
+- All package versions **must match** [versions.md](mdc:planning_documents/versions.md).
+- No use of "latest" or unpinned dependencies.
+- Node.js: 18.19.0, Python: 3.12.0 (see `.nvmrc`, `.python-version`).
+
+## 3. Coding Standards
+### 3.1 Frontend (React 18 + TypeScript)
+- Use **function components** only.
+- TypeScript `strict` mode enabled; no `any` except for 3rd-party signatures with `@ts-expect-error`.
+- **TanStack Query** for all HTTP; no raw fetch outside `hooks/api/*`.
+- **Zustand v4.5** + `immer` for state; co-locate selectors.
+- UI primitives from `@/components/ui/*` (shadcn/ui).
+- Tailwind classes must follow `tailwindcss-animate` ordering.
+- **Lint/format:** ESLint, Prettier, Stylelint; run `npm run quality` before commit.
+
+### 3.2 Backend (FastAPI)
+- Entry-point: `backend/app/main.py` only.
+- Response models extend `BaseModel` with `model_config = {"strict": True}`.
+- All external HTTP via shared `httpx.AsyncClient` (DI).
+- Real-time: `python-socketio` server at `/ws` (no Flask-SocketIO).
+- JWT auth: 15 min access / 24 h refresh; secret in `JWT_SECRET_KEY`.
+- **Lint/format:** ruff, black, mypy; run before commit.
+
+### 3.3 Shared
+- **Naming:** `kebab-case` for files, `PascalCase` for components.
+- **Imports:** Absolute `@/` alias in frontend only.
+- **Env vars:** Must exist in [versions.md](mdc:planning_documents/versions.md).
+- **No direct SQL** or database code unless scheduled.
+
+## 4. Testing & Quality Gates
+- **Coverage ≥ 90 %** (lines & branches) for both frontend and backend.
+- Frontend: Vitest + React Testing Library; Backend: pytest-asyncio.
+- WebSocket tests: `python-socketio` test client only.
+- Contract tests: `schemathesis` against `/openapi.json`.
+- **CI/CD:** All PRs must pass type, lint, test, and coverage gates. No `skip-ci` label allowed.
+
+## 5. Security & Performance
+- Never log raw API keys or JWTs.
+- Add `@rate_limit` decorator to public POST routes (backend).
+- Enforce Content-Security-Policy via Nginx (frontend Docker).
+- **Performance targets:** API P95 ≤ 400 ms (prod), bundle ≤ 250 KB gzipped, FCP ≤ 2.5 s.
+
+## 6. Good / Bad Examples
+```typescript
+// ✅ Good – type-safe TanStack Query wrapper
+export const useGenerateOutline = () =>
+  useMutation<ChatResponse, Error, ChatRequest>({
+    mutationFn: (payload) =>
+      apiClient.POST("/chat/generate", { body: payload }),
+  })
+
+// ❌ Bad – untyped fetch, no error handling
+const gen = (prompt) =>
+  fetch("/api/chat/generate", { method: "POST", body: JSON.stringify({ prompt }) })
+```
+
+```python
+# ✅ Good – async HTTPX client via DI
+async def llm_client() -> AsyncClient: ...
+
+# ❌ Bad – requests.post blocking call inside async route
+```
+
+
+
+
+```

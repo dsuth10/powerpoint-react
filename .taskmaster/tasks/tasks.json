@@ -1,0 +1,497 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Repository and Development Environment",
+        "description": "Create a monorepo structure with Docker configuration for both frontend and backend development",
+        "details": "Initialize a Git repository with a monorepo structure containing frontend/ and backend/ directories. Create Docker and Docker Compose configurations to ensure consistent development environments. Set up .gitignore files, README.md with setup instructions, and a versions.md file to pin dependency versions (Node 18.19.0, Python 3.12.0, etc.). Configure Docker Compose to run both services together with appropriate networking.",
+        "testStrategy": "Verify Docker containers build and run successfully on different platforms (Linux, macOS, Windows). Ensure hot-reloading works in development mode. Test that frontend can reach backend API endpoints through Docker networking.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize Monorepo Structure with Git",
+            "description": "Create the initial Git repository with the correct monorepo structure including frontend and backend directories, along with other required top-level directories and files.",
+            "dependencies": [],
+            "details": "Create a new Git repository. Set up the directory structure with frontend/ and backend/ as the main directories. Add additional directories like docs/ and .github/ if needed. Create initial README.md with project overview and setup instructions. Create versions.md file to document and pin dependency versions (Node 18.19.0, Python 3.12.0). Set up appropriate .gitignore files at the root and in subdirectories to exclude node_modules, __pycache__, and other build artifacts.",
+            "status": "done",
+            "testStrategy": "Verify the repository structure matches the required layout. Confirm all required directories and files exist. Validate .gitignore files contain appropriate entries."
+          },
+          {
+            "id": 2,
+            "title": "Create Docker Configuration for Frontend and Backend",
+            "description": "Develop Dockerfiles for both frontend and backend services with proper multi-stage builds, non-root user configuration, and correct build contexts.",
+            "dependencies": [],
+            "details": "Create a Dockerfile for the frontend service using Node 18.19.0 as the base image. Implement multi-stage build to optimize the production image size. Create a Dockerfile for the backend service using Python 3.12.0. Configure both Dockerfiles to run as non-root users for security. Set up proper COPY and RUN commands to install dependencies and build the applications. Configure appropriate EXPOSE ports and entry commands. Add .dockerignore files to exclude unnecessary files from the build context.",
+            "status": "done",
+            "testStrategy": "Build both Docker images to verify they compile without errors. Check that multi-stage builds are properly implemented. Verify non-root users are configured correctly. Confirm hot reload capability works in development mode."
+          },
+          {
+            "id": 3,
+            "title": "Configure Docker Compose for Development Environment",
+            "description": "Create a docker-compose.dev.yml file that properly configures both services with appropriate networking, volumes for live reloading, and environment variables.",
+            "dependencies": [],
+            "details": "Create docker-compose.dev.yml file that defines both frontend and backend services. Configure volumes to mount source code for live reloading during development. Set up proper networking between services so frontend can communicate with backend. Define appropriate environment variables for development. Configure service dependencies to ensure proper startup order. Ensure the configuration works across Windows, macOS, and Linux platforms. Add comments explaining key configuration choices.",
+            "status": "done",
+            "testStrategy": "Start the services using docker-compose up and verify both containers start successfully. Test live reloading by making changes to source files. Verify frontend can communicate with backend through Docker networking."
+          },
+          {
+            "id": 4,
+            "title": "Implement Toolchain Version Pinning",
+            "description": "Ensure consistent development environments by pinning toolchain versions in configuration files and documentation.",
+            "dependencies": [],
+            "details": "Create .nvmrc file in the frontend directory to pin Node.js to version 18.19.0. Add .python-version file in the backend directory to pin Python to version 3.12.0. Update package.json to specify exact versions of npm dependencies. Create requirements.txt with pinned Python package versions. Update versions.md with comprehensive version information for all tools and dependencies. Ensure Docker images use the same versions as specified in these files. Update README.md to reference these version requirements.",
+            "status": "done",
+            "testStrategy": "Verify that all version files exist and contain the correct version numbers. Confirm Docker builds use the specified versions. Check that package.json and requirements.txt align with the versions specified in versions.md."
+          },
+          {
+            "id": 5,
+            "title": "Enhance Repository Documentation and Hygiene",
+            "description": "Improve repository documentation and setup additional development tools to ensure a smooth developer experience.",
+            "dependencies": [],
+            "details": "Update README.md with comprehensive setup instructions, including platform-specific commands for Windows (PowerShell), macOS, and Linux. Create a Makefile with common development tasks (build, test, lint, etc.). Add CONTRIBUTING.md with guidelines for contributors. Create root .gitignore file with comprehensive patterns. Add LICENSE file with appropriate license. Set up .editorconfig for consistent formatting across editors. Document environment variables in a .env.example file. Create a CHANGELOG.md file to track changes.",
+            "status": "done",
+            "testStrategy": "Review all documentation files for completeness and accuracy. Test Makefile targets to ensure they work as expected. Verify .gitignore patterns are effective by testing with common development artifacts."
+          },
+          {
+            "id": 6,
+            "title": "Perform Environment Verification and Smoke Testing",
+            "description": "Validate the complete development environment setup with comprehensive testing across platforms and verify service connectivity.",
+            "dependencies": [],
+            "details": "Create a verification script that checks the repository structure against PRD requirements. Validate Docker configurations for best practices (multi-stage builds, non-root users, etc.). Test docker-compose.dev.yml on Windows, macOS, and Linux to ensure cross-platform compatibility. Verify frontend can reach backend API endpoints through Docker networking. Test hot-reloading functionality in both frontend and backend. Verify all environment variables are properly passed to containers. Document any platform-specific issues and workarounds.",
+            "status": "done",
+            "testStrategy": "Run the verification script to validate repository structure. Start the development environment on different platforms to verify cross-platform compatibility. Make test API calls from frontend to backend to verify connectivity. Make changes to source files to verify hot-reloading works correctly."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Configure CI/CD Pipeline",
+        "description": "Set up GitHub Actions workflows for continuous integration and deployment",
+        "details": "Create .github/workflows/ci.yml for running tests, linting, and building Docker images. Configure type checking for both TypeScript and Python. Set up linting with ESLint, Stylelint for frontend and Ruff, Black for backend. Configure test runners for Vitest (frontend) and pytest (backend) with coverage thresholds of 90%. Add Docker image building and vulnerability scanning with Trivy. For deployment, create deploy.yml to handle staging and production deployments using Helm charts.",
+        "testStrategy": "Verify CI pipeline runs successfully on pull requests. Test that all quality gates (linting, type checking, tests) function correctly. Ensure Docker images are built and scanned properly. Validate that deployment workflow can be triggered manually.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create CI Workflow Scaffolding",
+            "description": "Set up the basic structure for GitHub Actions workflows with separate jobs for frontend and backend, including concurrency control and branch filters.",
+            "dependencies": [],
+            "details": "Create .github/workflows/ci.yml with workflow triggers for pull requests and pushes to main. Configure concurrency settings to prevent parallel runs on the same branch. Set up environment variables for Node 18.19.0 and Python 3.12.0. Define job matrix for frontend and backend. Add PR gating to prevent merging if CI fails. Include caching strategy for node_modules and pip dependencies keyed on lockfiles.",
+            "status": "done",
+            "testStrategy": "Verify workflow file passes GitHub Actions lint check. Test that workflow triggers correctly on PR and push events."
+          },
+          {
+            "id": 2,
+            "title": "Implement Frontend CI Jobs",
+            "description": "Configure frontend CI jobs for type checking, linting, testing, and artifact generation.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "In the ci.yml workflow, create a frontend job that runs on ubuntu-latest. Set up steps to checkout code, setup Node 18.19.0, install dependencies with npm ci, cache node_modules, run TypeScript type checking, execute ESLint and Stylelint with specific configurations, run Vitest tests with coverage threshold of 90%, and upload test reports and coverage as artifacts. Pin all GitHub Action versions for reproducibility.",
+            "status": "done",
+            "testStrategy": "Test the frontend CI job with a sample PR containing both passing and failing tests/lint to verify proper reporting."
+          },
+          {
+            "id": 3,
+            "title": "Implement Backend CI Jobs",
+            "description": "Configure backend CI jobs for type checking, linting, testing, and artifact generation.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "In the ci.yml workflow, create a backend job that runs on ubuntu-latest. Set up steps to checkout code, setup Python 3.12.0, install dependencies with pip and cache them, run Ruff for linting, Black for code formatting checks, Mypy for type checking, and pytest with coverage threshold of 90%. Upload test reports and coverage as artifacts. Ensure all tool versions are pinned.",
+            "status": "done",
+            "testStrategy": "Test the backend CI job with a sample PR containing both passing and failing tests/lint to verify proper reporting."
+          },
+          {
+            "id": 4,
+            "title": "Add Contract and Performance Testing",
+            "description": "Implement API contract testing with Schemathesis and basic performance testing with k6.",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Add a contract testing job that runs Schemathesis against the backend /openapi.json endpoint to validate API contracts. Include consumer verification steps. Create a performance testing job using k6 to run basic smoke tests for chat and slides endpoints with defined thresholds. Configure tests to be non-flaky with short durations suitable for CI. Upload test results as artifacts.",
+            "status": "done",
+            "testStrategy": "Verify contract tests correctly identify schema violations. Ensure performance tests have consistent results across multiple runs."
+          },
+          {
+            "id": 5,
+            "title": "Configure Docker Build and Security Scanning",
+            "description": "Set up Docker image building with multi-stage builds and security scanning with Trivy.",
+            "dependencies": [
+              "2.2",
+              "2.3"
+            ],
+            "details": "Create a Docker build job that builds frontend and backend images using multi-stage builds. Implement image size thresholds to prevent bloated images. Configure Trivy scanning for both images to detect vulnerabilities, failing the build on critical vulnerabilities. Generate and upload Software Bill of Materials (SBOM) for each image. Set up Docker layer caching to speed up builds.",
+            "status": "done",
+            "testStrategy": "Test Docker builds with intentionally vulnerable dependencies to verify Trivy correctly identifies and fails the build."
+          },
+          {
+            "id": 6,
+            "title": "Implement Security Checks",
+            "description": "Add dedicated security scanning for both frontend and backend codebases.",
+            "dependencies": [
+              "2.2",
+              "2.3"
+            ],
+            "details": "Create a security job that runs Bandit for Python backend code and npm audit for frontend dependencies. Configure the job to fail on high or critical vulnerabilities as specified in the PRD. Add CodeQL analysis for both JavaScript/TypeScript and Python code. Upload security scan results as artifacts and generate a security report summary.",
+            "status": "done",
+            "testStrategy": "Test security checks with known vulnerable dependencies to verify proper detection and reporting."
+          },
+          {
+            "id": 7,
+            "title": "Create Deployment Workflow",
+            "description": "Set up GitHub Actions workflow for deploying to staging and production environments using Helm charts.",
+            "dependencies": [
+              "2.5"
+            ],
+            "details": "Create .github/workflows/deploy.yml that triggers on successful completion of the CI workflow for main branch (staging) and on release tags (production). Configure Kubernetes authentication using OIDC. Set up Helm chart deployment with environment-specific values. Implement pre-deployment validation and post-deployment health checks. Add manual approval step for production deployments. Configure rollback mechanism for failed deployments.",
+            "status": "done",
+            "testStrategy": "Test deployment to a test environment to verify Helm chart installation works correctly. Validate rollback functionality works when health checks fail."
+          },
+          {
+            "id": 8,
+            "title": "Implement Release Workflow and Status Reporting",
+            "description": "Create a release workflow for building and publishing signed container images and implement CI status reporting.",
+            "dependencies": [
+              "2.5",
+              "2.7"
+            ],
+            "details": "Create .github/workflows/release.yml triggered by release tags to build, sign with Cosign, and push container images to the registry. Add status badges to README.md showing CI status. Configure PR comments with test coverage summary and status reports. Implement release notes generation based on conventional commits. Set up notifications for failed workflows via Slack or email. Ensure the release workflow is disabled by default and requires manual triggering.",
+            "status": "done",
+            "testStrategy": "Test the release workflow with a sample tag to verify image building, signing, and pushing works correctly. Verify status badges update properly."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Define Backend Domain Models",
+        "description": "Create Pydantic models for core data structures",
+        "details": "Implement Pydantic v2 models in backend/app/models/ directory: ChatRequest (prompt, slide_count, model), ChatResponse, SlidePlan (title, bullets, notes), ImageMeta (url, alt_text), and PPTXJob (job_id, status, error_message, result_url). Configure models with strict validation, camelCase JSON serialization, and appropriate type hints. Add docstrings and examples for each model.",
+        "testStrategy": "Write unit tests for model validation, serialization, and deserialization. Test edge cases like empty values, maximum lengths, and invalid inputs. Verify that models correctly convert between snake_case and camelCase for API responses.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement LLM Service Integration",
+        "description": "Create service to interact with OpenRouter API for slide outline generation",
+        "details": "Implement LLM service in backend/app/services/llm.py that connects to OpenRouter API. Create async functions to send prompts and receive responses. Implement proper error handling with retries (up to 3 attempts with exponential backoff). Parse LLM responses into structured SlidePlan objects. Add configuration for API keys via environment variables. Implement prompt engineering to ensure consistent slide outline format.",
+        "testStrategy": "Write unit tests with mocked API responses. Test error handling and retry logic. Create integration tests that use a test API key with rate limits. Verify that different prompt types produce valid SlidePlan structures.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Image Generation Service",
+        "description": "Create service to generate images for slides using Runware API",
+        "details": "Implement image service in backend/app/services/images.py to interact with Runware API. Create async functions to generate images based on slide content. Implement concurrent image generation for multiple slides using asyncio.gather. Add retry logic for failed requests. Implement fallback to placeholder images when generation fails. Configure caching to avoid regenerating identical images.",
+        "testStrategy": "Write unit tests with mocked API responses. Test concurrent image generation with multiple slides. Verify fallback mechanism works when API fails. Test caching logic to ensure identical requests reuse results.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement PPTX Builder Service",
+        "description": "Create service to generate PowerPoint files from slide plans and images",
+        "details": "Implement PPTX builder in backend/app/services/pptx.py using python-pptx library. Create functions to generate slides with titles, bullet points, and images. Implement proper layout and formatting for consistent slide appearance. Add support for speaker notes if provided. Create a basic slide template with placeholders for content. Implement file saving to temporary location with unique identifiers.",
+        "testStrategy": "Write unit tests to verify PPTX generation with various inputs. Test with missing images to ensure fallback works. Validate generated PPTX files can be opened in PowerPoint. Check that slide content matches input data.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Backend API Routes",
+        "description": "Create FastAPI endpoints for chat generation and slide building",
+        "details": "Implement API routes in backend/app/api/ directory. Create chat.py with POST /chat/generate endpoint that accepts ChatRequest and returns ChatResponse. Implement slides.py with POST /slides/build endpoint to initiate slide generation. Add GET /slides/download endpoint for file retrieval. Implement proper error handling and status codes. Add request validation using Pydantic models. Generate OpenAPI schema for frontend consumption.",
+        "testStrategy": "Write API tests using TestClient. Test successful and error scenarios for each endpoint. Verify request validation works correctly. Test with various input combinations. Validate OpenAPI schema generation is correct.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement WebSocket Server for Real-time Updates",
+        "description": "Create Socket.IO server for sending progress updates during slide generation",
+        "details": "Implement Socket.IO server in backend/app/socketio_app.py using python-socketio. Create event handlers for client connections. Implement authentication for WebSocket connections using session IDs. Create functions to emit 'slide:progress' events during generation. Add 'slide:completed' event emission when PPTX is ready. Integrate WebSocket server with FastAPI application.",
+        "testStrategy": "Write tests for WebSocket server using Socket.IO client. Test connection, authentication, and event emission. Verify clients receive progress updates correctly. Test reconnection handling and missed events.",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Backend Observability and Error Handling",
+        "description": "Add logging, metrics, and comprehensive error handling to backend",
+        "details": "Implement structured logging using structlog with JSON output. Add request ID tracking across services. Create custom exceptions for different error scenarios. Implement global exception handlers in FastAPI. Add Prometheus metrics endpoint with custom metrics for API latency, slide generation counts, and error rates. Implement health check endpoint. Add detailed error responses with appropriate HTTP status codes.",
+        "testStrategy": "Test logging output format and content. Verify metrics endpoint returns correct data. Test exception handling for various error scenarios. Verify health check endpoint works correctly.",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Authentication System",
+        "description": "Create passwordless authentication system using magic links and JWT",
+        "details": "Implement auth module in backend/app/core/auth.py. Create JWT generation and validation functions. Implement magic link email generation (logging to console in development). Create /auth/login endpoint to request magic links. Add /auth/refresh endpoint for token renewal. Implement FastAPI dependencies for protected routes. Add JWT middleware for authentication. Configure JWT secret via environment variables.",
+        "testStrategy": "Test JWT generation and validation. Verify magic link flow works correctly. Test token refresh functionality. Verify protected routes reject unauthorized requests. Test token expiration and renewal.",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Setup Frontend Project with Vite and React",
+        "description": "Initialize frontend React application with TypeScript and Vite",
+        "details": "Create frontend project using Vite with React and TypeScript. Configure Tailwind CSS for styling. Set up ESLint and Prettier for code quality. Add shadcn/UI components library. Configure Vitest for unit testing. Set up environment variables for development and production. Create directory structure following feature-based organization. Configure absolute imports for cleaner imports.",
+        "testStrategy": "Verify application builds and runs correctly. Test hot module reloading functionality. Ensure ESLint and Prettier configurations work. Validate test setup with sample component tests.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Generate TypeScript API Client from OpenAPI",
+        "description": "Create type-safe API client from backend OpenAPI schema",
+        "details": "Set up openapi-typescript-codegen to generate API client. Create script to fetch OpenAPI schema from backend and generate TypeScript client. Implement custom templates for React Query integration. Generate hooks for API endpoints (useGenerateChatMutation, useBuildSlidesMutation). Add types for all request and response models. Configure error handling and response parsing.",
+        "testStrategy": "Verify generated client matches backend API contract. Test generated hooks with mock data. Ensure type safety between frontend and backend. Validate error handling works correctly.",
+        "priority": "high",
+        "dependencies": [
+          7,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Implement Frontend Routing with TanStack Router",
+        "description": "Set up application routing for chat and slides pages",
+        "details": "Install and configure TanStack Router v1. Create route definitions for main application pages. Implement lazy loading for route components. Create root route that redirects to chat. Add chat route with session ID parameter. Implement not found page for invalid routes. Add route guards for authentication if needed.",
+        "testStrategy": "Test route navigation and parameters. Verify lazy loading works correctly. Test redirect functionality. Ensure route guards prevent unauthorized access if implemented.",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement Frontend State Management with Zustand",
+        "description": "Create state stores for chat and slides data",
+        "details": "Set up Zustand v4.5 for state management. Create ChatStore for managing chat messages and session data. Implement SlideStore for slide generation state and progress. Add immer middleware for immutable updates. Implement persistence for session data if needed. Create selectors for efficient component rendering. Add TypeScript types for all store states and actions.",
+        "testStrategy": "Write unit tests for store actions and selectors. Test state updates and immutability. Verify persistence works if implemented. Test store interactions with components.",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implement WebSocket Hook for Real-time Updates",
+        "description": "Create custom hook for WebSocket communication with backend",
+        "details": "Implement useWebSocket custom hook using Socket.IO client. Add connection management with automatic reconnection. Create event listeners for 'slide:progress' and 'slide:completed' events. Implement authentication for WebSocket connection. Add connection status tracking. Create typed event handlers for different message types.",
+        "testStrategy": "Test WebSocket connection and event handling. Verify reconnection logic works. Test event listeners with mock server. Ensure authentication works correctly. Validate typed event handlers process data correctly.",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement Core Layout Components",
+        "description": "Create layout components for application structure",
+        "details": "Implement Header component with application branding. Create Sidebar component for navigation. Implement MainLayout component as container for pages. Add responsive design using Tailwind CSS. Create loading and error states for layout. Implement theme support if needed. Add accessibility attributes for screen readers.",
+        "testStrategy": "Test layout components rendering. Verify responsive behavior on different screen sizes. Test accessibility with axe-core. Ensure layout components work with different content.",
+        "priority": "high",
+        "dependencies": [
+          11,
+          13
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement Chat UI Components",
+        "description": "Create components for chat-based interaction",
+        "details": "Implement ChatContainer component to manage chat flow. Create ChatInput component for user prompts. Implement ChatMessage component for displaying messages. Create ModelSelector component for AI model selection. Implement SlidePlanPreview component to display generated outlines. Add animations for message appearance using Framer Motion. Implement auto-scrolling for new messages.",
+        "testStrategy": "Test chat components rendering and interaction. Verify input validation works. Test with different message types and content. Ensure animations work correctly. Validate accessibility for all components.",
+        "priority": "high",
+        "dependencies": [
+          14,
+          16
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Implement Slide Generation UI Components",
+        "description": "Create components for slide generation and progress display",
+        "details": "Implement SlideGenerator component to initiate slide generation. Create ProgressIndicator component for generation progress. Implement DownloadButton component for PPTX download. Add error handling and retry functionality. Create loading states and animations. Implement notifications for completion and errors.",
+        "testStrategy": "Test slide generation components with mock data. Verify progress updates display correctly. Test download functionality. Ensure error states and retries work. Validate accessibility for all components.",
+        "priority": "high",
+        "dependencies": [
+          15,
+          17
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Implement Download Manager",
+        "description": "Create utility for handling PPTX file downloads",
+        "details": "Implement DownloadManager utility for file downloads. Add support for resumable downloads using range requests. Implement download progress tracking. Add error handling and retry functionality. Create download status notifications. Implement file saving with proper filename.",
+        "testStrategy": "Test download functionality with various file sizes. Verify resume capability works. Test error handling and retries. Ensure progress tracking is accurate. Validate file saving works correctly.",
+        "priority": "medium",
+        "dependencies": [
+          18
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Implement Chat Page Integration",
+        "description": "Integrate chat components with API and state management",
+        "details": "Create ChatPage component integrating all chat UI components. Connect to ChatStore for state management. Implement API calls using generated hooks. Add optimistic UI updates for better user experience. Implement error handling and loading states. Add session management if needed. Create smooth transitions between states.",
+        "testStrategy": "Test end-to-end chat flow with mock API. Verify state updates correctly. Test error handling and recovery. Ensure loading states display properly. Validate optimistic updates work correctly.",
+        "priority": "high",
+        "dependencies": [
+          12,
+          17
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Implement Slide Generation Integration",
+        "description": "Integrate slide generation with API, WebSockets, and download",
+        "details": "Connect SlideGenerator to API for initiating generation. Implement WebSocket connection for progress updates. Connect DownloadManager for file retrieval. Add error handling and retry functionality. Implement state management for generation process. Create smooth transitions between states.",
+        "testStrategy": "Test end-to-end slide generation flow. Verify WebSocket updates display correctly. Test download functionality with real files. Ensure error handling and retries work. Validate state transitions are smooth.",
+        "priority": "high",
+        "dependencies": [
+          15,
+          18,
+          19,
+          20
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Implement Authentication UI",
+        "description": "Create components for user authentication",
+        "details": "Implement LoginPage component for email input. Create MagicLinkPage for handling link clicks. Implement authentication state management. Add protected route handling. Create loading and error states for authentication. Implement token refresh logic. Add persistence for authentication state.",
+        "testStrategy": "Test authentication flow end-to-end. Verify protected routes work correctly. Test token refresh functionality. Ensure error states display properly. Validate persistence works across page reloads.",
+        "priority": "medium",
+        "dependencies": [
+          10,
+          13,
+          14
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Implement End-to-End Testing",
+        "description": "Create Cypress tests for critical user flows",
+        "details": "Set up Cypress for end-to-end testing. Create tests for main user flow: entering prompt, receiving outline, generating slides, downloading PPTX. Implement tests for authentication if implemented. Add accessibility testing with cypress-axe. Create test fixtures and mocks for external services. Implement visual regression testing if needed.",
+        "testStrategy": "Run tests in CI pipeline. Verify tests pass consistently. Test on multiple browsers (Chrome, Firefox). Ensure tests cover critical user paths. Validate accessibility compliance.",
+        "priority": "medium",
+        "dependencies": [
+          21,
+          22
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Implement Performance Optimization",
+        "description": "Optimize frontend and backend performance",
+        "details": "Implement code splitting for frontend routes. Add lazy loading for components. Optimize image loading and processing. Implement caching strategies for API responses. Add memoization for expensive computations. Optimize WebSocket message frequency. Implement backend response compression. Add database indexes if database is added later.",
+        "testStrategy": "Run Lighthouse performance audits. Measure and compare load times before and after optimization. Test with slow network conditions. Verify bundle sizes are within budget. Validate that optimizations don't break functionality.",
+        "priority": "medium",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Create Kubernetes Deployment Configuration",
+        "description": "Prepare Helm charts for Kubernetes deployment",
+        "details": "Create Helm charts for application deployment. Configure Deployments for frontend and backend. Set up Services and Ingress resources. Add ConfigMaps and Secrets for configuration. Configure horizontal pod autoscaling. Implement health checks and readiness probes. Add resource limits and requests. Configure persistent volumes if needed. Implement blue/green deployment strategy.",
+        "testStrategy": "Deploy to test Kubernetes cluster. Verify all components start correctly. Test scaling under load. Ensure configuration is properly applied. Validate blue/green deployment works. Test health checks and recovery.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          9,
+          24
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-09T09:35:23.960Z",
+      "updated": "2025-08-09T10:12:04.049Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

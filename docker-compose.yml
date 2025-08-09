@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+      - ./backend/requirements.txt:/app/requirements.txt
+      - ./backend/requirements-dev.txt:/app/requirements-dev.txt
+      - ./backend/pytest.ini:/app/pytest.ini
+      - ./backend/.flake8:/app/.flake8
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/api/v1/health').getcode()<400 else sys.exit(1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - node_modules_frontend:/app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    command: ["sh", "-lc", "npm install --legacy-peer-deps && npm run dev"]
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "curl -fsS http://localhost:5173 >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  node_modules_frontend:

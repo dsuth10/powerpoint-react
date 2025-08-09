@@ -1,0 +1,38 @@
+# Rule: Mandatory Docker Development Environment for Frontend
+
+## Purpose
+To guarantee a consistent, working, and cross-platform development and CI environment for the frontend, all commands (test, build, lint, etc.) **must** be run inside the provided Docker container.
+
+## Requirements
+- All developers and CI/CD pipelines must use the `frontend/Dockerfile` to run tests, builds, and quality checks for the frontend.
+- Local Node.js/npm installations on Windows or Mac **must not** be used for these tasks, as they may cause subtle and hard-to-debug errors.
+- The canonical workflow is:
+  1. Build the Docker image:
+     ```sh
+     docker build -t ppt-frontend-dev ./frontend
+     ```
+  2. Run commands in the container, e.g.:
+     ```sh
+     docker run --rm ppt-frontend-dev
+     ```
+     or for interactive development:
+     ```sh
+     docker run --rm -it -v $(pwd)/frontend:/app -w /app ppt-frontend-dev sh
+     ```
+- All documentation and onboarding must reference this workflow.
+
+## Rationale
+- Ensures all contributors and CI/CD use the same Node, npm, and dependency versions.
+- Prevents platform-specific errors (especially on Windows).
+- Guarantees reproducible builds and test results.
+
+## Enforcement
+- PRs and commits that do not follow this rule may be rejected.
+- CI/CD must use the Dockerfile for all frontend jobs.
+
+---
+**Last updated:** 2025-07-12
+description:
+globs:
+alwaysApply: false
+---

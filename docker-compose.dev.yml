@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+      - ./backend/requirements.txt:/app/requirements.txt
+      - ./backend/requirements-dev.txt:/app/requirements-dev.txt
+      - ./backend/pytest.ini:/app/pytest.ini
+      - ./backend/.flake8:/app/.flake8
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_BACKEND_URL=http://backend:8000
+    command: ["npm", "run", "dev"]
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "curl -fsS http://localhost:5173 >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      - backend

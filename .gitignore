@@ -1,0 +1,58 @@
+# Node
+node_modules/
+frontend/node_modules/
+*.log
+dist/
+build/
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vite
+frontend/dist/
+
+# VSCode
+.vscode/
+
+# Docker
+*.local
+*.pid
+
+# Misc
+*.swp
+*.swo
+
+# Logs
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 

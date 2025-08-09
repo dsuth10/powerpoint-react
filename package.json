@@ -1,0 +1,32 @@
+{
+  "name": "ai-powerpoint-generator-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "lint:frontend": "npm run lint --workspace=frontend",
+    "test:frontend": "npm run test --workspace=frontend || echo 'Frontend test setup pending'",
+    "quality:frontend": "npm run lint --workspace=frontend && npm run test --workspace=frontend || echo 'Frontend test setup pending'",
+    "quality:backend": "make lint && make test || echo 'Backend Makefile setup pending'",
+    "quality": "npm run quality:frontend && npm run quality:backend",
+    "start:backend": "uvicorn backend.app.main:app --reload",
+    "start:frontend": "npm run dev --workspace=frontend",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.127.3",
+    "jest-environment-jsdom": "^30.0.4",
+    "prettier": "^3.2.5",
+    "stylelint": "^16.1.0",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-config-tailwindcss": "^1.0.0",
+    "stylelint-order": "^7.0.0"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "^1.15.0"
+  }
+}

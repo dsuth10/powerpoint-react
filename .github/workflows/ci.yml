@@ -4,10 +4,11 @@ on:
   push:
     branches: [master, main]
   pull_request:
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
     branches: [master, main]
+
+concurrency:
+  group: "ci-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 jobs:
   backend:
@@ -15,7 +16,8 @@ jobs:
     services:
       postgres:
         image: postgres:15
-        ports: [5432:5432]
+        ports:
+          - "5432:5432"
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test

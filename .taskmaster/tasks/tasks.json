@@ -181,7 +181,99 @@
           1
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Base Model Configuration",
+            "description": "Set up a base Pydantic model with common configuration for all domain models",
+            "dependencies": [],
+            "details": "Create a BaseModel class in backend/app/models/base.py that extends Pydantic's BaseModel. Configure it with strict validation (model_config = {\"strict\": True}), camelCase JSON serialization using an alias_generator, and enable from_attributes. Add appropriate json_encoders for datetime and UUID types. Include docstrings explaining the base configuration and usage examples.",
+            "status": "pending",
+            "testStrategy": "Test serialization/deserialization with camelCase conversion, verify strict validation is enforced, and ensure custom types like datetime and UUID are properly handled."
+          },
+          {
+            "id": 2,
+            "title": "Implement ChatRequest Model",
+            "description": "Create the ChatRequest model for handling user prompt inputs",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement ChatRequest model in backend/app/models/chat.py that inherits from BaseModel. Include fields: prompt (str), slide_count (int), and model (str). Add validators to ensure prompt is not empty, slide_count is between 1-20, and model is one of the allowed values. Add appropriate type hints, docstrings, and JSON schema examples. Include field descriptions for OpenAPI documentation.",
+            "status": "pending",
+            "testStrategy": "Test validation rules for each field with valid and invalid inputs. Verify error messages are clear and helpful. Test JSON serialization/deserialization with camelCase conversion."
+          },
+          {
+            "id": 3,
+            "title": "Implement ChatResponse Model",
+            "description": "Create the ChatResponse model for AI-generated slide plan responses",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement ChatResponse model in backend/app/models/chat.py that inherits from BaseModel. Include fields for the response data structure containing the generated slide plan. Add appropriate type hints, docstrings, and JSON schema examples. Ensure the model properly references the SlidePlan model for structured slide content.",
+            "status": "pending",
+            "testStrategy": "Test serialization/deserialization with nested models. Verify all fields are correctly represented in JSON output with camelCase conversion."
+          },
+          {
+            "id": 4,
+            "title": "Implement SlidePlan Model",
+            "description": "Create the SlidePlan model for representing slide content structure",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement SlidePlan model in backend/app/models/slides.py that inherits from BaseModel. Include fields: title (str), bullets (List[str]), and notes (Optional[str]). Add validators to ensure title is not empty and has a reasonable maximum length (100 chars), bullets are not empty, and each bullet has a reasonable maximum length (200 chars). Add appropriate type hints, docstrings, and JSON schema examples.",
+            "status": "pending",
+            "testStrategy": "Test validation rules for title and bullets with valid and invalid inputs. Test serialization/deserialization with camelCase conversion. Verify optional fields work correctly when omitted."
+          },
+          {
+            "id": 5,
+            "title": "Implement ImageMeta Model",
+            "description": "Create the ImageMeta model for image metadata",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement ImageMeta model in backend/app/models/slides.py that inherits from BaseModel. Include fields: url (str) and alt_text (str). Add validators to ensure url is a valid URL format and alt_text is not empty. Add appropriate type hints, docstrings, and JSON schema examples. Include field descriptions for OpenAPI documentation.",
+            "status": "pending",
+            "testStrategy": "Test URL validation with valid and invalid URLs. Test serialization/deserialization with camelCase conversion. Verify error messages for invalid URLs are clear and helpful."
+          },
+          {
+            "id": 6,
+            "title": "Implement PPTXJob Model",
+            "description": "Create the PPTXJob model for tracking slide generation jobs",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement PPTXJob model in backend/app/models/jobs.py that inherits from BaseModel. Include fields: job_id (UUID), status (str, with allowed values like 'pending', 'processing', 'completed', 'failed'), error_message (Optional[str]), and result_url (Optional[str]). Add validators to ensure status is one of the allowed values. Add appropriate type hints, docstrings, and JSON schema examples.",
+            "status": "pending",
+            "testStrategy": "Test validation rules for status field with valid and invalid values. Test UUID handling and serialization. Verify optional fields work correctly when omitted."
+          },
+          {
+            "id": 7,
+            "title": "Implement Error Response Models",
+            "description": "Create standardized error response models",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement ErrorResponse model in backend/app/models/errors.py that inherits from BaseModel. Include fields: error_code (str), message (str), and details (Optional[Dict]). Create specific error subclasses for common error scenarios (ValidationError, NotFoundError, etc.). Add appropriate type hints, docstrings, and JSON schema examples. Include field descriptions for OpenAPI documentation.",
+            "status": "pending",
+            "testStrategy": "Test serialization of different error types. Verify error details are properly included in the response. Test with various error scenarios to ensure consistent error format."
+          },
+          {
+            "id": 8,
+            "title": "Create Model Unit Tests",
+            "description": "Implement comprehensive unit tests for all domain models",
+            "dependencies": [
+              "3.2",
+              "3.3",
+              "3.4",
+              "3.5",
+              "3.6",
+              "3.7"
+            ],
+            "details": "Create test files in tests/models/ directory for each model. Implement parametrized pytest tests covering valid/invalid payloads, field validation, aliasing (snake_case to camelCase conversion), and error messages. Test serialization/deserialization roundtrips for all models. Verify models appear correctly in the OpenAPI schema with proper descriptions and examples.",
+            "status": "pending",
+            "testStrategy": "Run tests with pytest. Verify all validation rules are properly tested with both valid and invalid inputs. Ensure test coverage for all models and their fields. Test integration with FastAPI's OpenAPI schema generation."
+          }
+        ]
       },
       {
         "id": 4,

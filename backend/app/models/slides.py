@@ -1,34 +1,37 @@
-from pydantic import BaseModel, Field
+from __future__ import annotations
+
 from typing import List, Optional
 
+from pydantic import AnyUrl, Field, constr, field_validator
+
+from app.models.base import BaseModel
+
+
 class ImageMeta(BaseModel):
-    """
-    Metadata for an image to be included in a slide.
+    """Metadata for an image to be included in a slide."""
 
-    Attributes:
-        url (str): The image URL.
-        alt (str): Alt text for accessibility.
-        provider (str): Image provider name (e.g., 'runware').
-    """
-    url: str = Field(..., description="The image URL.")
-    alt: str = Field(..., description="Alt text for accessibility.")
-    provider: str = Field(..., description="Image provider name (e.g., 'runware').")
+    url: AnyUrl = Field(..., description="The image URL.")
+    alt_text: constr(min_length=1) = Field(
+        ..., alias="altText", description="Alt text for accessibility."
+    )
+    provider: constr(min_length=1) = Field(
+        ..., description="Image provider name (e.g., 'runware')."
+    )
 
-    model_config = {"strict": True, "populate_by_name": True}
 
 class SlidePlan(BaseModel):
-    """
-    Plan for a single slide in the generated presentation.
+    """Plan for a single slide in the generated presentation."""
 
-    Attributes:
-        title (str): Slide title.
-        body (str): Main slide content.
-        image (Optional[ImageMeta]): Optional image metadata.
-        notes (Optional[str]): Optional speaker notes.
-    """
-    title: str = Field(..., description="Slide title.")
-    body: str = Field(..., description="Main slide content.")
+    title: constr(min_length=1, max_length=100) = Field(..., description="Slide title.")
+    bullets: List[constr(min_length=1, max_length=200)] = Field(
+        ..., description="Bullet points for the slide."
+    )
     image: Optional[ImageMeta] = Field(None, description="Optional image metadata.")
     notes: Optional[str] = Field(None, description="Optional speaker notes.")
 
-    model_config = {"strict": True, "populate_by_name": True} 
+    @field_validator("bullets")
+    @classmethod
+    def validate_bullets_not_empty(cls, v: List[str]) -> List[str]:
+        if not v:
+            raise ValueError("bullets must contain at least one item")
+        return v

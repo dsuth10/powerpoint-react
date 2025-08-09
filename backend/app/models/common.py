@@ -1,19 +1,23 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from __future__ import annotations
+
+from typing import Literal, Optional
+from uuid import UUID
+
+from pydantic import AnyUrl, Field
+
+from app.models.base import BaseModel
+
 
 class PPTXJob(BaseModel):
-    """
-    Model representing a PPTX build job.
+    """Model representing a PPTX build job."""
 
-    Attributes:
-        job_id (str): Unique job identifier (UUID).
-        status (str): Job status (e.g., 'pending', 'in_progress', 'completed', 'failed').
-        download_url (Optional[str]): URL to download the generated PPTX file.
-        error (Optional[str]): Error message if the job failed.
-    """
-    job_id: str = Field(..., alias="jobId", description="Unique job identifier (UUID).")
-    status: str = Field(..., description="Job status (e.g., 'pending', 'in_progress', 'completed', 'failed').")
-    download_url: Optional[str] = Field(None, alias="downloadUrl", description="URL to download the generated PPTX file.")
-    error: Optional[str] = Field(None, description="Error message if the job failed.")
-
-    model_config = {"strict": True, "populate_by_name": True} 
+    job_id: UUID = Field(..., alias="jobId", description="Unique job identifier.")
+    status: Literal["pending", "in_progress", "completed", "failed"] = Field(
+        ..., description="Job status."
+    )
+    result_url: Optional[AnyUrl] = Field(
+        None, alias="resultUrl", description="URL to download the generated PPTX file."
+    )
+    error_message: Optional[str] = Field(
+        None, alias="errorMessage", description="Error message if the job failed."
+    )

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\parser.py
+# hypothesis_version: 6.137.1
+
+['T', 'directive', 'directive_definition', 'enum', 'enum_type_definition', 'enum_type_extension', 'extend', 'false', 'float', 'fragment', 'fragment_definition', 'implements', 'input', 'int', 'interface', 'list', 'mutation', 'named_values', 'null', 'object', 'on', 'operation_definition', 'parse', 'parse_const_value', 'parse_type', 'parse_value', 'query', 'repeatable', 'scalar', 'schema', 'schema_definition', 'schema_extension', 'string_literal', 'subscription', 'true', 'type', 'union', 'union_type_extension', 'variable_value']

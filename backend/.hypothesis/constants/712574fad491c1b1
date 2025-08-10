@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_log.py
+# hypothesis_version: 6.137.1
+
+[1000000, '%06f', '%\\1', '%s', '(%[^s])', '(no headers)', '-', '<%s>', 'D', 'Error in logging', 'KeyMethod', 'P', 'T', 'Tf', '_format_%s', 'a', 'b', 'first_request_line', 'i', 'key method', 'o', 'process_id', 'r', 'remote_address', 'request_header', 'request_start_time', 'request_time', 'request_time_frac', 'request_time_micro', 'response_header', 'response_size', 'response_status', 's', 't', '{} {} HTTP/{}.{}']

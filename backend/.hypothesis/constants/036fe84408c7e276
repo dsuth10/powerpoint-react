@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\checks.py
+# hypothesis_version: 6.137.1
+
+[200, 300, 400, 401, 404, 500, '$ref', '*', ', ', '/', 'Content-Type', 'Cookie', 'Missing ', 'POST', 'Response', 'Schema', '__attrs__', 'apiKey', 'basic', 'boolean', 'cookie', 'cookies', 'default', 'delete', 'explicit', 'generated', 'header', 'headers', 'http', 'in', 'integer', 'name', 'null', 'number', 'query', 'responses', 's', 'session', 'string', 'type', 'value', 'variables', 'with any auth', 'with invalid auth', '{', '}']

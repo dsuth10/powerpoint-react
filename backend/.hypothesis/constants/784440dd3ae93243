@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\engineio\packet.py
+# hypothesis_version: 6.137.1
+
+[',', ':', 'CLOSE', 'MESSAGE', 'NOOP', 'OPEN', 'PING', 'PONG', 'UPGRADE', 'b', 'utf-8']

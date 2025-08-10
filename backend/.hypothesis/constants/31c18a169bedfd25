@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\auths.py
+# hypothesis_version: 6.137.1
+
+[300, 'Auth', 'AuthContext', 'Case', '_schemathesis_auth', 'apply_to', 'skip_for']

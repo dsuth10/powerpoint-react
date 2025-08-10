@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_urldispatcher.py
+# hypothesis_version: 6.137.1
+
+[b'HTTP/1.1 100 Continue\r\n\r\n', 256, 1024, '%', '%25', '%2F', "'", "' ", '(?P<{var}>{re})', '(?P<{}>{})', '*', '.', '.*', '/', '100-continue', '://', '<ul>\n{}\n</ul>', 'AbstractResource', 'AbstractRoute', 'AbstractRuleMatching', 'Application', 'Domain must be str', 'Domain not valid', 'DynamicResource', 'GET', 'HEAD', 'OPTIONS', 'PlainResource', 'Resource', 'ResourceRoute', 'Scheme not supported', 'StaticResource', 'Unknown Expect: %s', 'UrlDispatcher', 'UrlMappingMatchInfo', 'View', '[.:-]', '[^{}/]+', '\\.', '_apps', '_current_app', '_exception', '_frozen', '_route', 'app', 'ascii', 'directory', 'domain', 'filename', 'formatter', 'http://', 'http_exception', 'path', 'pattern', 'prefix', 'rb', 'routes', 'rule', 'text/html', 'v', 'var', 'win32', '{', '}']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\constants.py
+# hypothesis_version: 6.137.1
+
+['$ref', 'additionalItems', 'additionalProperties', 'allOf', 'anyOf', 'body', 'const', 'contains', 'contentEncoding', 'contentMediaType', 'cookie', 'cookies', 'dependencies', 'else', 'enum', 'exclusiveMaximum', 'exclusiveMinimum', 'format', 'header', 'headers', 'if', 'items', 'maxItems', 'maxLength', 'maxProperties', 'maximum', 'minItems', 'minLength', 'minProperties', 'minimum', 'multipleOf', 'not', 'oneOf', 'path', 'path_parameters', 'pattern', 'patternProperties', 'properties', 'propertyNames', 'query', 'required', 'then', 'type', 'uniqueItems']

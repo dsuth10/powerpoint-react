@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\transports\__init__.py
+# hypothesis_version: 6.137.1
+
+[1000, 'Content-Type', 'R', 'S', '__call__', 'app', 'auth', 'call', 'call_and_validate', 'content-type', 'cookies', 'data', 'files', 'headers', 'hooks', 'json', 'localhost', 'method', 'multipart/form-data', 'params', 'path', 'query_string', 'timeout', 'url', 'verify']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\h2\stream.py
+# hypothesis_version: 6.137.1
+
+[b'HEAD', b'content-length', '<%s id:%d state:%r>', 'END_HEADERS', 'END_STREAM', 'End stream %r', 'PADDED', 'Push stream %r', 'Upgrading %r']

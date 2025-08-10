@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\aio\storage\mongodb.py
+# hypothesis_version: 6.137.1
+
+['$$NOW', '$$entry', '$_id', '$add', '$cond', '$count', '$each', '$entries', '$expireAt', '$filter', '$group', '$gte', '$lt', '$match', '$min', '$not', '$position', '$project', '$push', '$set', '$slice', '$sum', '$unwind', '2.1', 'P', 'R', '_id', 'as', 'async+mongodb', 'async+mongodb+srv', 'cond', 'count', 'else', 'entries', 'entries.%d', 'entry', 'expireAt', 'if', 'input', 'limits', 'min', 'mongodb', 'motor.motor_asyncio', 'pymongo', 'pymongo.errors', 'then']

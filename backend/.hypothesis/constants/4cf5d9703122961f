@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\runner\probes.py
+# hypothesis_version: 6.137.1
+
+[400, '\x00', 'GET', 'NULL_BYTE_IN_HEADER', 'User-Agent', 'X-Schemathesis-Probe', 'all', 'error', 'failure', 'ignore', 'name', 'outcome', 'proxies', 'request', 'response', 'skip', 'success', 'timeout']

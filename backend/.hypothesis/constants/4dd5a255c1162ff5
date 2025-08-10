@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\uri_template\charset.py
+# hypothesis_version: 6.137.1
+
+["!$&'()*+,;=", '-._~', '.', '0123456789', ':/?#[]@', '_']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\directive_locations.py
+# hypothesis_version: 6.137.1
+
+['DirectiveLocation', 'argument definition', 'enum', 'enum value', 'field', 'field definition', 'fragment definition', 'fragment spread', 'inline fragment', 'input object', 'interface', 'mutation', 'object', 'query', 'scalar', 'schema', 'subscription', 'union', 'variable definition']

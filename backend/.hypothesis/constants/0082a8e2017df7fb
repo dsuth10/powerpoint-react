@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\utilities\find_breaking_changes.py
+# hypothesis_version: 6.137.1
+
+['BreakingChange', 'BreakingChangeType', 'DangerousChange', 'DangerousChangeType', 'a Scalar type', 'a Union type', 'an Enum type', 'an Input type', 'an Interface type', 'an Object type']

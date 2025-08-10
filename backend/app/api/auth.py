@@ -14,7 +14,11 @@ class TokenPair(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
-@router.post("/login", response_model=TokenPair)
+@router.post(
+    "/login",
+    response_model=TokenPair,
+    responses={429: {"description": "Too Many Requests"}},
+)
 def login(request: LoginRequest):
     # In production, send a magic link via SES. Here, mock by logging.
     logging.info(f"[MOCK SES] Would send magic link to: {request.email}")
@@ -26,7 +30,11 @@ def login(request: LoginRequest):
 class RefreshRequest(BaseModel):
     refresh_token: str
 
-@router.post("/refresh", response_model=TokenPair)
+@router.post(
+    "/refresh",
+    response_model=TokenPair,
+    responses={401: {"description": "Unauthorized"}, 429: {"description": "Too Many Requests"}},
+)
 def refresh(request: RefreshRequest):
     data = verify_token(request.refresh_token, token_type="refresh")
     access = create_access_token(subject=data.sub)

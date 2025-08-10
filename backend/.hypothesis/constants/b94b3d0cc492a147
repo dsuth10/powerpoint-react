@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pydantic\dataclasses.py
+# hypothesis_version: 6.137.1
+
+['_T', '__annotations__', '__pydantic_config__', 'dataclass', 'default', 'kw_only', 'rebuild_dataclass', 'repr']

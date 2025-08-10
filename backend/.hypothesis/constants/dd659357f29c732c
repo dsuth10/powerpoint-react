@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\socketio\kombu_manager.py
+# hypothesis_version: 6.137.1
+
+[300000, 'durable', 'eventlet', 'fanout', 'flask-socketio.', 'gevent', 'kombu', 'queue_arguments', 'socket', 'socketio', 'type', 'x-expires']

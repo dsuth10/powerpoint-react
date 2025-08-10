@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\pyutils\inspect.py
+# hypothesis_version: 6.137.1
+
+[240, '(...)', ', ', '...', ': ', '<', '<object>', '>', '[...]', '__inspect__', 'async generator', 'class', 'coroutine', 'coroutine function', 'exception', 'exception class', 'frozenset(...)', 'function', 'generator', 'generator function', 'inspect', 'method', 'set(...)', '{', '{...}', '}']

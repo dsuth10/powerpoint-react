@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\_hypothesis.py
+# hypothesis_version: 6.137.1
+
+[',', '_schemathesis_hooks', 'additionalProperties', 'application', 'arbitrary-value', 'auth_storage', 'before_add_examples', 'body', 'case', 'cookie', 'delete', 'examples', 'generation_config', 'get', 'head', 'header', 'hooks', 'ignore', 'media_type', 'options', 'patch', 'path', 'post', 'properties', 'put', 'query', 'required', 'skip_on_not_negated', 'trace', 'value']

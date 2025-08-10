@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\action.py
+# hypothesis_version: 6.137.1
+
+['customshow', 'endshow', 'firstslide', 'hlinkfile', 'hlinkpres', 'hlinkshowjump', 'hlinksldjump', 'jump', 'lastslide', 'lastslideviewed', 'macro', 'nextslide', 'no next slide', 'no previous slide', 'ole', 'previousslide', 'program']

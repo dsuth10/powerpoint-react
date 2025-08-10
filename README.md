@@ -18,6 +18,14 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 - Chat API updated to return `ChatResponse` from `POST /api/v1/chat/generate`
 - CI/CD hardening: concurrency, npm/pip caching, coverage ≥ 90% gates, artifact uploads, k6 smoke, Docker build + Trivy scan (frontend & backend), SBOMs, CodeQL, deploy/release workflows
 - Make targets and PowerShell scripts for smoke/verify
+- Backend system improvements:
+  - Rate limiting applied to public POST routes via `Depends(rate_limit_dependency)`; OpenAPI now documents 429 responses where applicable
+  - Auth refresh documents 401; slides builder documents 422 for validation errors
+  - `/metrics` endpoint exposed with `text/plain` content type and included in OpenAPI
+  - OpenAPI forced to 3.0.3 for better tooling compatibility
+  - LLM calls short-circuit offline (no API key) to keep local tests fast and deterministic
+  - Download endpoint added: `GET /api/v1/slides/download?jobId=<uuid>` serves generated PPTX with correct headers
+  - Real-time updates via Socket.IO mounted at `/ws` with events `slide:progress`, `slide:completed`, and `resume` (optional auth via JWT or `sessionId`)
 
 ## Project Structure
 
@@ -76,6 +84,30 @@ make logs      # tail container logs
 make quality   # backend lint+tests locally
 ```
 
+### Backend Testing (local)
+
+Run backend tests with Schemathesis explicitly enabled (we disable auto-loaded plugins for stability):
+
+PowerShell (Windows):
+
+```powershell
+cd backend
+$env:PYTHONPATH=(Get-Location).Path
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+python -m pytest -q -p schemathesis
+```
+
+Bash:
+
+```sh
+cd backend
+PYTHONPATH=$(pwd) PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q -p schemathesis
+```
+
+Notes:
+- If you omit `-p schemathesis` while disabling auto plugins, contract tests will fail due to a missing `case` fixture.
+- Tests do not call external LLMs when `OPENROUTER_API_KEY` is unset; the API returns a local fallback for speed.
+
 ### Environment Variables
 - Frontend expects `VITE_BACKEND_URL` and `VITE_WS_URL`. In Docker dev, these are provided by compose. For local overrides, create `frontend/.env.local` with:
 
@@ -83,6 +115,18 @@ make quality   # backend lint+tests locally
   VITE_BACKEND_URL=http://localhost:8000
   VITE_WS_URL=ws://localhost:8000/ws
   ```
+
+- Backend keys (for live API calls). For simplest usage, just set your keys and run; no login/JWT required:
+
+  ```env
+  # .env (repo root) or environment variables
+  OPENROUTER_API_KEY=sk-or-...
+  STABILITY_API_KEY=sk-stability-...
+  ```
+
+  Notes:
+  - If keys are not set, the backend returns local fallbacks where applicable so you can still develop and run tests.
+  - When deploying publicly, enable authentication and tighten CORS/Rate Limits.
 
 # Stage 1 Foundation Complete
 
@@ -142,6 +186,30 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
   - Response: `{ slides: SlidePlan[], sessionId?: string }`
   - `SlidePlan`: `{ title: string, bullets: string[], image?: ImageMeta, notes?: string }`
   - `ImageMeta`: `{ url: string, altText: string, provider: string }`
+  - Possible errors: `429 Too Many Requests`
+- `POST /api/v1/auth/login` → `TokenPair`
+  - Possible errors: `429 Too Many Requests`
+- `POST /api/v1/auth/refresh` → `TokenPair`
+  - Possible errors: `401 Unauthorized`, `429 Too Many Requests`
+- `POST /api/v1/slides/build` → `PPTXJob`
+  - Possible errors: `422 Validation Error`, `429 Too Many Requests`
+- `GET /api/v1/slides/download?jobId=<uuid>` → PPTX file download
+  - Content-Type: `application/vnd.openxmlformats-officedocument.presentationml.presentation`
+  - Filename: `presentation-<jobId>.pptx`
+  - Possible errors: `404 Not Found`
+- `GET /metrics` → Prometheus text exposition format (`text/plain`)
+
+### WebSocket (Socket.IO)
+
+- Base path (HTTP): `/ws` (Socket.IO path: `/ws/socket.io`)
+- Example client URL (dev): `http://localhost:8000` with `socketio_path="/ws/socket.io"`
+- Events emitted by server:
+  - `slide:progress` – payload with progress details
+  - `slide:completed` – payload with result metadata
+  - `resume` (client → server) – request replay of missed events with `{ sessionId: string, fromIndex?: number }`
+- Authentication (optional in dev):
+  - JWT via `Authorization: Bearer <access-token>`
+  - or `sessionId` UUID via connection `auth` payload or query string
 
 ## Scripts
 

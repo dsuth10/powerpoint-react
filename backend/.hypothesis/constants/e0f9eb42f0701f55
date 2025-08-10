@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\engineio\async_socket.py
+# hypothesis_version: 6.137.1
+
+[',', '0', '<binary>', 'CONTENT_LENGTH', 'HTTP_CONNECTION', 'HTTP_UPGRADE', '_upgrade_', 'disconnect', 'message', 'packet is too large', 'probe', 'upgrade', 'utf-8', 'websocket', 'wsgi.input']

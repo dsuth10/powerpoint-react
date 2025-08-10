@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\aio\storage\etcd.py
+# hypothesis_version: 6.137.1
+
+[b'0', b':', 'aetcd', 'aetcd.Client', 'async+etcd', 'limits']

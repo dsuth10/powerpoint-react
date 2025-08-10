@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\storage\redis_cluster.py
+# hypothesis_version: 6.137.1
+
+[1000, '*', ',', '2.0.0', '2.5.0', '4.2.0', ':', '@', 'host', 'max_connections', 'password', 'port', 'redis', 'redis+cluster', 'rediscluster', 'username', 'utf-8']

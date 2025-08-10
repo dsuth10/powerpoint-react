@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\utilities\build_client_schema.py
+# hypothesis_version: 6.137.1
+
+['__schema', 'args', 'build_client_schema', 'defaultValue', 'deprecationReason', 'description', 'directives', 'enumValues', 'fields', 'inputFields', 'interfaces', 'isRepeatable', 'kind', 'locations', 'mutationType', 'name', 'ofType', 'possibleTypes', 'queryType', 'specifiedByURL', 'subscriptionType', 'type', 'types']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\loaders.py
+# hypothesis_version: 6.137.1
+
+[400, 403, 404, 500, '-+0123456789.', ':(?![\\\\/])', 'GenericResponse', 'R', 'YAMLLoader']

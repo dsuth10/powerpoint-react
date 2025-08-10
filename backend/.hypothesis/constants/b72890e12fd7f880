@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\parameters.py
+# hypothesis_version: 6.137.1
+
+['$ref', '<UNKNOWN>', 'additionalProperties', 'allOf', 'anyOf', 'body', 'content', 'cookie', 'description', 'enum', 'example', 'examples', 'exclusiveMaximum', 'exclusiveMinimum', 'formData', 'format', 'header', 'in', 'items', 'maxItems', 'maxLength', 'maxProperties', 'maximum', 'minItems', 'minLength', 'minProperties', 'minimum', 'multipart/form-data', 'multipleOf', 'name', 'not', 'nullable', 'object', 'oneOf', 'pattern', 'properties', 'required', 'schema', 'string', 'type', 'uniqueItems', 'value', 'x-', 'x-example', 'x-examples', 'x-nullable']

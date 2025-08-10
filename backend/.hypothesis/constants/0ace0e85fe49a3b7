@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\typing.py
+# hypothesis_version: 6.137.1
+
+['AsyncRedisClient', 'Awaitable', 'Callable', 'ClassVar', 'Counter', 'Dict', 'EmcacheClientP', 'ItemP', 'List', 'MemcachedClientP', 'MongoClient', 'MongoCollection', 'MongoDatabase', 'NamedTuple', 'Optional', 'P', 'ParamSpec', 'Protocol', 'R', 'R_co', 'RedisClient', 'ScriptP', 'Serializable', 'Tuple', 'Type', 'TypeVar', 'Union', 'coredis.Redis[bytes]', 'redis.Redis[bytes]']

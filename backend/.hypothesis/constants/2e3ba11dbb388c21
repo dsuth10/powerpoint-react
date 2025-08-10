@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\transports\content_types.py
+# hypothesis_version: 6.137.1
+
+['"', '+json', '+xml', '/', ';', '=', '\\', '\\"', '\\\\', 'application', 'application/x-yaml', 'json', 'plain', 'text', 'text/vnd.yaml', 'text/x-yaml', 'text/yaml', 'xml']

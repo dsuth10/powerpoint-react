@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\engineio\base_client.py
+# hypothesis_version: 6.137.1
+
+['&', '&t=', '/', 'Invalid event', 'client disconnect', 'connect', 'disconnect', 'disconnected', 'engineio.client', 'http', 'https', 'invalid transport', 'message', 'polling', 's', 'server disconnect', 'transport error', 'websocket', 'ws', 'wss']

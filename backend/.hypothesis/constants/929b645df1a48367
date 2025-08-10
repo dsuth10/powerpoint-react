@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\utilities\extend_schema.py
+# hypothesis_version: 6.137.1
+
+['args', 'ast_node', 'directives', 'enum_type_definition', 'extend_schema', 'extend_schema_impl', 'extension_ast_nodes', 'fields', 'interfaces', 'name', 'reason', 'specified_by_url', 'types', 'url', 'values']

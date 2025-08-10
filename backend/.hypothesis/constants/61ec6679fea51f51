@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_response.py
+# hypothesis_version: 6.137.1
+
+[200, 304, 1024, '/', '0', '; ', '; charset=', 'BaseRequest', 'CIMultiDict[str]', 'ContentCoding', 'Response', 'StreamResponse', 'application/json', 'charset', 'chunked', 'close', 'deflate', 'domain', 'eof', 'expires', 'gzip', 'httponly', 'identity', 'json_response', 'keep-alive', 'max-age', 'not prepared', 'path', 'samesite', 'secure', 'text/plain', 'utf-8', 'version']

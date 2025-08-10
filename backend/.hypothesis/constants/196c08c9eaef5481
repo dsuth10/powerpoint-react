@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\schemas.py
+# hypothesis_version: 6.137.1
+
+['/', 'C', '_schemathesis_hooks', 'endpoint', 'method', 'operation_id', 'tag']

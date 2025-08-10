@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\redis\_parsers\hiredis.py
+# hypothesis_version: 6.137.1
+
+['_reader', 'encoding', 'errors', 'notEnoughData', 'protocolError', 'replyError']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\fixups\fast_api.py
+# hypothesis_version: 6.137.1
+
+['before_load_schema', 'exclusiveMaximum', 'exclusiveMinimum', 'maximum', 'minimum']

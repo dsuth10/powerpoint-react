@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\engineio\async_drivers\aiohttp.py
+# hypothesis_version: 6.137.1
+
+['-', '0', '127.0.0.1', 'CONTENT-LENGTH', 'CONTENT-TYPE', 'CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP/%s.%s', 'HTTP_%s', 'OPTIONS', 'PATH_INFO', 'QUERY_STRING', 'RAW_URI', 'REMOTE_ADDR', 'REMOTE_PORT', 'REQUEST_METHOD', 'SCRIPT_NAME', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL', 'SERVER_SOFTWARE', '_', 'aiohttp', 'aiohttp.request', 'asyncio', 'create_route', 'http', 'make_response', 'translate_request', 'websocket', 'wsgi.async', 'wsgi.errors', 'wsgi.input', 'wsgi.multiprocess', 'wsgi.multithread', 'wsgi.run_once', 'wsgi.url_scheme', 'wsgi.version']

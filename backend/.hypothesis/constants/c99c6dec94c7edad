@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\fixups\utf8_bom.py
+# hypothesis_version: 6.137.1
+
+['Case', 'GenericResponse', 'after_call', 'utf-8', 'utf-8-sig']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\predicates.py
+# hypothesis_version: 6.137.1
+
+['is_const_value_node', 'is_definition_node', 'is_selection_node', 'is_type_node', 'is_value_node']

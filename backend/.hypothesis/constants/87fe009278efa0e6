@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\websocket\_app.py
+# hypothesis_version: 6.137.1
+
+[256, 'Sending ping', 'WebSocketApp', 'Websocket connected', 'ping/pong timed out', 'utf-8']

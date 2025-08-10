@@ -1,16 +1,10 @@
-import { Route } from '@tanstack/react-router'
+import { Route, lazyRouteComponent } from '@tanstack/react-router'
 import rootRoute from '../__root.route'
-
-function SlidesPage() {
-  return (
-    <div className="text-xl font-semibold">Slides Page (placeholder)</div>
-  )
-}
 
 const route = new Route({
   getParentRoute: () => rootRoute,
   path: '/slides',
-  component: SlidesPage,
+  component: lazyRouteComponent(() => import('../pages/SlidesPage')),
 })
 
 export default route; 

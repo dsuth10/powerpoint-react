@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\validation\rules\overlapping_fields_can_be_merged.py
+# hypothesis_version: 6.137.1
+
+[' and ', 'ConflictReason', 'PairSet', '_data']

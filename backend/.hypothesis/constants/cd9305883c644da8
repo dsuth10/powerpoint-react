@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\werkzeug\datastructures\headers.py
+# hypothesis_version: 6.137.1
+
+['-', 'CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP_', 'HTTP_CONTENT_LENGTH', 'HTTP_CONTENT_TYPE', '[\\r\\n]', '_']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\runner\__init__.py
+# hypothesis_version: 6.137.1
+
+[128, '4.0', 'app', 'auth', 'auth_type', 'base_url', 'cert', 'database', 'deadline', 'derandomize', 'endpoint', 'headers', 'max_examples', 'method', 'none', 'operation_id', 'phases', 'report_multiple_bugs', 'tag', 'verbosity', 'verify']

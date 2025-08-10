@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\engineio\server.py
+# hypothesis_version: 6.137.1
+
+[1000, ' handler error', ',', '/', '4', ';', 'Content-Encoding', 'EIO', 'GET', 'HTTP_ACCEPT_ENCODING', 'HTTP_ORIGIN', 'HTTP_UPGRADE', 'Invalid transport', 'Lax', 'OPTIONS', 'POST', 'QUERY_STRING', 'REQUEST_METHOD', 'SameSite', 'Set-Cookie', '_', 'bad-jsonp-index', 'bad-origin', 'bad-sid', 'bad-transport', 'bad-upgrade', 'bad-version', 'connect', 'disconnect', 'engineio.server', 'headers', 'j', 'maxPayload', 'name', 'path', 'pingInterval', 'pingTimeout', 'polling', 'response', 'run_async', 'sid', 'sleep', 'status', 'thread', 'transport', 'upgrades', 'websocket']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\constants.py
+# hypothesis_version: 6.137.1
+
+[0.05, 10000, 15000, '0', '1', ':memory:', 'SCHEMATHESIS_HOOKS', 'delete', 'dev', 'f', 'false', 'get', 'head', 'n', 'no', 'off', 'on', 'options', 'patch', 'post', 'put', 't', 'trace', 'true', 'y', 'yes', '\ufeff']

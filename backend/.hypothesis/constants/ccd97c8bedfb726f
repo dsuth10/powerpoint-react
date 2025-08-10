@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\aio\storage\redis.py
+# hypothesis_version: 6.137.1
+
+[1000, '*', ',', '/', '2.1', '3.4.0', ':', '@', 'LIMITS', 'async+redis', 'async+redis+cluster', 'async+redis+sentinel', 'async+redis+unix', 'async+rediss', 'coredis', 'coredis.sentinel', 'host', 'max_connections', 'password', 'port', 'redis', 'redis+unix', 'unix', 'username']

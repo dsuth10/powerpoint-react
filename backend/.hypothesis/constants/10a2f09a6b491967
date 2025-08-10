@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\loaders.py
+# hypothesis_version: 6.137.1
+
+[1000, '.json', '.yaml', '.yml', '20', '3.1', '30', 'Content-Type', 'Unknown error', "['responses']\n", '^3\\.0\\.\\d(-.+)?$', 'after_load_schema', 'aiohttp.', 'before_load_schema', 'endpoint', 'fast_api', 'method', 'openapi', 'operation_id', 'read', 'swagger', 'tag', 'timeout', 'utf8']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\type\assert_name.py
+# hypothesis_version: 6.137.1
+
+['Must provide name.', 'assert_name', 'false', 'null', 'true']

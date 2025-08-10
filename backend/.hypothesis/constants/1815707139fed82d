@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\deprecated\sphinx.py
+# hypothesis_version: 6.137.1
+
+['.. {directive}::', '\\1', '\\n+$', 'adapter_cls', 'deprecated', 'directive', 'line_length', 'reason', 'version', 'versionadded', 'versionchanged', '{}\n']

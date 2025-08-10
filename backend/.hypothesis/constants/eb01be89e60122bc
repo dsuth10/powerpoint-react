@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\limits.py
+# hypothesis_version: 6.137.1
+
+['/', 'GRANULARITY', 'LIMITER', '__slots__', 'amount', 'day', 'hour', 'minute', 'month', 'multiples', 'namespace', 'second', 'year']

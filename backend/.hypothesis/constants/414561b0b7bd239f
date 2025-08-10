@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\token_kind.py
+# hypothesis_version: 6.137.1
+
+['!', '$', '&', '(', ')', '...', ':', '<EOF>', '<SOF>', '=', '@', 'BlockString', 'Comment', 'Float', 'Int', 'Name', 'String', 'TokenKind', '[', ']', '{', '|', '}']

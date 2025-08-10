@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\cryptography\x509\general_name.py
+# hypothesis_version: 6.137.1
+
+['ascii', 'value must be a Name', 'value must be string']

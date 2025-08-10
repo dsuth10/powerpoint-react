@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\validation\validate.py
+# hypothesis_version: 6.137.1
+
+[100, 'assert_valid_sdl', 'validate', 'validate_sdl']

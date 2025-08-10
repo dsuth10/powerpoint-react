@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\examples.py
+# hypothesis_version: 6.137.1
+
+[1000, '$ref', '/', '2', '2.0', 'Id', '_id', 'allOf', 'anyOf', 'body', 'content', 'example', 'examples', 'externalValue', 'id', 'in', 'items', 'media_type', 'name', 'oneOf', 'parameters', 'paths', 'phase', 'properties', 'requestBody', 'required', 'responses', 'schema', 'value', 'x-example', 'x-examples']

@@ -7,6 +7,15 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_HOURS: int = 24
     PROJECT_ENV: str = "development"
 
+    # API key access (optional key-only mode)
+    # If REQUIRE_API_KEY is true and API_KEYS has at least one value,
+    # HTTP routes (except health/auth) and WebSocket connections will require a valid key.
+    REQUIRE_API_KEY: bool = False
+    API_KEYS: List[str] = []
+
+    # CORS
+    ALLOWED_ORIGINS: List[str] = ["*"]
+
     # LLM / OpenRouter configuration
     OPENROUTER_API_KEY: str | None = None
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\error\__init__.py
+# hypothesis_version: 6.137.1
+
+['GraphQLError', 'GraphQLSyntaxError', 'located_error']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\cryptography\hazmat\primitives\ciphers\modes.py
+# hypothesis_version: 6.137.1
+
+[128, 256, 512, 'AES', 'CBC', 'CFB', 'CFB8', 'CTR', 'ECB', 'GCM', 'OFB', 'XTS', 'nonce', 'tag', 'tweak']

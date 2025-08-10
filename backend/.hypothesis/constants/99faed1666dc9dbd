@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\throttling.py
+# hypothesis_version: 6.137.1
+
+[100, 1000, '/', 'd', 'h', 'm', 'max_delay', 's']

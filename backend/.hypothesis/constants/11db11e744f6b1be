@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\validation\rules\possible_type_extensions.py
+# hypothesis_version: 6.137.1
+
+['enum', 'enum_type_extension', 'extension', 'input object', 'interface', 'object', 'scalar', 'union', 'union_type_extension', 'unknown type']

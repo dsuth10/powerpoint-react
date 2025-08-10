@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\enum\action.py
+# hypothesis_version: 6.137.1
+
+[101, 102, 'END_SHOW', 'FIRST_SLIDE', 'HYPERLINK', 'Hyperlink.', 'LAST_SLIDE', 'LAST_SLIDE_VIEWED', 'NAMED_SLIDE', 'NAMED_SLIDE_SHOW', 'NEXT_SLIDE', 'NONE', 'OLE Verb.', 'OLE_VERB', 'OPEN_FILE', 'PLAY', 'PP_ACTION', 'PREVIOUS_SLIDE', 'PpActionType', 'RUN_MACRO', 'RUN_PROGRAM', 'Runs a macro.', 'Runs a program.', 'Runs the slideshow.', 'Slide show ends.']

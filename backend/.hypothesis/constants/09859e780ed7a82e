@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\jose\backends\base.py
+# hypothesis_version: 6.137.1
+
+['alg', 'k', 'kty', 'oct']

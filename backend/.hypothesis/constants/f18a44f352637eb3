@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\socketio\async_redis_manager.py
+# hypothesis_version: 6.137.1
+
+['aioredis', 'channel', 'data', 'from_url', 'message', 'socketio', 'type', 'utf-8']

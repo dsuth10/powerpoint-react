@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\werkzeug\datastructures\auth.py
+# hypothesis_version: 6.137.1
+
+[':', '=', '_on_update', '_parameters', '_token', '_type', 'basic', 'digest', 'domain', 'nonce', 'opaque', 'password', 'qop', 'realm', 'username', 'utf8']

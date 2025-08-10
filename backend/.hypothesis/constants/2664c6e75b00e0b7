@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\arrow\util.py
+# hypothesis_version: 6.137.1
+
+[1000, 1000000, '()', '(]', '[)', '[]', 'is_timestamp', 'iso_to_gregorian', 'next_weekday', 'validate_ordinal']

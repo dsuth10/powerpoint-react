@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_fileresponse.py
+# hypothesis_version: 6.137.1
+
+[200, 256, 1024, '.Z', '.br', '.bz2', '.gz', '.xz', 'AIOHTTP_NOSENDFILE', 'BaseRequest', 'FileResponse', 'application/gzip', 'application/x-brotli', 'application/x-bzip2', 'application/x-xz', 'bytes', 'bytes {}-{}/{}', 'rb']

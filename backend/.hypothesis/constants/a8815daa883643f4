@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\Documents\Code Projects\PowerPoint React App\backend\app\models\slides.py
+# hypothesis_version: 6.137.1
+
+[100, 200, 'Slide title.', 'The image URL.', 'altText', 'body', 'bullets']

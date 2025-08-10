@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_protocol.py
+# hypothesis_version: 6.137.1
+
+[0.0, 10.0, 15.0, 400, 500, 504, 3630, 8190, 32768, '/', '<{} {}>', 'Accept', 'Connection lost', 'PayloadAccessError', 'RequestHandler', 'RequestPayloadError', 'Server', 'UNKNOWN', 'Uncompleted request.', 'Unhandled exception', '__http_exception__', '_close', '_current_request', '_force_close', '_handler_waiter', '_keepalive', '_keepalive_handle', '_keepalive_timeout', '_lingering_time', '_manager', '_message_tail', '_messages', '_payload_parser', '_reading_paused', '_request_count', '_request_factory', '_request_handler', '_request_in_progress', '_request_parser', '_task_handler', '_tcp_keepalive', '_upgrade', '_waiter', 'access_log', 'access_logger', 'asyncio.Task[None]', 'connected', 'debug', 'disconnected', 'logger', 'text/html', 'text/plain', '{0.value} {0.phrase}']

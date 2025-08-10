@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\storage\mongodb.py
+# hypothesis_version: 6.137.1
+
+['$$NOW', '$$entry', '$_id', '$add', '$cond', '$count', '$each', '$entries', '$expireAt', '$filter', '$group', '$gte', '$lt', '$match', '$min', '$not', '$position', '$project', '$push', '$set', '$slice', '$sum', '$unwind', '2.1', '_id', 'as', 'cond', 'count', 'counters', 'else', 'entries', 'entries.%d', 'entry', 'expireAt', 'if', 'input', 'limits', 'min', 'mongodb', 'mongodb+srv', 'pymongo', 'pymongo.errors', 'then', 'windows']

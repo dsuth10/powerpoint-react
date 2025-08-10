@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\pyutils\convert_case.py
+# hypothesis_version: 6.137.1
+
+['(_)([a-z\\d])', '\\1_', 'camel_to_snake', 'snake_to_camel']

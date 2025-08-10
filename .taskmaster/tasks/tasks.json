@@ -686,7 +686,63 @@
           6
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create API Directory Structure and Base Setup",
+            "description": "Set up the API directory structure and create base FastAPI router configuration for the chat and slides endpoints.",
+            "dependencies": [],
+            "details": "Create the directory structure in backend/app/api/ with __init__.py, chat.py, and slides.py files. In __init__.py, set up the APIRouter and include the chat and slides routers. Configure CORS, middleware, and error handling at the router level. Ensure proper imports and router registration with the main FastAPI app.",
+            "status": "done",
+            "testStrategy": "Test the API router configuration using TestClient. Verify that the router is properly registered and accessible. Test basic error handling and CORS configuration."
+          },
+          {
+            "id": 2,
+            "title": "Implement Chat Generation Endpoint",
+            "description": "Create the POST /chat/generate endpoint that accepts chat prompts and returns AI-generated responses.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "In chat.py, implement the POST /chat/generate endpoint that accepts a ChatRequest Pydantic model with prompt, model, and optional context fields. Create the corresponding ChatResponse model with message, tokens, and metadata fields. Implement proper error handling for invalid requests, service unavailability, and rate limiting. Connect to the AI service using the shared httpx.AsyncClient for making external API calls.",
+            "status": "done",
+            "testStrategy": "Write unit tests using TestClient to verify successful requests and responses. Test error scenarios including invalid requests, service timeouts, and rate limiting. Mock external API calls to test different response scenarios."
+          },
+          {
+            "id": 3,
+            "title": "Implement Slide Building Endpoint",
+            "description": "Create the POST /slides/build endpoint that initiates the slide generation process based on user input.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "In slides.py, implement the POST /slides/build endpoint that accepts a SlideRequest Pydantic model with title, content, style preferences, and other configuration options. Return a SlideJob response with job_id, status, and estimated_completion fields. Implement background task processing using FastAPI's BackgroundTasks. Add proper validation for input parameters and error handling for invalid requests.",
+            "status": "done",
+            "testStrategy": "Test the slides/build endpoint with various input combinations. Verify background task creation works correctly. Test error handling for invalid inputs. Verify the response structure matches the expected format."
+          },
+          {
+            "id": 4,
+            "title": "Implement Slide Download Endpoint",
+            "description": "Create the GET /slides/download endpoint for retrieving generated presentation files.",
+            "dependencies": [
+              "7.3"
+            ],
+            "details": "In slides.py, implement the GET /slides/download/{job_id} endpoint that retrieves the generated PPTX file for a specific job. Add proper file streaming with appropriate content types and headers. Implement error handling for non-existent jobs, incomplete jobs, and expired downloads. Add optional query parameters for file format selection (PPTX, PDF).",
+            "status": "done",
+            "testStrategy": "Test file download functionality with various file sizes. Verify proper content type and headers are set. Test error scenarios including non-existent jobs and incomplete jobs. Verify file streaming works correctly."
+          },
+          {
+            "id": 5,
+            "title": "Implement Request Validation and OpenAPI Schema Generation",
+            "description": "Add comprehensive request validation using Pydantic models and generate the OpenAPI schema for frontend consumption.",
+            "dependencies": [
+              "7.2",
+              "7.3",
+              "7.4"
+            ],
+            "details": "Create detailed Pydantic models for all request and response types with strict validation rules. Add field descriptions, examples, and validation constraints. Configure FastAPI to generate a comprehensive OpenAPI schema with proper documentation. Implement custom validation logic for complex business rules. Ensure all endpoints use the Pydantic models for request validation and response serialization.",
+            "status": "done",
+            "testStrategy": "Test validation rules with valid and invalid inputs. Verify custom validators work correctly. Test the generated OpenAPI schema for correctness and completeness. Ensure the schema can be consumed by frontend tools."
+          }
+        ]
       },
       {
         "id": 8,
@@ -699,7 +755,61 @@
           7
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Socket.IO Server Setup",
+            "description": "Implement the basic Socket.IO server structure in backend/app/socketio_app.py using python-socketio and integrate it with the FastAPI application.",
+            "dependencies": [],
+            "details": "Create a new file at backend/app/socketio_app.py. Initialize a python-socketio AsyncServer with CORS settings matching the FastAPI app. Create a function to mount the Socket.IO server to the FastAPI application. Implement basic connection and disconnection event handlers. Export the server instance for use in other modules. Update main.py to integrate the Socket.IO server with the FastAPI app using the mount function.",
+            "status": "done",
+            "testStrategy": "Write unit tests to verify server initialization and mounting. Test basic connection and disconnection events using a Socket.IO client. Verify CORS settings are correctly applied."
+          },
+          {
+            "id": 2,
+            "title": "Implement WebSocket Authentication",
+            "description": "Create authentication middleware for WebSocket connections using session IDs and JWT tokens to ensure secure connections.",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Implement an authentication middleware function that validates the session ID or JWT token from the connection request. Create a decorator for socket event handlers that requires authentication. Add session storage to track authenticated connections. Implement session expiration and cleanup. Update the connection handler to reject unauthenticated connections. Add error handling for authentication failures.",
+            "status": "done",
+            "testStrategy": "Test authentication with valid and invalid tokens. Verify unauthenticated connections are rejected. Test session expiration and cleanup. Ensure authenticated connections are properly tracked."
+          },
+          {
+            "id": 3,
+            "title": "Create Slide Generation Progress Events",
+            "description": "Implement functions to emit 'slide:progress' events during the slide generation process to provide real-time updates to clients.",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Create a ProgressTracker class that manages progress state for each slide generation job. Implement methods to update progress percentage, current step description, and estimated time remaining. Add a function to emit 'slide:progress' events with the current progress data. Modify the slide generation service to call the progress update function at key points. Implement throttling to prevent excessive event emissions.",
+            "status": "done",
+            "testStrategy": "Test progress tracking with mock generation processes. Verify events are emitted with correct data structure. Test throttling works as expected. Ensure progress updates are sent to the correct client only."
+          },
+          {
+            "id": 4,
+            "title": "Implement Slide Completion Notification",
+            "description": "Add functionality to emit 'slide:completed' events when PPTX generation is finished, including metadata about the generated file.",
+            "dependencies": [
+              "8.3"
+            ],
+            "details": "Create a function to emit 'slide:completed' events with file metadata (URL, size, filename). Implement error handling to emit 'slide:error' events when generation fails. Add a completion callback to the slide generation service. Include relevant metadata such as download URL, generation time, and slide count in the completion event. Implement cleanup of progress tracking resources after completion.",
+            "status": "done",
+            "testStrategy": "Test completion events with both successful and failed generations. Verify metadata is correctly included. Test error events contain appropriate error information. Ensure resources are properly cleaned up after completion."
+          },
+          {
+            "id": 5,
+            "title": "Add Reconnection Handling and Missed Updates",
+            "description": "Implement mechanisms to handle client reconnections and provide missed updates to ensure a seamless user experience.",
+            "dependencies": [
+              "8.4"
+            ],
+            "details": "Create a cache to store recent progress and completion events for each generation job. Implement a reconnection handler that sends missed updates to reconnected clients. Add a client-side ping mechanism to detect disconnections. Create a recovery endpoint that clients can query for generation status after reconnection. Implement session restoration for clients reconnecting with the same session ID. Add logging for connection events to aid debugging.",
+            "status": "done",
+            "testStrategy": "Test reconnection scenarios by forcibly disconnecting clients. Verify clients receive missed updates upon reconnection. Test the recovery endpoint with various generation states. Ensure session restoration works correctly across reconnections."
+          }
+        ]
       },
       {
         "id": 9,
@@ -712,21 +822,134 @@
           7,
           8
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Structured Logging with Request ID Tracking",
+            "description": "Set up structured logging using structlog with JSON output format and implement request ID tracking across services to enable traceability of requests through the system.",
+            "dependencies": [],
+            "details": "Create a logging module that configures structlog with JSON formatter. Implement middleware to generate and attach request IDs to each incoming request. Use contextvars to maintain request context throughout the request lifecycle. Ensure all log entries include the request ID, timestamp, log level, and relevant context. Add helper functions to make logging consistent across the application.",
+            "status": "done",
+            "testStrategy": "Test log output format to ensure it's valid JSON. Verify request IDs are properly generated and included in logs. Test context propagation across different parts of the application. Validate log entries contain all required fields."
+          },
+          {
+            "id": 2,
+            "title": "Create Custom Exception Hierarchy and Global Exception Handlers",
+            "description": "Design and implement a comprehensive exception hierarchy for different error scenarios and set up global exception handlers in FastAPI to provide consistent error responses.",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Create a base exception class that all custom exceptions inherit from. Implement specific exception classes for different error categories (e.g., ValidationError, AuthenticationError, ResourceNotFoundError). Set up FastAPI exception handlers to catch these exceptions and return appropriate HTTP status codes with standardized error response format. Ensure all exceptions are properly logged with context information.",
+            "status": "done",
+            "testStrategy": "Test each exception type to ensure it's caught by the global handler. Verify correct HTTP status codes are returned for different exception types. Test error response format consistency. Ensure sensitive information is not leaked in error responses."
+          },
+          {
+            "id": 3,
+            "title": "Implement Prometheus Metrics Endpoint with Custom Metrics",
+            "description": "Create a Prometheus metrics endpoint that exposes custom metrics for API latency, slide generation counts, error rates, and other key performance indicators.",
+            "dependencies": [
+              "9.1",
+              "9.2"
+            ],
+            "details": "Use prometheus-client library to implement metrics collection. Create custom metrics for API endpoint latency (histogram), slide generation counts (counter), error rates by type (counter), and request counts (counter). Implement a FastAPI middleware to track request duration and update metrics. Create a dedicated /metrics endpoint that exposes the Prometheus-formatted metrics. Add labels to metrics for better categorization.",
+            "status": "done",
+            "testStrategy": "Test metrics endpoint returns valid Prometheus format. Verify metrics are correctly incremented when corresponding actions occur. Test middleware correctly measures request duration. Validate all defined metrics are present in the endpoint response."
+          },
+          {
+            "id": 4,
+            "title": "Add Health Check Endpoint with Component Status",
+            "description": "Implement a comprehensive health check endpoint that reports the status of various system components and dependencies to facilitate monitoring and alerting.",
+            "dependencies": [
+              "9.3"
+            ],
+            "details": "Create a /health endpoint that returns the overall system status. Implement checks for critical dependencies (e.g., database connections, external services). Include version information, uptime, and component-specific health indicators. Return appropriate HTTP status codes based on health status (200 for healthy, 503 for unhealthy). Add caching to prevent excessive health checks from impacting performance.",
+            "status": "done",
+            "testStrategy": "Test health endpoint returns correct status when all components are healthy. Verify appropriate error status when dependencies fail. Test caching behavior to ensure it doesn't mask actual health issues. Validate response format includes all required health information."
+          },
+          {
+            "id": 5,
+            "title": "Implement Detailed Error Responses with Status Codes",
+            "description": "Enhance API error responses with detailed information and appropriate HTTP status codes to improve client-side error handling and debugging.",
+            "dependencies": [
+              "9.2"
+            ],
+            "details": "Design a standardized error response schema with fields for error code, message, details, and request ID. Map different exception types to appropriate HTTP status codes (e.g., 400 for validation errors, 401 for authentication errors, 404 for not found). Implement middleware to ensure all error responses follow the standard format. Add documentation for error codes and their meanings. Ensure error messages are user-friendly while providing enough detail for debugging.",
+            "status": "done",
+            "testStrategy": "Test error responses for different exception scenarios. Verify HTTP status codes match the error type. Validate error response schema consistency across different endpoints. Test internationalization of error messages if implemented. Ensure request IDs are included in error responses for correlation with logs."
+          }
+        ]
       },
       {
         "id": 10,
         "title": "Implement Authentication System",
-        "description": "Create passwordless authentication system using magic links and JWT",
-        "details": "Implement auth module in backend/app/core/auth.py. Create JWT generation and validation functions. Implement magic link email generation (logging to console in development). Create /auth/login endpoint to request magic links. Add /auth/refresh endpoint for token renewal. Implement FastAPI dependencies for protected routes. Add JWT middleware for authentication. Configure JWT secret via environment variables.",
-        "testStrategy": "Test JWT generation and validation. Verify magic link flow works correctly. Test token refresh functionality. Verify protected routes reject unauthorized requests. Test token expiration and renewal.",
-        "priority": "medium",
+        "description": "Create a simplified key-only access system with optional passwordless authentication scaffolding",
+        "status": "done",
         "dependencies": [
           7
         ],
-        "status": "pending",
-        "subtasks": []
+        "priority": "high",
+        "details": "Implement minimal auth module in backend/app/core/auth.py as optional scaffolding. Ensure all core endpoints work without authentication when API keys are set in environment variables. Keep JWT and magic link functionality as optional for production environments. Configure API keys via environment variables. Maintain rate limiting for endpoint protection. Remove authentication barriers from core flows to enable immediate usage after setting API keys.",
+        "testStrategy": "Verify all API routes are accessible without Authorization header. Validate that setting OPENROUTER_API_KEY and STABILITY_API_KEY enables real integrations; otherwise local fallbacks still work. Confirm WebSocket connections and events work without tokens. Ensure CORS works in dev and OpenAPI contract remains valid.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement API Key Configuration System",
+            "description": "Create a system for configuring and validating API keys through environment variables, ensuring the application can function with just API keys without requiring user authentication.",
+            "dependencies": [],
+            "details": "Create a configuration module in backend/app/core/config.py that loads API keys from environment variables (OPENROUTER_API_KEY, STABILITY_API_KEY, etc.). Implement validation functions to check if keys are present and properly formatted. Add fallback mechanisms for when keys are not provided to use local mock services. Create helper functions to retrieve keys for different services. Document all required and optional environment variables.",
+            "status": "done",
+            "testStrategy": "Write unit tests to verify environment variable loading. Test validation logic with valid and invalid API keys. Verify fallback behavior works when keys are missing."
+          },
+          {
+            "id": 2,
+            "title": "Modify Endpoints to Work Without JWT Authentication",
+            "description": "Update all API endpoints to function without requiring JWT authentication while still supporting it as an optional feature for production environments.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Modify the FastAPI dependency injection system in backend/app/api/deps.py to make authentication optional. Update route definitions to use the modified dependencies. Ensure all endpoints can be accessed without an Authorization header when API keys are configured. Keep the JWT authentication code but make it conditional based on configuration. Add appropriate error handling for missing API keys when required for specific operations.",
+            "status": "done",
+            "testStrategy": "Test all endpoints without authentication headers. Verify they return proper responses when API keys are configured. Test with missing API keys to ensure appropriate error messages."
+          },
+          {
+            "id": 3,
+            "title": "Implement WebSocket Anonymous Support",
+            "description": "Update WebSocket connections to support anonymous users with session IDs instead of requiring authentication tokens.",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "Modify WebSocket connection handlers to accept connections without authentication tokens. Implement a session ID generation system for anonymous users. Update the WebSocket manager to track connections by session ID rather than user ID. Ensure all WebSocket events work properly for anonymous sessions. Add appropriate rate limiting for WebSocket connections based on session ID or IP address.",
+            "status": "done",
+            "testStrategy": "Test WebSocket connections without authentication. Verify session IDs are generated consistently. Test multiple concurrent connections to ensure proper tracking and event routing."
+          },
+          {
+            "id": 4,
+            "title": "Configure Rate Limiting and CORS",
+            "description": "Implement rate limiting for API endpoints and WebSocket connections, and ensure CORS is properly configured for development and production environments.",
+            "dependencies": [
+              "10.2",
+              "10.3"
+            ],
+            "details": "Implement rate limiting middleware using a library like slowapi. Configure different rate limits for authenticated vs. anonymous requests. Set up CORS middleware with appropriate settings for development and production. Ensure WebSocket connections respect CORS settings. Add configuration options to adjust rate limits based on environment. Implement proper error responses for rate-limited requests.",
+            "status": "done",
+            "testStrategy": "Test rate limiting by making rapid requests and verifying 429 responses after limits are exceeded. Verify CORS headers are present in responses. Test cross-origin requests in development and production modes."
+          },
+          {
+            "id": 5,
+            "title": "Update Documentation for Key-Only Usage",
+            "description": "Update the README and documentation to clearly explain the key-only usage model and provide guidance on production hardening for authentication.",
+            "dependencies": [
+              "10.1",
+              "10.2",
+              "10.3",
+              "10.4"
+            ],
+            "details": "Update the README.md with clear instructions on setting up API keys. Document all required environment variables and their purposes. Create a section on production hardening that explains how to enable full authentication if needed. Add troubleshooting guidance for common authentication issues. Include examples of using the API with and without authentication. Document rate limiting behavior and how to configure it.",
+            "status": "done",
+            "testStrategy": "Review documentation for clarity and completeness. Verify all environment variables are documented. Test the setup process following only the documentation to ensure it's sufficient."
+          }
+        ]
       },
       {
         "id": 11,
@@ -739,7 +962,64 @@
           1
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize Vite Project with React and TypeScript",
+            "description": "Create a new frontend project using Vite with React and TypeScript templates. Set up the initial project structure and configure package.json with necessary dependencies.",
+            "dependencies": [],
+            "details": "Run 'npm create vite@latest frontend -- --template react-ts' to create the project. Navigate to the project directory and install dependencies with 'npm install'. Update package.json with project metadata and scripts for development, building, and testing. Configure tsconfig.json for TypeScript settings including strict mode and ESNext target.",
+            "status": "pending",
+            "testStrategy": "Verify the project initializes correctly by running 'npm run dev' and confirming the development server starts without errors. Check that the default Vite React page loads in the browser."
+          },
+          {
+            "id": 2,
+            "title": "Configure Tailwind CSS and UI Components",
+            "description": "Set up Tailwind CSS for styling and integrate shadcn/UI component library for consistent UI elements.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Install Tailwind CSS with 'npm install -D tailwindcss postcss autoprefixer' and initialize with 'npx tailwindcss init -p'. Configure content paths in tailwind.config.js. Create CSS file with Tailwind directives. Install shadcn/UI CLI with 'npm install -D @shadcn/ui' and initialize with 'npx shadcn-ui init'. Configure component installation path and styling preferences. Install core UI components like Button, Card, and Dialog.",
+            "status": "pending",
+            "testStrategy": "Create a simple test component that uses Tailwind classes and shadcn/UI components. Verify styles are applied correctly and components render as expected."
+          },
+          {
+            "id": 3,
+            "title": "Set Up ESLint and Prettier for Code Quality",
+            "description": "Configure ESLint and Prettier for consistent code formatting and quality standards across the project.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Install ESLint and Prettier with 'npm install -D eslint prettier eslint-config-prettier eslint-plugin-react eslint-plugin-react-hooks @typescript-eslint/eslint-plugin @typescript-eslint/parser'. Create .eslintrc.js with React and TypeScript configurations. Add .prettierrc with formatting rules. Configure .eslintignore and .prettierignore files. Add lint and format scripts to package.json. Create a pre-commit hook using husky and lint-staged to enforce code quality on commits.",
+            "status": "pending",
+            "testStrategy": "Run 'npm run lint' to verify ESLint configuration works correctly. Test Prettier formatting with 'npm run format' and check that files are formatted according to the defined rules."
+          },
+          {
+            "id": 4,
+            "title": "Configure Vitest for Unit Testing",
+            "description": "Set up Vitest as the testing framework for the frontend application with React Testing Library integration.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Install Vitest and testing utilities with 'npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom'. Create vitest.config.ts with environment configuration for jsdom. Set up test utilities folder with setup files for React Testing Library. Add test scripts to package.json including coverage reporting. Create a sample test for a basic component to verify the setup works correctly.",
+            "status": "pending",
+            "testStrategy": "Run 'npm test' to verify the test setup works. Create a simple component test that renders a component and asserts its presence in the document."
+          },
+          {
+            "id": 5,
+            "title": "Create Feature-Based Directory Structure and Configure Absolute Imports",
+            "description": "Establish a feature-based project structure and configure absolute imports for cleaner code organization.",
+            "dependencies": [
+              "11.1",
+              "11.2",
+              "11.3",
+              "11.4"
+            ],
+            "details": "Create a src directory structure with folders for features, components, hooks, utils, assets, and types. Set up environment variables with .env files for development and production. Configure vite.config.ts with alias paths for absolute imports. Update tsconfig.json with path mappings that match the alias configuration. Create index files in each directory for easier imports. Add .env.example file with required environment variables. Document the project structure in README.md.",
+            "status": "pending",
+            "testStrategy": "Import components and utilities using absolute paths in a test file to verify the configuration works. Check that the application builds successfully with the new structure. Verify environment variables are accessible through import.meta.env."
+          }
+        ]
       },
       {
         "id": 12,
@@ -752,8 +1032,62 @@
           7,
           11
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up openapi-typescript-codegen and create schema fetch script",
+            "description": "Install and configure openapi-typescript-codegen in the project. Create a script to fetch the OpenAPI schema from the backend and generate the TypeScript client.",
+            "dependencies": [],
+            "details": "Install openapi-typescript-codegen as a dev dependency. Create a script in scripts/generate-api-client.ts that fetches the OpenAPI schema from the backend endpoint (typically /openapi.json). Configure the generator with appropriate output directory (src/api/generated). Add npm script in package.json to run the generator. Implement error handling for schema fetch failures and validation of the schema format.",
+            "status": "done",
+            "testStrategy": "Verify the script can successfully fetch the schema and generate client code. Test with both valid and invalid schema responses to ensure proper error handling."
+          },
+          {
+            "id": 2,
+            "title": "Create custom templates for React Query integration",
+            "description": "Develop custom templates for openapi-typescript-codegen that integrate with React Query for hooks generation.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Create a templates directory with custom Handlebars templates that extend the default templates from openapi-typescript-codegen. Modify the templates to generate React Query hooks for each API endpoint. Implement templates for mutations (useMutation) and queries (useQuery) following React Query patterns. Configure the generator script to use these custom templates. Ensure templates handle different HTTP methods appropriately (GET for queries, POST/PUT/DELETE for mutations).",
+            "status": "done",
+            "testStrategy": "Validate generated templates produce valid TypeScript code. Test with sample API endpoints to ensure correct hook generation for different HTTP methods."
+          },
+          {
+            "id": 3,
+            "title": "Generate API endpoint hooks with proper typing",
+            "description": "Generate type-safe hooks for all API endpoints including useGenerateChatMutation and useBuildSlidesMutation with proper request and response typing.",
+            "dependencies": [
+              "12.2"
+            ],
+            "details": "Update the generator script to create hooks for all API endpoints. Ensure proper typing for request parameters and response models. Generate specific hooks mentioned in requirements (useGenerateChatMutation, useBuildSlidesMutation). Add JSDoc comments to generated hooks for better developer experience. Implement proper parameter handling for different endpoint types (path params, query params, request body). Ensure generated hooks follow React Query's conventions for mutations and queries.",
+            "status": "done",
+            "testStrategy": "Test generated hooks with mock data to verify type safety. Ensure hooks can be imported and used in React components without type errors."
+          },
+          {
+            "id": 4,
+            "title": "Implement error handling and response parsing",
+            "description": "Add robust error handling and response parsing to the generated API client.",
+            "dependencies": [
+              "12.3"
+            ],
+            "details": "Extend the API client with custom error handling that properly processes HTTP errors. Create error classes that extract error details from API responses. Implement response parsing that converts API responses to the expected TypeScript types. Add retry logic for transient errors. Implement request/response interceptors if needed. Ensure authentication headers are properly handled. Add timeout handling and cancellation support.",
+            "status": "done",
+            "testStrategy": "Test error handling with various error scenarios (4xx, 5xx, network errors). Verify response parsing correctly transforms API responses to TypeScript objects. Test retry logic with simulated transient failures."
+          },
+          {
+            "id": 5,
+            "title": "Create API client documentation and usage examples",
+            "description": "Document the generated API client and create usage examples for the frontend team.",
+            "dependencies": [
+              "12.4"
+            ],
+            "details": "Create a README.md file in the API client directory explaining how to use the generated hooks. Provide usage examples for common scenarios (queries, mutations, handling loading states, error handling). Document any custom configurations or extensions. Create example components demonstrating integration with React components. Add information about regenerating the client when the API changes. Include troubleshooting section for common issues.",
+            "status": "done",
+            "testStrategy": "Review documentation for clarity and completeness. Verify example code works as expected when copied into a component."
+          }
+        ]
       },
       {
         "id": 13,
@@ -766,7 +1100,61 @@
           11
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and Configure TanStack Router",
+            "description": "Set up TanStack Router v1 in the React application and configure the basic router structure",
+            "dependencies": [],
+            "details": "Install TanStack Router v1 using npm or yarn. Create a router.tsx file to define the router instance. Configure the RouterProvider component in the main App component. Set up the basic router structure with createRootRoute and createRouter functions. Implement the necessary provider wrappers for the router to work with the application's state management.",
+            "status": "done",
+            "testStrategy": "Verify router installation and basic configuration by creating a simple test route and ensuring it renders correctly. Test that the RouterProvider is properly integrated with the application."
+          },
+          {
+            "id": 2,
+            "title": "Create Route Definitions and Implement Lazy Loading",
+            "description": "Define the main application routes and implement lazy loading for route components",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "Create route definitions using createRoute for main pages (chat, slides, etc.). Implement lazy loading for route components using React.lazy() and Suspense. Set up appropriate loading fallbacks for lazy-loaded components. Configure route file structure following TanStack Router best practices. Ensure proper typing for route parameters and search params.",
+            "status": "done",
+            "testStrategy": "Test that routes are properly defined and can be accessed. Verify lazy loading works by checking network requests for component chunks. Test that loading fallbacks appear during component loading."
+          },
+          {
+            "id": 3,
+            "title": "Implement Root Route with Redirect to Chat",
+            "description": "Create a root route that automatically redirects users to the chat page",
+            "dependencies": [
+              "13.2"
+            ],
+            "details": "Implement the root route (/) using createRoute. Add a loader function that returns a redirect to the chat route. Configure the redirect to preserve any query parameters if needed. Handle any potential redirect loops. Ensure the redirect happens before any components are rendered to avoid flashing content.",
+            "status": "done",
+            "testStrategy": "Test that accessing the root URL redirects to the chat page. Verify that the redirect happens quickly without rendering unnecessary components. Test with various query parameters to ensure they're preserved."
+          },
+          {
+            "id": 4,
+            "title": "Add Chat Route with Session ID Parameter",
+            "description": "Implement the chat route with support for session ID parameters and proper typing",
+            "dependencies": [
+              "13.3"
+            ],
+            "details": "Create a chat route with path parameter for session ID (/chat/:sessionId?). Implement proper TypeScript typing for the session ID parameter. Add loader and action functions for the chat route to handle data fetching and mutations. Set up default behavior for when no session ID is provided. Create a component for rendering the chat interface that uses the route parameters.",
+            "status": "done",
+            "testStrategy": "Test navigation to chat routes with and without session IDs. Verify that session IDs are correctly parsed and available to components. Test edge cases like invalid session IDs and handling of special characters in IDs."
+          },
+          {
+            "id": 5,
+            "title": "Implement Not Found Page and Route Guards",
+            "description": "Create a not found page for invalid routes and implement authentication route guards if needed",
+            "dependencies": [
+              "13.4"
+            ],
+            "details": "Create a NotFound component to display when users access invalid routes. Configure the catch-all route for handling 404 cases. Implement route guards using loader functions to check authentication status if needed. Set up redirects to login page for protected routes when user is not authenticated. Add appropriate error boundaries for route-level errors.",
+            "status": "done",
+            "testStrategy": "Test accessing invalid routes to verify the NotFound page appears. If authentication guards are implemented, test that protected routes redirect unauthenticated users appropriately. Verify that authenticated users can access protected routes. Test error handling for routes that fail to load."
+          }
+        ]
       },
       {
         "id": 14,
@@ -779,7 +1167,64 @@
           11
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Zustand with TypeScript Types and Immer Middleware",
+            "description": "Initialize Zustand v4.5 with TypeScript support and integrate immer middleware for immutable state updates",
+            "dependencies": [],
+            "details": "Install Zustand v4.5 and immer packages. Create a base store configuration that includes TypeScript generics for type safety. Set up the immer middleware to enable immutable state updates using mutable syntax. Create a utility file for store creation that can be reused across different stores. Define common TypeScript interfaces for store actions and state.",
+            "status": "pending",
+            "testStrategy": "Write unit tests to verify store creation with proper typing. Test that immer middleware correctly handles immutable updates while allowing mutable syntax."
+          },
+          {
+            "id": 2,
+            "title": "Implement ChatStore for Message Management",
+            "description": "Create a Zustand store for managing chat messages, conversation history, and chat session data",
+            "dependencies": [
+              "14.1"
+            ],
+            "details": "Define TypeScript interfaces for chat message structure, chat session, and store state. Implement actions for adding, updating, and removing messages. Create methods for starting new chat sessions and continuing existing ones. Add selectors for filtering messages by type or status. Implement functions for message pagination if needed. Include typing indicators and message status tracking.",
+            "status": "pending",
+            "testStrategy": "Test store actions for adding and updating messages. Verify selectors correctly filter messages. Test chat session management functions. Ensure immutability is maintained during state updates."
+          },
+          {
+            "id": 3,
+            "title": "Implement SlideStore for Slide Generation State",
+            "description": "Create a Zustand store to manage slide generation state, progress tracking, and slide content",
+            "dependencies": [
+              "14.1"
+            ],
+            "details": "Define TypeScript interfaces for slide data, generation progress, and store state. Implement actions for initializing slide generation, updating progress, and storing generated slides. Create selectors for accessing current slide, progress percentage, and generation status. Add methods for navigating between slides and updating slide content. Implement error handling for failed generation attempts.",
+            "status": "pending",
+            "testStrategy": "Test slide generation state transitions. Verify progress tracking works correctly. Test slide navigation and content update functions. Ensure error states are properly captured and exposed."
+          },
+          {
+            "id": 4,
+            "title": "Add Persistence Layer for Session Data",
+            "description": "Implement persistence for chat and slide data using localStorage or sessionStorage",
+            "dependencies": [
+              "14.2",
+              "14.3"
+            ],
+            "details": "Configure persistence middleware for Zustand stores. Determine which parts of the state should be persisted (e.g., chat history, user preferences). Implement serialization and deserialization of store state with proper type checking. Add version control for persisted data to handle schema changes. Create migration strategies for outdated persisted data. Implement storage cleanup for old or expired data.",
+            "status": "pending",
+            "testStrategy": "Test persistence across page reloads. Verify that sensitive data is not persisted if applicable. Test migration of outdated persisted data. Ensure storage limits are respected and cleanup works correctly."
+          },
+          {
+            "id": 5,
+            "title": "Create Store Integration Hooks for Components",
+            "description": "Develop custom React hooks that expose store functionality to components with optimized re-rendering",
+            "dependencies": [
+              "14.2",
+              "14.3",
+              "14.4"
+            ],
+            "details": "Create custom hooks that use Zustand's selectors for efficient component rendering. Implement useChat hook for chat-related components that exposes relevant state and actions. Create useSlides hook for slide-related components with appropriate selectors. Add memoization for expensive computations within hooks. Implement combined hooks for components that need access to multiple stores. Document usage patterns and examples for each hook.",
+            "status": "pending",
+            "testStrategy": "Test hooks in component integration tests. Verify that components only re-render when relevant state changes. Test memoization effectiveness for expensive computations. Ensure hooks properly expose all necessary state and actions to components."
+          }
+        ]
       },
       {
         "id": 15,
@@ -793,7 +1238,63 @@
           11
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create WebSocket connection management",
+            "description": "Implement the core WebSocket connection functionality using Socket.IO client with connection status tracking and automatic reconnection logic",
+            "dependencies": [],
+            "details": "Create a useWebSocket hook that initializes a Socket.IO client connection to the backend '/ws' endpoint. Implement connection state management using useState to track connection status (connecting, connected, disconnected, error). Add automatic reconnection logic with exponential backoff. Expose a connect() and disconnect() method. Use Zustand to store the connection state globally if needed across components.",
+            "status": "pending",
+            "testStrategy": "Test connection establishment and status tracking with a mock Socket.IO server. Verify reconnection attempts occur with proper backoff. Test manual connect/disconnect functionality."
+          },
+          {
+            "id": 2,
+            "title": "Implement WebSocket authentication",
+            "description": "Add JWT authentication support to the WebSocket connection to ensure secure communication",
+            "dependencies": [
+              "15.1"
+            ],
+            "details": "Extend the useWebSocket hook to accept authentication tokens. Implement logic to send the JWT token during the Socket.IO handshake using the 'auth' option. Handle authentication errors and token expiration. Add a mechanism to update the token when it's refreshed. Ensure the connection is re-established with the new token when needed.",
+            "status": "pending",
+            "testStrategy": "Test authentication with valid and invalid tokens. Verify connection is established with valid tokens and rejected with invalid ones. Test token refresh scenario to ensure connection persists."
+          },
+          {
+            "id": 3,
+            "title": "Create typed event handlers and listeners",
+            "description": "Implement TypeScript interfaces for WebSocket events and create typed event handlers for different message types",
+            "dependencies": [
+              "15.1"
+            ],
+            "details": "Define TypeScript interfaces for all expected WebSocket events (e.g., SlideProgressEvent, SlideCompletedEvent). Create a type-safe event registration system that ensures handlers receive correctly typed payloads. Implement a registerHandler method that accepts event name and callback with proper typing. Use TypeScript generics to ensure type safety across the event system.",
+            "status": "pending",
+            "testStrategy": "Test event handler registration and callback execution with mock events. Verify type safety by ensuring TypeScript compilation fails with incorrect event types."
+          },
+          {
+            "id": 4,
+            "title": "Implement specific event listeners for slide events",
+            "description": "Add specific event listeners for 'slide:progress' and 'slide:completed' events with appropriate handlers",
+            "dependencies": [
+              "15.3"
+            ],
+            "details": "Using the typed event system, implement specific listeners for 'slide:progress' and 'slide:completed' events. For 'slide:progress', handle incremental updates to slide generation progress. For 'slide:completed', handle the completion of slide generation. Create helper methods like onSlideProgress and onSlideCompleted that register the appropriate handlers. Ensure events update the application state using Zustand store actions.",
+            "status": "pending",
+            "testStrategy": "Test event listeners with mock slide progress and completion events. Verify correct state updates occur in response to events. Test with various progress percentages and completion scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Create hook API and integration examples",
+            "description": "Finalize the useWebSocket hook API and create usage examples for integration with components",
+            "dependencies": [
+              "15.2",
+              "15.3",
+              "15.4"
+            ],
+            "details": "Finalize the useWebSocket hook API with a clean interface that exposes connection methods, status, and event registration. Implement proper cleanup in useEffect to disconnect when components unmount. Add comprehensive JSDoc comments for all public methods. Create example usage patterns showing how to integrate the hook with React components. Implement a higher-level useSlideEvents hook that uses useWebSocket internally but provides a simpler API for slide-specific events.",
+            "status": "pending",
+            "testStrategy": "Test the complete hook in an integration test with a mock Socket.IO server. Verify all functionality works together correctly. Test component integration examples to ensure proper usage patterns work as expected."
+          }
+        ]
       },
       {
         "id": 16,
@@ -807,7 +1308,59 @@
           13
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Header Component",
+            "description": "Create a responsive Header component with application branding and navigation elements",
+            "dependencies": [],
+            "details": "Create a Header.tsx component that includes the application logo, navigation links, and responsive design for different screen sizes. Use Tailwind CSS for styling. Include a mobile menu toggle for small screens. Add proper semantic HTML elements (header, nav) and ensure the component is accessible with appropriate ARIA attributes. Implement theme support by adding CSS variables or Tailwind classes that can be toggled.",
+            "status": "pending",
+            "testStrategy": "Write unit tests using React Testing Library to verify the Header renders correctly. Test responsive behavior by resizing the viewport. Use axe-core to verify accessibility compliance."
+          },
+          {
+            "id": 2,
+            "title": "Implement Sidebar Component",
+            "description": "Create a collapsible Sidebar component for application navigation",
+            "dependencies": [],
+            "details": "Develop a Sidebar.tsx component that displays navigation links for the application. Implement collapsible functionality for mobile views. Use Tailwind CSS for styling and responsive design. Include proper keyboard navigation support. Add active state styling for the current route using TanStack Router's hooks. Ensure the sidebar is accessible with appropriate ARIA attributes and focus management.",
+            "status": "pending",
+            "testStrategy": "Test sidebar rendering and collapsible functionality using React Testing Library. Verify keyboard navigation works correctly. Test route matching for active states."
+          },
+          {
+            "id": 3,
+            "title": "Implement MainLayout Component",
+            "description": "Create a container layout component that combines Header, Sidebar, and content area",
+            "dependencies": [
+              "16.1",
+              "16.2"
+            ],
+            "details": "Create a MainLayout.tsx component that serves as the main container for the application. Integrate the Header and Sidebar components. Implement a content area that will contain the page-specific components. Use CSS Grid or Flexbox via Tailwind for layout structure. Add responsive behavior to adjust layout based on screen size. Include loading and error state handling with appropriate UI components.",
+            "status": "pending",
+            "testStrategy": "Test the MainLayout component with various content sizes and screen dimensions. Verify that Header and Sidebar components are properly integrated. Test loading and error states display correctly."
+          },
+          {
+            "id": 4,
+            "title": "Implement Loading and Error States",
+            "description": "Create reusable loading and error state components for the layout",
+            "dependencies": [],
+            "details": "Develop LoadingState.tsx and ErrorState.tsx components that can be used throughout the application. For loading states, implement a visually appealing spinner or skeleton UI using Tailwind CSS. For error states, create a component that displays error messages with options to retry or contact support. Ensure both components are accessible and provide clear feedback to users.",
+            "status": "pending",
+            "testStrategy": "Test loading and error components in isolation. Verify they render correctly with different props. Test accessibility compliance using axe-core."
+          },
+          {
+            "id": 5,
+            "title": "Implement Responsive Layout Integration",
+            "description": "Integrate all layout components with responsive design and accessibility features",
+            "dependencies": [
+              "16.3",
+              "16.4"
+            ],
+            "details": "Finalize the integration of all layout components with comprehensive responsive design using Tailwind CSS breakpoints. Implement media queries for any custom styling needs. Add theme support by creating a theme context and provider. Ensure all layout components have proper accessibility attributes including ARIA roles, labels, and keyboard navigation. Test the entire layout system on various screen sizes and devices. Create a layout documentation file explaining the component structure and usage patterns.",
+            "status": "pending",
+            "testStrategy": "Conduct comprehensive testing across multiple viewport sizes. Use axe-core for accessibility testing. Perform manual testing with screen readers. Create visual regression tests to ensure layout consistency."
+          }
+        ]
       },
       {
         "id": 17,
@@ -821,7 +1374,62 @@
           16
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement ChatContainer Component",
+            "description": "Create the main ChatContainer component that will manage the chat flow and serve as the parent container for all chat-related components.",
+            "dependencies": [],
+            "details": "Create a React functional component using TypeScript that manages the state of the chat conversation. Use Zustand with immer for state management to track messages array, loading states, and error states. Implement the layout structure with proper styling for the chat interface. Add logic for handling new messages and maintaining conversation context. Ensure the component is responsive and follows the design system.",
+            "status": "pending",
+            "testStrategy": "Write unit tests using React Testing Library to verify the component renders correctly. Test state management with different message scenarios. Verify the component handles loading and error states appropriately."
+          },
+          {
+            "id": 2,
+            "title": "Create ChatInput and ModelSelector Components",
+            "description": "Implement the ChatInput component for user message input and the ModelSelector component for AI model selection.",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "For ChatInput: Create a form component with textarea/input field, submit button, and character counter. Implement validation for empty messages and character limits. Add keyboard shortcuts (Shift+Enter for new line, Enter to submit). For ModelSelector: Create a dropdown/radio button group component that allows users to select different AI models. Implement onChange handlers to update the selected model in the chat state. Style both components according to the design system and ensure they're accessible.",
+            "status": "pending",
+            "testStrategy": "Test form submission and validation logic. Verify keyboard shortcuts work as expected. Test that model selection correctly updates the state. Ensure components meet accessibility standards with keyboard navigation and screen reader support."
+          },
+          {
+            "id": 3,
+            "title": "Implement ChatMessage Component",
+            "description": "Create the ChatMessage component to display both user and AI messages with appropriate styling and formatting.",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "Implement a component that renders different message types (user, AI) with distinct styling. Support markdown rendering for AI responses using a library like react-markdown. Add syntax highlighting for code blocks. Implement message metadata display (timestamp, model used). Create skeleton loaders for messages in loading state. Ensure the component handles different content lengths appropriately.",
+            "status": "pending",
+            "testStrategy": "Test rendering of different message types and content formats. Verify markdown parsing works correctly. Test skeleton loading states. Ensure long messages display correctly without breaking the layout."
+          },
+          {
+            "id": 4,
+            "title": "Create SlidePlanPreview Component",
+            "description": "Implement the SlidePlanPreview component to display generated presentation outlines within the chat interface.",
+            "dependencies": [
+              "17.3"
+            ],
+            "details": "Create a component that renders structured presentation outlines received from the AI. Implement collapsible sections for slides and subsections. Add visual indicators for slide hierarchy and structure. Include interactive elements to edit or refine the outline. Style the component to visually distinguish it from regular chat messages. Ensure the preview is responsive and maintains readability at different screen sizes.",
+            "status": "pending",
+            "testStrategy": "Test rendering of different outline structures. Verify collapsible sections work correctly. Test interaction with outline elements. Ensure the component displays correctly at various screen sizes."
+          },
+          {
+            "id": 5,
+            "title": "Implement Message Animations and Auto-scrolling",
+            "description": "Add animations for message appearance using Framer Motion and implement auto-scrolling functionality for new messages.",
+            "dependencies": [
+              "17.1",
+              "17.3"
+            ],
+            "details": "Integrate Framer Motion to create smooth entrance animations for new messages. Implement different animation variants for user vs. AI messages. Create a custom hook for managing auto-scrolling behavior that scrolls to the latest message when new content is added. Add a \"scroll to bottom\" button that appears when the user has scrolled up. Implement smooth scrolling behavior. Ensure animations are subtle and don't interfere with usability or accessibility.",
+            "status": "pending",
+            "testStrategy": "Test that animations render correctly and don't cause layout shifts. Verify auto-scrolling works when new messages are added. Test the scroll to bottom button functionality. Ensure animations respect user preferences for reduced motion."
+          }
+        ]
       },
       {
         "id": 18,
@@ -835,7 +1443,67 @@
           17
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement SlideGenerator Component",
+            "description": "Create the SlideGenerator component that allows users to initiate slide generation based on the chat outline",
+            "dependencies": [],
+            "details": "Create a React component that takes the outline data from the chat context and provides a button to initiate slide generation. Use Zustand store to manage the slide generation state. Implement a form with options for slide style, theme, and other generation parameters. Add validation to ensure an outline exists before generation can start. Use TanStack Query's mutation hooks to handle the API request to the backend slide generation endpoint.",
+            "status": "pending",
+            "testStrategy": "Write unit tests using React Testing Library to verify component rendering and form validation. Test the mutation hook with mock data to ensure proper API interaction. Verify accessibility compliance with axe-core."
+          },
+          {
+            "id": 2,
+            "title": "Implement ProgressIndicator Component",
+            "description": "Create a component to display real-time progress of slide generation",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Develop a ProgressIndicator component that subscribes to WebSocket events at '/ws' to receive real-time progress updates during slide generation. Implement a visual progress bar showing percentage complete. Add step indicators for different phases (parsing outline, generating content, creating slides, etc.). Use Framer Motion for smooth animations between progress states. Handle connection errors and reconnection logic for the WebSocket.",
+            "status": "pending",
+            "testStrategy": "Test WebSocket event handling with mock events. Verify progress bar updates correctly with different percentage values. Test error handling when WebSocket connection fails. Ensure animations render properly across different states."
+          },
+          {
+            "id": 3,
+            "title": "Implement DownloadButton Component",
+            "description": "Create a component for downloading the generated PPTX file",
+            "dependencies": [
+              "18.1",
+              "18.2"
+            ],
+            "details": "Implement a DownloadButton component that becomes active once slide generation is complete. Use the browser's Fetch API with 'blob' response type to download the PPTX file. Add proper error handling for failed downloads. Implement download progress tracking if the file is large. Use proper MIME types and suggested filenames for the download. Add visual feedback during the download process.",
+            "status": "pending",
+            "testStrategy": "Test download functionality with mock API responses. Verify error handling works when download fails. Test with various file sizes to ensure progress tracking works. Ensure proper file naming and MIME type handling."
+          },
+          {
+            "id": 4,
+            "title": "Implement Error Handling and Retry Functionality",
+            "description": "Add comprehensive error handling and retry mechanisms for the slide generation process",
+            "dependencies": [
+              "18.1",
+              "18.2",
+              "18.3"
+            ],
+            "details": "Create error boundary components to catch and display errors during slide generation. Implement specific error messages for different failure scenarios (API errors, timeout, WebSocket disconnection). Add retry functionality with exponential backoff for failed API calls. Create a RetryButton component that allows users to restart generation from the point of failure. Implement error logging to help with debugging.",
+            "status": "pending",
+            "testStrategy": "Test error boundaries with simulated errors. Verify retry logic works with mock failed requests. Test different error scenarios to ensure appropriate messages are displayed. Verify that the retry mechanism correctly resumes from failure points."
+          },
+          {
+            "id": 5,
+            "title": "Implement Notifications and Loading States",
+            "description": "Create loading animations and notification system for slide generation events",
+            "dependencies": [
+              "18.1",
+              "18.2",
+              "18.3",
+              "18.4"
+            ],
+            "details": "Implement a notification system using a toast-like component for success, error, and info messages. Create loading animations for different states of slide generation. Add skeleton loaders for components while data is loading. Implement sound notifications (optional with user permission) for generation completion. Ensure notifications are accessible and can be dismissed. Use Framer Motion for smooth transitions between loading states.",
+            "status": "pending",
+            "testStrategy": "Test notification rendering and dismissal. Verify loading animations display correctly during different states. Test accessibility of notifications with screen readers. Ensure skeleton loaders render properly while content is loading."
+          }
+        ]
       },
       {
         "id": 19,
@@ -848,7 +1516,64 @@
           18
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create DownloadManager Core Utility",
+            "description": "Implement the base DownloadManager utility class with core functionality for initiating file downloads and handling file saving with proper filenames.",
+            "dependencies": [],
+            "details": "Create a DownloadManager class with methods for initiating downloads and saving files. Implement the download method that takes a file URL and optional filename. Use the Fetch API with appropriate headers for downloading. Implement proper file saving using the File System Access API or fallback to Blob URLs with download attribute. Handle content-disposition headers to extract filenames when not provided.",
+            "status": "pending",
+            "testStrategy": "Unit test the DownloadManager class with mocked responses. Test file saving with different filename scenarios. Verify proper handling of content-disposition headers."
+          },
+          {
+            "id": 2,
+            "title": "Implement Resumable Downloads with Range Requests",
+            "description": "Add support for resumable downloads by implementing range requests that allow downloads to continue from where they left off if interrupted.",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Extend the DownloadManager to store download progress in memory and localStorage. Implement functionality to check if a partial download exists. Add support for HTTP Range headers to request specific byte ranges. Create logic to append new data to existing partial downloads. Implement methods to calculate download ranges based on existing data.",
+            "status": "pending",
+            "testStrategy": "Test resumable downloads by simulating network interruptions. Verify range requests are correctly formatted. Test with various file sizes to ensure proper chunking."
+          },
+          {
+            "id": 3,
+            "title": "Implement Download Progress Tracking",
+            "description": "Create a system to track and report download progress, including percentage complete, download speed, and estimated time remaining.",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Add event listeners to track bytes received during download. Implement a progress calculation system that emits events with download percentage, speed, and ETA. Create a time-window based speed calculation algorithm. Use ReadableStream API to process the download in chunks for accurate progress tracking. Implement a throttled progress update mechanism to avoid UI performance issues.",
+            "status": "pending",
+            "testStrategy": "Test progress tracking with files of various sizes. Verify accuracy of percentage calculations. Test speed calculations with throttled connections. Ensure progress events are emitted at appropriate intervals."
+          },
+          {
+            "id": 4,
+            "title": "Add Error Handling and Retry Functionality",
+            "description": "Implement robust error handling for various network failures and add automatic retry functionality with exponential backoff.",
+            "dependencies": [
+              "19.1",
+              "19.2",
+              "19.3"
+            ],
+            "details": "Create error classification system for different types of network errors. Implement exponential backoff retry strategy with configurable attempts. Add timeout handling for stalled downloads. Create recovery mechanisms for server errors vs. client errors. Implement circuit breaker pattern to prevent excessive retries. Add detailed error reporting with actionable messages for users.",
+            "status": "pending",
+            "testStrategy": "Test error handling with simulated network failures. Verify retry mechanism works with proper backoff. Test timeout handling. Ensure circuit breaker prevents excessive retries. Validate error messages are user-friendly."
+          },
+          {
+            "id": 5,
+            "title": "Implement Download Status Notifications",
+            "description": "Create a notification system to inform users about download status, including start, progress, completion, and errors.",
+            "dependencies": [
+              "19.3",
+              "19.4"
+            ],
+            "details": "Implement a notification manager that integrates with the DownloadManager. Create toast notifications for download events using a UI library or custom implementation. Add support for browser notifications API where appropriate. Implement persistent download status indicators in the UI. Create a download history feature to track past downloads. Add ability to cancel ongoing downloads.",
+            "status": "pending",
+            "testStrategy": "Test notifications appear correctly for different download states. Verify download history tracking works. Test cancellation functionality. Ensure notifications are accessible and follow UI design guidelines."
+          }
+        ]
       },
       {
         "id": 20,
@@ -862,7 +1587,63 @@
           17
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ChatPage Component Structure",
+            "description": "Implement the basic ChatPage component that will serve as the container for all chat UI components. Set up the component layout and routing integration.",
+            "dependencies": [],
+            "details": "Create a new ChatPage.tsx component in the pages directory. Import necessary components from the chat UI components (ChatContainer, ChatInput, ChatMessage, etc.). Set up the basic layout structure with proper styling using the project's styling approach. Integrate with TanStack Router for proper routing. Include placeholder sections for all required chat UI elements that will be connected in subsequent tasks.",
+            "status": "pending",
+            "testStrategy": "Write unit tests to verify the ChatPage component renders correctly with all placeholder elements. Test routing integration to ensure the page loads properly."
+          },
+          {
+            "id": 2,
+            "title": "Integrate ChatStore for State Management",
+            "description": "Connect the ChatPage component with the ChatStore using Zustand for state management. Implement state access and update methods.",
+            "dependencies": [
+              "20.1"
+            ],
+            "details": "Import and initialize the ChatStore within the ChatPage component. Create hooks to access chat state (messages, loading states, etc.). Implement state update methods for adding messages, updating message status, and handling chat session state. Use immer for immutable state updates as per project requirements. Set up proper state initialization and cleanup on component mount/unmount.",
+            "status": "pending",
+            "testStrategy": "Test state management integration by mocking ChatStore and verifying state updates correctly flow through the component. Verify that component re-renders appropriately when state changes."
+          },
+          {
+            "id": 3,
+            "title": "Implement API Integration with Generated Hooks",
+            "description": "Connect the ChatPage to backend API endpoints using the generated API hooks. Implement data fetching, sending messages, and handling responses.",
+            "dependencies": [
+              "20.2"
+            ],
+            "details": "Import and use the generated API hooks for chat functionality. Implement functions to send user messages to the API. Set up handlers for receiving and processing API responses. Implement proper error handling for API calls. Use TanStack Query for data fetching with appropriate caching strategies. Connect WebSocket handlers for real-time updates if applicable using the python-socketio integration at /ws endpoint.",
+            "status": "pending",
+            "testStrategy": "Test API integration with mock API responses. Verify correct handling of success and error states. Test WebSocket connection and message handling if applicable."
+          },
+          {
+            "id": 4,
+            "title": "Add Optimistic UI Updates and Loading States",
+            "description": "Implement optimistic UI updates for better user experience and add loading states for pending operations.",
+            "dependencies": [
+              "20.2",
+              "20.3"
+            ],
+            "details": "Implement optimistic updates for user messages to show them immediately in the UI before API confirmation. Add loading indicators for pending message sending and processing. Create skeleton loaders for content that's being fetched. Implement proper state transitions between loading, success, and error states. Use Framer Motion for smooth animations between states as mentioned in the task details.",
+            "status": "pending",
+            "testStrategy": "Test optimistic updates by simulating network delays and verifying UI updates correctly. Verify loading states display properly during API operations. Test state transitions for smoothness and correctness."
+          },
+          {
+            "id": 5,
+            "title": "Implement Error Handling and Session Management",
+            "description": "Add comprehensive error handling for API failures and implement session management for chat conversations.",
+            "dependencies": [
+              "20.3",
+              "20.4"
+            ],
+            "details": "Implement error boundaries to catch and display errors gracefully. Create error state components for different types of failures (network, server, etc.). Add retry mechanisms for failed API calls. Implement session management to maintain chat context across page reloads if needed. Use JWT authentication as specified in project requirements. Add persistence for chat history using local storage or other appropriate methods. Implement proper cleanup and resource management.",
+            "status": "pending",
+            "testStrategy": "Test error handling by simulating various error conditions and verifying appropriate error messages are displayed. Test session persistence by reloading the page and verifying chat state is maintained correctly. Verify authentication integration works properly if applicable."
+          }
+        ]
       },
       {
         "id": 21,
@@ -878,7 +1659,63 @@
           20
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement API Service for Slide Generation",
+            "description": "Create a service that connects to the backend API to initiate slide generation based on user input. This service should handle the API request/response cycle and provide appropriate error handling.",
+            "dependencies": [],
+            "details": "Create a `slideGenerationService.ts` file that exports functions for initiating slide generation. Use TanStack Query's `useMutation` hook to manage the API call state. Implement proper error handling with typed error responses. The service should accept prompt text and any configuration options, then return a generation ID that can be used for tracking progress via WebSockets.",
+            "status": "pending",
+            "testStrategy": "Write unit tests using Vitest to verify API calls are made correctly. Mock API responses to test success and error scenarios. Test that the service correctly formats requests and parses responses."
+          },
+          {
+            "id": 2,
+            "title": "Implement WebSocket Connection for Progress Updates",
+            "description": "Create a WebSocket connection manager that subscribes to generation progress events from the backend and provides real-time updates to the UI.",
+            "dependencies": [
+              "21.1"
+            ],
+            "details": "Create a `slideGenerationSocket.ts` utility that establishes a connection to the `/ws` endpoint using socket.io-client. Implement event handlers for 'generation_started', 'generation_progress', 'generation_complete', and 'generation_error' events. The utility should accept a generation ID and callback functions for different event types. Include reconnection logic and heartbeat monitoring.",
+            "status": "pending",
+            "testStrategy": "Test WebSocket connection establishment and event handling with mock socket events. Verify that callbacks are triggered correctly for each event type. Test reconnection logic by simulating disconnections."
+          },
+          {
+            "id": 3,
+            "title": "Implement Slide Generation State Management",
+            "description": "Create a Zustand store to manage the slide generation process state, including progress tracking, error handling, and generation results.",
+            "dependencies": [
+              "21.1",
+              "21.2"
+            ],
+            "details": "Create a `useSlideGenerationStore.ts` using Zustand with immer for state management. The store should track generation status (idle, generating, completed, error), progress percentage, generation ID, result data, and error information. Implement actions for starting generation, updating progress, completing generation, handling errors, and resetting state. Use TypeScript interfaces for all state and action types.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for the store to verify state transitions and action behaviors. Test that the store correctly updates based on different actions and maintains the expected state structure."
+          },
+          {
+            "id": 4,
+            "title": "Connect DownloadManager for Generated Files",
+            "description": "Integrate the DownloadManager utility to handle downloading generated slide files once generation is complete.",
+            "dependencies": [
+              "21.3"
+            ],
+            "details": "Import and use the DownloadManager from Task 19 to handle file downloads. Create a function that triggers download when generation is complete. Implement proper error handling for download failures and add retry functionality. The download should be initiated automatically when generation completes or manually by user action. Store download status in the slide generation state.",
+            "status": "pending",
+            "testStrategy": "Test the download integration with mock files of various sizes. Verify that download progress is tracked correctly. Test error handling and retry functionality. Ensure the UI correctly reflects download status."
+          },
+          {
+            "id": 5,
+            "title": "Create UI Components for Generation Process",
+            "description": "Implement UI components that display generation status, progress, and provide controls for the slide generation process.",
+            "dependencies": [
+              "21.3",
+              "21.4"
+            ],
+            "details": "Create components for: 1) GenerationControls - buttons to start/cancel generation and download files, 2) GenerationProgress - progress bar and status messages, 3) GenerationError - error display with retry options. Implement smooth transitions between states using CSS transitions or Framer Motion. Connect these components to the Zustand store for state management. Ensure all components are accessible and provide clear feedback to users.",
+            "status": "pending",
+            "testStrategy": "Write component tests to verify rendering in different states. Test user interactions like starting generation and downloading files. Verify that components correctly reflect the current state from the store. Test accessibility using axe or similar tools."
+          }
+        ]
       },
       {
         "id": 22,
@@ -893,7 +1730,62 @@
           14
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement LoginPage Component",
+            "description": "Create a LoginPage component that allows users to input their email address for magic link authentication",
+            "dependencies": [],
+            "details": "Create a React component that includes a form with email input field, validation, and submission handling. Use Zustand for managing form state. Implement proper error handling for invalid inputs. Add loading state during form submission. Style the component according to design guidelines. Ensure the component is responsive and accessible.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for form validation logic. Test form submission with mock API calls. Verify error states display correctly. Test accessibility with screen readers."
+          },
+          {
+            "id": 2,
+            "title": "Create MagicLinkPage Component",
+            "description": "Implement a page component that handles magic link authentication when users click the link in their email",
+            "dependencies": [
+              "22.1"
+            ],
+            "details": "Create a React component that extracts the token from URL parameters. Implement logic to validate the token with the backend API. Show appropriate loading states during validation. Handle success and error cases. Redirect to the appropriate page after successful authentication. Use TanStack Router for navigation and route handling.",
+            "status": "pending",
+            "testStrategy": "Test token extraction from URL. Mock API responses for token validation. Test different scenarios (valid token, expired token, invalid token). Verify redirects work correctly."
+          },
+          {
+            "id": 3,
+            "title": "Implement Authentication State Management",
+            "description": "Create a Zustand store to manage authentication state across the application",
+            "dependencies": [
+              "22.2"
+            ],
+            "details": "Implement a Zustand store with immer for authentication state management. Include state for user information, authentication status, and loading states. Create actions for login, logout, and token refresh. Implement persistence using localStorage or sessionStorage. Add proper type definitions for the store. Implement selectors for commonly accessed state properties.",
+            "status": "pending",
+            "testStrategy": "Test store initialization. Verify actions correctly modify state. Test persistence functionality. Ensure type safety with TypeScript."
+          },
+          {
+            "id": 4,
+            "title": "Add Protected Route Handling",
+            "description": "Implement route protection to restrict access to authenticated users only",
+            "dependencies": [
+              "22.3"
+            ],
+            "details": "Create a higher-order component or route wrapper using TanStack Router to protect routes. Implement logic to check authentication state before rendering protected routes. Add redirect functionality for unauthenticated users. Handle loading states during authentication checks. Ensure smooth transitions between routes.",
+            "status": "pending",
+            "testStrategy": "Test route protection with authenticated and unauthenticated states. Verify redirects work correctly. Test loading states during authentication checks."
+          },
+          {
+            "id": 5,
+            "title": "Implement Token Refresh and Error Handling",
+            "description": "Add functionality to refresh authentication tokens and handle authentication errors",
+            "dependencies": [
+              "22.3",
+              "22.4"
+            ],
+            "details": "Implement token refresh logic using TanStack Query for API calls. Create interceptors to handle 401 errors and trigger token refresh. Implement exponential backoff for retry attempts. Add global error handling for authentication failures. Create UI components for displaying authentication errors. Implement automatic logout on critical authentication failures.",
+            "status": "pending",
+            "testStrategy": "Test token refresh flow with mock API responses. Verify error handling works correctly. Test automatic logout functionality. Ensure UI correctly displays authentication error states."
+          }
+        ]
       },
       {
         "id": 23,
@@ -907,7 +1799,65 @@
           22
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Cypress and Initial Configuration",
+            "description": "Install and configure Cypress for end-to-end testing, including folder structure, base configuration, and CI integration",
+            "dependencies": [],
+            "details": "Install Cypress using npm/yarn. Create cypress.config.ts with proper TypeScript configuration. Set up environment variables for different testing environments. Configure viewport settings for responsive testing. Set up custom commands in cypress/support/commands.ts. Create base test utilities and helpers. Configure Cypress for CI pipeline integration.",
+            "status": "pending",
+            "testStrategy": "Verify Cypress installation by running a simple test. Ensure configuration works across different environments."
+          },
+          {
+            "id": 2,
+            "title": "Implement Main User Flow Tests",
+            "description": "Create end-to-end tests for the core user journey: entering a prompt, receiving an outline, generating slides, and downloading the PPTX",
+            "dependencies": [
+              "23.1"
+            ],
+            "details": "Create test file for main user flow. Implement test for entering prompt in ChatInput. Test outline generation and display in SlidePlanPreview. Verify slide generation process and progress indicators. Test PPTX download functionality using Cypress file download capabilities. Add assertions for each step of the flow. Implement proper waiting strategies for asynchronous operations.",
+            "status": "pending",
+            "testStrategy": "Run tests against both mock data and actual API responses. Verify each step completes successfully and the final PPTX file is downloadable."
+          },
+          {
+            "id": 3,
+            "title": "Implement Authentication Flow Tests",
+            "description": "Create tests for user authentication flows including login, magic link handling, and protected routes",
+            "dependencies": [
+              "23.1"
+            ],
+            "details": "Create test file for authentication flows. Implement test for email input on LoginPage. Test magic link handling on MagicLinkPage. Verify protected route access with and without authentication. Test token refresh functionality. Create test for authentication persistence across page reloads. Mock JWT token validation as needed.",
+            "status": "pending",
+            "testStrategy": "Use Cypress intercept to mock authentication API responses. Test both successful and error scenarios. Verify protected routes redirect unauthenticated users appropriately."
+          },
+          {
+            "id": 4,
+            "title": "Add Accessibility Testing with cypress-axe",
+            "description": "Integrate cypress-axe for automated accessibility testing across all main application pages and components",
+            "dependencies": [
+              "23.1",
+              "23.2",
+              "23.3"
+            ],
+            "details": "Install cypress-axe and axe-core packages. Configure cypress-axe in cypress/support/e2e.ts. Create custom command for accessibility testing. Implement accessibility tests for each main page: home, login, chat interface, slide preview. Test focus management and keyboard navigation. Generate accessibility violation reports. Add severity filtering for violations.",
+            "status": "pending",
+            "testStrategy": "Run accessibility tests on all pages. Verify WCAG compliance. Address critical and serious violations. Document any accepted violations with justifications."
+          },
+          {
+            "id": 5,
+            "title": "Create Test Fixtures and Implement Visual Regression Testing",
+            "description": "Set up test fixtures/mocks for external services and implement visual regression testing for UI components",
+            "dependencies": [
+              "23.1",
+              "23.2",
+              "23.4"
+            ],
+            "details": "Create fixture data for API responses in cypress/fixtures. Implement intercept patterns for mocking external services. Install and configure a visual regression testing tool (cypress-image-snapshot or similar). Create baseline screenshots for critical UI components. Implement visual comparison tests for chat interface, slide preview, and authentication screens. Configure threshold for acceptable visual differences.",
+            "status": "pending",
+            "testStrategy": "Compare visual snapshots against baselines. Update baselines when intentional UI changes occur. Test across different viewport sizes to ensure responsive design integrity."
+          }
+        ]
       },
       {
         "id": 24,
@@ -920,7 +1870,61 @@
           21
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Frontend Code Splitting and Lazy Loading",
+            "description": "Set up code splitting for frontend routes and implement lazy loading for components to reduce initial bundle size and improve load times.",
+            "dependencies": [],
+            "details": "Use React.lazy() and Suspense to implement code splitting for TanStack Router routes. Create a LazyLoad component wrapper that can be used for any component that doesn't need to be loaded immediately. Update route definitions to use lazy loading. Implement a loading fallback component to display during lazy loading. Configure Webpack/bundler for optimal chunk sizes.",
+            "status": "pending",
+            "testStrategy": "Measure bundle sizes before and after implementation. Verify that routes load correctly with network throttling. Test that fallback components display properly during loading."
+          },
+          {
+            "id": 2,
+            "title": "Optimize Image Loading and Processing",
+            "description": "Implement techniques to optimize image loading, processing, and display throughout the application.",
+            "dependencies": [
+              "24.1"
+            ],
+            "details": "Add image lazy loading using Intersection Observer API or a library like react-lazyload. Implement responsive images with srcset and sizes attributes. Create an optimized Image component that handles proper sizing, lazy loading, and placeholder display. Add blur-up or LQIP (Low Quality Image Placeholders) for better perceived performance. Implement proper caching headers for images.",
+            "status": "pending",
+            "testStrategy": "Test image loading performance with Lighthouse. Verify lazy loading works correctly across different viewports. Measure and compare image load times before and after optimization."
+          },
+          {
+            "id": 3,
+            "title": "Implement Frontend Caching and Memoization",
+            "description": "Add caching strategies for API responses and memoization for expensive computations to improve frontend performance.",
+            "dependencies": [
+              "24.1"
+            ],
+            "details": "Configure TanStack Query with appropriate caching strategies for API responses. Implement staleTime and cacheTime settings based on data volatility. Add useMemo and useCallback hooks for expensive computations and callback functions. Implement React.memo for components that render frequently but with the same props. Create custom hooks for memoized selectors when using Zustand state.",
+            "status": "pending",
+            "testStrategy": "Profile component rendering before and after memoization. Verify that API requests are properly cached and not duplicated. Test that stale data is refreshed appropriately."
+          },
+          {
+            "id": 4,
+            "title": "Optimize WebSocket Communication",
+            "description": "Implement optimizations for WebSocket message frequency and payload size to reduce network overhead.",
+            "dependencies": [
+              "24.3"
+            ],
+            "details": "Implement throttling and debouncing for frequent WebSocket events. Add message batching for multiple small messages. Optimize payload size by removing unnecessary data. Implement compression for WebSocket messages using MessagePack or similar. Add reconnection logic with exponential backoff. Create a mechanism to sync missed messages after reconnection.",
+            "status": "pending",
+            "testStrategy": "Measure WebSocket message frequency and payload sizes before and after optimization. Test reconnection scenarios. Verify that throttling and batching don't affect critical functionality."
+          },
+          {
+            "id": 5,
+            "title": "Implement Backend Response Optimization",
+            "description": "Add response compression and optimize API endpoint performance on the backend.",
+            "dependencies": [
+              "24.4"
+            ],
+            "details": "Implement gzip/brotli compression middleware for FastAPI responses. Add proper caching headers for static resources. Optimize database queries if applicable. Implement response pagination for large data sets. Add ETags for cacheable responses. Optimize serialization/deserialization of Pydantic models. Implement request throttling for high-frequency endpoints.",
+            "status": "pending",
+            "testStrategy": "Measure API response times before and after optimization. Verify compression is working correctly. Test with high load to ensure optimizations scale properly. Check that headers are set correctly for caching."
+          }
+        ]
       },
       {
         "id": 25,
@@ -935,12 +1939,68 @@
           24
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Helm Chart Structure and Base Configuration",
+            "description": "Set up the basic Helm chart structure for the application with necessary templates and values files.",
+            "dependencies": [],
+            "details": "Create a new directory 'helm/' at the project root. Initialize a new Helm chart with 'helm create presentai'. Modify Chart.yaml with appropriate metadata. Create values.yaml with configurable parameters for both frontend and backend services. Set up directory structure with templates/ folder containing _helpers.tpl for common labels and functions. Add .helmignore file to exclude unnecessary files. Create a README.md with usage instructions.",
+            "status": "pending",
+            "testStrategy": "Validate the Helm chart structure using 'helm lint'. Verify that the chart can be packaged with 'helm package'."
+          },
+          {
+            "id": 2,
+            "title": "Configure Frontend and Backend Deployments",
+            "description": "Create Kubernetes Deployment configurations for both frontend and backend components.",
+            "dependencies": [
+              "25.1"
+            ],
+            "details": "Create deployment.yaml in templates/ directory with separate sections for frontend and backend. Configure container specifications including image repository, tag, and pull policy. Set up environment variables referencing ConfigMap and Secret resources. Define appropriate ports for containers. Configure resource requests and limits based on application needs. Add labels for service selection. Implement readiness and liveness probes with appropriate endpoints and timing. Set up deployment strategy with rolling updates.",
+            "status": "pending",
+            "testStrategy": "Use 'helm template' to render the deployments and validate the YAML output. Verify that all required fields are properly configured."
+          },
+          {
+            "id": 3,
+            "title": "Set up Services and Ingress Resources",
+            "description": "Create Service and Ingress configurations to expose the application externally.",
+            "dependencies": [
+              "25.2"
+            ],
+            "details": "Create service.yaml in templates/ directory with ClusterIP services for both frontend and backend. Define appropriate ports and targetPorts. Add selector labels matching deployment labels. Create ingress.yaml with rules to route traffic to frontend and backend services. Configure TLS settings if needed. Add annotations for Ingress controller configuration. Set up path-based routing with appropriate rewrite rules. Configure CORS headers if needed.",
+            "status": "pending",
+            "testStrategy": "Validate Ingress configuration with 'helm template'. Test the routing rules by deploying to a test cluster and verifying connectivity."
+          },
+          {
+            "id": 4,
+            "title": "Implement ConfigMaps and Secrets Management",
+            "description": "Create templates for configuration data and sensitive information storage.",
+            "dependencies": [
+              "25.1"
+            ],
+            "details": "Create configmap.yaml in templates/ directory with application configuration parameters. Include environment-specific settings that can be overridden in values.yaml. Create secrets.yaml template for sensitive data like API keys and database credentials. Use Helm's built-in functions to encode values as base64. Add annotations for external secrets management integration if needed. Configure volume mounts in deployments to access ConfigMap and Secret data. Document all configuration parameters in values.yaml with descriptions and default values.",
+            "status": "pending",
+            "testStrategy": "Verify that secrets are properly encoded. Test that ConfigMap and Secret values are correctly mounted in pods. Validate that sensitive information is not exposed in logs or template output."
+          },
+          {
+            "id": 5,
+            "title": "Configure Horizontal Pod Autoscaling and Blue/Green Deployment",
+            "description": "Implement autoscaling configuration and deployment strategy for zero-downtime updates.",
+            "dependencies": [
+              "25.2",
+              "25.3",
+              "25.4"
+            ],
+            "details": "Create hpa.yaml in templates/ directory with HorizontalPodAutoscaler resources for frontend and backend. Configure CPU and memory-based scaling metrics with appropriate thresholds. Set minimum and maximum replica counts based on expected load. Implement blue/green deployment strategy using Kubernetes service selectors. Create separate deployment templates for blue and green environments. Add scripts or Helm hooks to manage the cutover process. Configure persistent volumes if needed for stateful components. Document the blue/green deployment process in README.md.",
+            "status": "pending",
+            "testStrategy": "Test autoscaling by applying load to the application and verifying that new pods are created. Validate blue/green deployment by performing a test deployment and verifying zero downtime during the transition."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-08-09T09:35:23.960Z",
-      "updated": "2025-08-09T11:39:40.057Z",
+      "updated": "2025-08-10T08:27:08.545Z",
       "description": "Tasks for master context"
     }
   }

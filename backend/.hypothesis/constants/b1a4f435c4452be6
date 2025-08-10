@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\stateful\events.py
+# hypothesis_version: 6.137.1
+
+['case', 'checks', 'elapsed', 'error', 'exception', 'failure', 'failures', 'interrupted', 'is_final', 'name', 'rejected', 'response', 'source', 'started_at', 'state_machine', 'status', 'status_code', 'success', 'target', 'timestamp', 'transition_id']

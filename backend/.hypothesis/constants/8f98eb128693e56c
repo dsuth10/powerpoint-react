@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\resolver.py
+# hypothesis_version: 6.137.1
+
+['A', 'AAAA', 'AsyncResolver', 'DNS lookup failed', 'DefaultResolver', 'ThreadedResolver', 'ascii', 'family', 'flags', 'getaddrinfo', 'gethostbyname', 'host', 'hostname', 'port', 'proto']

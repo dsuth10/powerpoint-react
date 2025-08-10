@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\oxml\xmlchemy.py
+# hypothesis_version: 6.137.1
+
+['%s_lst', ':', 'BaseOxmlElement', '_add_%s', '_insert_%s', '_new_%s', '_remove_%s', 'add_%s', 'get_or_add_%s', 'get_or_change_to_%s', 'unicode']

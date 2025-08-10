@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\type\scalars.py
+# hypothesis_version: 6.137.1
+
+[-2147483648, 2147483647, 'Boolean', 'Float', 'GRAPHQL_MAX_INT', 'GRAPHQL_MIN_INT', 'GraphQLBoolean', 'GraphQLFloat', 'GraphQLID', 'GraphQLInt', 'GraphQLString', 'ID', 'Int', 'String', 'builtins', 'false', 'true']

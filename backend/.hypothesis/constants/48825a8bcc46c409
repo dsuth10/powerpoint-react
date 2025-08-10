@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\limits\strategies.py
+# hypothesis_version: 6.137.1
+
+['acquire_entry', 'fixed-window', 'get_moving_window', 'moving-window']

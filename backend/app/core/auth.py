@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt, JWTError
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from app.core.config import settings
 
@@ -37,3 +37,20 @@ def verify_token(token: str, token_type: str = "access") -> TokenData:
 def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     token_data = verify_token(token, token_type="access")
     return token_data.sub 
+
+
+def api_key_dependency(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key")) -> None:
+    """Optional API key guard.
+
+    Behavior:
+    - If settings.REQUIRE_API_KEY is False or no API keys configured, allow.
+    - If REQUIRE_API_KEY is True, the provided header must match one of settings.API_KEYS.
+    """
+    if not settings.REQUIRE_API_KEY:
+        return None
+    configured = [k for k in settings.API_KEYS if k]
+    if not configured:
+        return None
+    if not x_api_key or x_api_key not in configured:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API key")
+    return None

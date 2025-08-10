@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\_override.py
+# hypothesis_version: 6.137.1
+
+['cookies', 'headers', 'path_parameters', 'query']

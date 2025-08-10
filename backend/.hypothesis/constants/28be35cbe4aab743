@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\failures.py
+# hypothesis_version: 6.137.1
+
+['/', 'GraphQL client error', 'GraphQL server error', 'Malformed media type', 'Response timeout', 'Schema', 'Schema at ', 'Server error', 'Use after free', 'graphql_client_error', 'graphql_server_error', 'ignored_auth', 'json_decode', 'json_schema', 'malformed_media_type', 'missing_content_type', 'missing_headers', 'request_timeout', 'server_error', 'use_after_free']

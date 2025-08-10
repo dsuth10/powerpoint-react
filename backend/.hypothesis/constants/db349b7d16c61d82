@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\prometheus_client\openmetrics\exposition.py
+# hypothesis_version: 6.137.1
+
+[' # {} {}', ' # {} {} {}', '"', '"{}"', '# EOF\n', '# HELP {} {}\n', ',', ', ', '\\', '\\"', '\\\\', '\\n', '_bucket', '_total', 'counter', 'gaugehistogram', 'histogram', 'utf-8', '{', '{{{0}}}', '{} {}{}{}\n', '{}="{}"', '{}{} {}{}{}\n', '}']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\runner\serialization.py
+# hypothesis_version: 6.137.1
+
+['Failed Health Check', 'Network Error', 'Runtime Error', 'Scalar ', 'Schema Error', 'Unsupported Schema', 'body', 'case', 'context', 'cookies', 'data_too_large', 'elapsed', 'encoding', 'example', 'filter_too_much', 'generation_time', 'headers', 'history', 'id', 'large_base_example', 'media_type', 'message', 'method', 'name', 'path_parameters', 'path_template', 'query', 'request', 'response', 'status_code', 'too_slow', 'uri', 'utf-8', 'value', 'verbose_name']

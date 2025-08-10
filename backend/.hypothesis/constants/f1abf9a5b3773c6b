@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\printer.py
+# hypothesis_version: 6.137.1
+
+['\n)', '\n}', ' & ', ' repeatable', ' | ', '(', '(\n', ')', ', ', '...', ': ', '= ', 'enum', 'extend enum', 'extend input', 'extend interface', 'extend scalar', 'extend schema', 'extend type', 'extend union', 'false', 'implements ', 'input', 'interface', 'null', 'on ', 'print_ast', 'query', 'scalar', 'schema', 'true', 'type', 'union', '{\n']

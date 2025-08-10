@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\serializers.py
+# hypothesis_version: 6.137.1
+
+[b'null', '*', '*/*', '+json', 'Content-Type', 'application', 'application/json', 'application/x-yaml', 'application/xml', 'application/yaml', 'ascii', 'data', 'files', 'headers', 'ignore', 'json', 'latin-1', 'multipart/form-data', 'multipart/mixed', 'text/json', 'text/plain', 'text/vnd.yaml', 'text/x-yaml', 'text/xml', 'text/yaml', 'text/yml', 'utf8']

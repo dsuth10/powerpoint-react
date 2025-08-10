@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\lexer.py
+# hypothesis_version: 6.137.1
+
+[55295, 55296, 56319, 56320, 57343, 57344, 1114111, '\x00', '\x08', ' \t,\ufeff', '!', '"', '""', '"""', '#', '$', '&', "'", '\'"\'', '(', ')', '+-', '-', '.', '..', '/', '0', '9', ':', '=', '@', 'A', 'Ee', 'F', 'Lexer', 'Unterminated string.', '[', '\\', '\\u', ']', 'a', 'b', 'f', 'n', 'r', 'surrogatepass', 't', 'u', 'utf-16', '{', '|', '}', '~', '\ud7ff', '\ud800', '\udbff', '\udc00', '\udfff', '\ue000', '\U0010ffff']

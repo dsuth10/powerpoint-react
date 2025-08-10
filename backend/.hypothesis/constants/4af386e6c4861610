@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\_xml.py
+# hypothesis_version: 6.137.1
+
+[55295, 57344, 65533, 65536, 1114111, ' xmlns', '"', '$ref', '&', '&amp;', '&apos;', '&gt;', '&lt;', '&quot;', "'", '/', ':', '<', '>', 'NFKC', '[^a-zA-Z0-9_\\-.]', '_', 'attribute', 'data', 'element', 'items', 'name', 'namespace', 'prefix', 'properties', 'utf8', 'wrapped', 'x_', 'xml']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\cryptography\x509\base.py
+# hypothesis_version: 6.137.1
+
+[160, 1950, '_attributes', 'big', 'value must be bytes']

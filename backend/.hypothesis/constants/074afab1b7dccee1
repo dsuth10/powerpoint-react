@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\language\character_classes.py
+# hypothesis_version: 6.137.1
+
+['0', '9', 'A', 'Z', '_', 'a', 'is_digit', 'is_letter', 'is_name_continue', 'is_name_start', 'string', 'z']

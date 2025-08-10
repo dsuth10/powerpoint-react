@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\converter.py
+# hypothesis_version: 6.137.1
+
+['anyOf', 'binary', 'file', 'format', 'maxLength', 'minLength', 'not', 'null', 'object', 'pattern', 'properties', 'readOnly', 'required', 'string', 'type', 'writeOnly', 'x-writeOnly']

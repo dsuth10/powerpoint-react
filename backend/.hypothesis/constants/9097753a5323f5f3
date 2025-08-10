@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\_dependency_versions.py
+# hypothesis_version: 6.137.1
+
+['2.1.0', '3.0', '6.98.14', '7.0.0', '8.0.0', 'hypothesis', 'pyrate-limiter', 'pytest', 'werkzeug']

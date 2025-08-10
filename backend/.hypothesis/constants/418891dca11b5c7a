@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\exceptions.py
+# hypothesis_version: 6.137.1
+
+[1000, ' -> ', ', ', '.', ':', ';locations:', ';path:', 'Connection failed', 'GraphQLErrors', 'GroupedException', 'HTTPConnectionPool', 'IgnoredAuthError', 'UseAfterFreeError', '[root]', '\\(_ssl\\.c:\\d+\\)', '__notes__', 'builtins', 'connection_other', 'connection_ssl', 'http_client_error', 'http_forbidden', 'http_not_found', 'http_server_error', 'locations', 'message', 'network_other', 'path', 'schema_generic', 'schema_unsupported', 'syntax_error', 'unclassified', 'utf-8', 'yaml_non_string_keys']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\Documents\Code Projects\PowerPoint React App\backend\app\core\auth.py
+# hypothesis_version: 6.137.1
+
+[401, '/auth/login', 'HS256', 'Invalid token type', 'X-API-Key', 'access', 'exp', 'refresh', 'sub', 'type']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\expressions\parser.py
+# hypothesis_version: 6.137.1
+
+['#regex:', '$request', '$response', 'Unmatched bracket', 'body', 'header', 'path', 'query', '{', '}']

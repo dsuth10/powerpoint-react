@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\socketio\pubsub_manager.py
+# hypothesis_version: 6.137.1
+
+['/', 'args', 'callback', 'close_room', 'data', 'disconnect', 'emit', 'enter_room', 'event', 'host_id', 'id', 'ignore_queue', 'leave_room', 'method', 'namespace', 'pubsub', 'pubsub message: {}', 'room', 'sid', 'skip_sid', 'socketio']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\utils.py
+# hypothesis_version: 6.137.1
+
+['X', 'array', 'boolean', 'cookie', 'header', 'integer', 'null', 'number', 'object', 'string', 'type']

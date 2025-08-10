@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\jose\jws.py
+# hypothesis_version: 6.137.1
+
+[b'.', ',', ':', 'JWT', 'Not enough segments', 'alg', 'keys', 'kty', 'typ', 'utf-8']

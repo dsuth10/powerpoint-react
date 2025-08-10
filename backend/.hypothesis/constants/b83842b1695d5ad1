@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\schemas.py
+# hypothesis_version: 6.137.1
+
+[b'#', 0.0, '#/', '$ref', '*', ', ', '/', '2.0', '3.1', 'C', 'Content-Type', '_parent', '_path', '_path_item', '_resolver', '_scope', 'application/json', 'base64', 'basePath', 'before_process_path', 'binary', 'body', 'components', 'consumes', 'content', 'default', 'definitions', 'description', 'example', 'examples', 'file', 'form-data', 'formData', 'format', 'headers', 'in', 'info', 'links', 'mixed', 'multipart', 'multipart/form-data', 'nullable', 'openapi', 'operationId', 'parameters', 'paths', 'produces', 'properties', 'requestBody', 'required', 'responses', 'schema', 'schemas', 'servers', 'swagger', 'tags', 'type', 'url', 'utf-8', 'variables', 'x-example', 'x-examples', 'x-inlined', 'x-links', 'x-nullable', 'x-required', '~', '~0', '~1']

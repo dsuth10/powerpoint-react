@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\enum\base.py
+# hypothesis_version: 6.137.1
+
+['%s\n%s\n', '=', 'Enumeration', '__doc__', '__docs_rst__', '__members__', '__ms_name__', '_member_to_xml', '_valid_settings', '_xml_to_member', '``%s``\n%s', '{0:s} ({1:d})']

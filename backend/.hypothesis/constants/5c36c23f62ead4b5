@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_ws.py
+# hypothesis_version: 6.137.1
+
+[0.0, 2.0, 10.0, 101, 1024, ',', '13', '7', '8', 'Already started', 'CIMultiDict[str]', 'WSMsgType', 'WebSocketReady', 'WebSocketResponse', 'asyncio.Task[None]', 'upgrade', 'utf-8', 'websocket']

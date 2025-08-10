@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\prometheus_client\multiprocess.py
+# hypothesis_version: 6.137.1
+
+[0.0, '*.db', '_', '_bucket', '_count', 'gauge', 'histogram', 'le', 'live', 'livemax', 'livemin', 'livemostrecent', 'livesum', 'max', 'min', 'mostrecent', 'pid', 'sum']

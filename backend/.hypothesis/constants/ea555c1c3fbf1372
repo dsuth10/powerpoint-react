@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\socketio\redis_manager.py
+# hypothesis_version: 6.137.1
+
+['channel', 'data', 'eventlet', 'gevent', 'message', 'redis', 'socket', 'socketio', 'type', 'utf-8']

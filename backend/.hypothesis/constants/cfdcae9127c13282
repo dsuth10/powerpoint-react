@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\PIL\_typing.py
+# hypothesis_version: 6.137.1
+
+['Buffer', 'IntegralLike', 'StrOrBytesPath', 'SupportsRead', 'TypeGuard', '_T_co']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\stateful\statistic.py
+# hypothesis_version: 6.137.1
+
+[200, 300, 400, 500, 600, '2xx', '4xx', '5xx', 'Links', 'Total', 'entry', 'is_first', 'is_last', 'is_single', 'line', 'name', 'responses', 'status_code', 'target', 'targets', 'transitions', '│   ', '└', '├']

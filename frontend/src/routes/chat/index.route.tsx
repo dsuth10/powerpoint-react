@@ -1,16 +1,22 @@
-import { Route } from '@tanstack/react-router'
+import { Route, lazyRouteComponent, redirect } from '@tanstack/react-router'
 import rootRoute from '../__root.route'
-
-function ChatPage() {
-  return (
-    <div className="text-xl font-semibold">Chat Page (placeholder)</div>
-  )
+// Placeholder async creator; replace with API hook call when available
+async function createOrResolveChatSessionId(): Promise<string> {
+  // TODO: integrate with real API client in hooks/api
+  // For now, generate a simple random id stub
+  const id = Math.random().toString(36).slice(2, 10)
+  return Promise.resolve(id)
 }
 
 const route = new Route({
   getParentRoute: () => rootRoute,
   path: '/chat',
-  component: ChatPage,
+  // If no session id provided, create or resolve and redirect
+  beforeLoad: async () => {
+    const sessionId = await createOrResolveChatSessionId()
+    throw redirect({ to: '/chat/$sessionId', params: { sessionId }, replace: true })
+  },
+  component: lazyRouteComponent(() => import('../pages/ChatPage')),
 })
 
 export default route; 

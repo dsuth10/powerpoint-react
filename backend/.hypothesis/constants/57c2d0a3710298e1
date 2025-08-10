@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\negative\mutations.py
+# hypothesis_version: 6.137.1
+
+['$ref', 'MutationContext', 'T', '_header_name', '_header_value', 'additionalItems', 'additionalProperties', 'allOf', 'anyOf', 'array', 'boolean', 'const', 'contains', 'contentEncoding', 'contentMediaType', 'cookie', 'dependencies', 'else', 'enum', 'example', 'examples', 'exclusiveMaximum', 'exclusiveMinimum', 'format', 'header', 'if', 'integer', 'items', 'keywords', 'maxItems', 'maxLength', 'maxProperties', 'maximum', 'minItems', 'minLength', 'minProperties', 'minimum', 'multipleOf', 'mutations', 'not', 'null', 'number', 'object', 'oneOf', 'path', 'pattern', 'patternProperties', 'properties', 'propertyNames', 'query', 'required', 'string', 'then', 'type', 'types', 'uniqueItems']

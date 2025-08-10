@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\Documents\Code Projects\PowerPoint React App\backend\app\api\chat.py
+# hypothesis_version: 6.137.1
+
+[429, 502, '/chat', '/generate', 'Bullet', 'Slide', 'Too Many Requests', 'body', 'bullets', 'chat', 'description', 'slides']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\hypothesis_graphql\_strategies\strategy.py
+# hypothesis_version: 6.137.1
+
+[65535, 'Boolean', 'Cs', 'Float', 'GraphQL', 'GraphQLStrategy', 'ID', 'Int', 'String', 'name', 'utf-8']

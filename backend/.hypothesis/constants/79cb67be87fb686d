@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\openapi\references.py
+# hypothesis_version: 6.137.1
+
+[100, 1000, '$ref', '/', 'additionalProperties', 'allOf', 'anyOf', 'file', 'handlers', 'http', 'https', 'items', 'maxItems', 'minItems', 'minProperties', 'object', 'oneOf', 'properties', 'required', '~', '~0', '~1']

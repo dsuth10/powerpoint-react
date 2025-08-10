@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\execution\execute.py
+# hypothesis_version: 6.137.1
+
+['ExecutionContext', 'ExecutionResult', 'Middleware', '__schema', '__type', '__typename', 'data', 'errors', 'execute', 'execute_sync', 'extensions', 'get_field_def']

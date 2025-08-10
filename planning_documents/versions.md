@@ -30,6 +30,12 @@ This document serves as the single source of truth for all package versions, dep
 | `shadcn/ui` | `latest` | Copy-paste component library |
 | `framer-motion` | `11.0.6` | Animation library |
 
+### API Codegen & Client
+| Package | Version | Rationale |
+|---------|---------|-----------|
+| `@hey-api/openapi-ts` | `0.80.7` | OpenAPI → TypeScript client/codegen with plugins |
+| `@hey-api/client-fetch` | `0.13.1` | Fetch-based client for generated SDK |
+
 ### Forms & Validation
 | Package | Version | Rationale |
 |---------|---------|-----------|

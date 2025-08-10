@@ -1,6 +1,6 @@
 import httpx
 from typing import Any, Dict, List, Optional
-from tenacity import retry, stop_after_attempt, wait_exponential, wait_random
+from tenacity import retry, stop_after_attempt, wait_exponential, wait_random, retry_if_exception
 from app.core.config import settings
 from app.models.slides import SlidePlan, ImageMeta
 from app.models.stability import StabilityGenerationRequest, StabilityGenerationResponse
@@ -18,7 +18,7 @@ def _headers() -> dict[str, str]:
         "Accept": "application/json",
     }
 
-async def get_async_client() -> httpx.AsyncClient:
+def get_async_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         base_url=settings.STABILITY_BASE_URL,
         timeout=settings.STABILITY_TIMEOUT_SECONDS,
@@ -57,7 +57,11 @@ def _cache_set(key: str, value: ImageMeta) -> None:
     _cache[key] = (time.time(), value)
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5),
+    retry=retry_if_exception(lambda e: not isinstance(e, ImageError)),
+)
 async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None) -> ImageMeta:
     async with get_async_client() as client:
         try:
@@ -73,7 +77,7 @@ async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None
                 raise ImageError("Rate limited by Stability API")
             resp.raise_for_status()
             data = StabilityGenerationResponse(**resp.json())
-            url = data.url
+            url = (data.url or '').rstrip('/')
             if not url:
                 raise ImageError("Malformed image response: missing url")
             meta = ImageMeta(url=url, alt_text=slide.title, provider="stability-ai")

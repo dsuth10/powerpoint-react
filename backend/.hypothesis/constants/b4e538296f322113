@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_request.py
+# hypothesis_version: 6.137.1
+
+[127, 1024, "!#$%&'*+.^_`|~-", '"', ',', ';', '<{} {} {} >', 'Application', 'BaseRequest', 'FileField', 'MultiMapping[str]', 'Request', 'RequestHandler', 'UrlMappingMatchInfo', '[{}]', '\\1', '\\\\([\\t !-~])', '\\\\[\\t !-~]', '^bytes=(\\d*)-(\\d*)$', '_cache', '_client_max_size', '_headers', '_loop', '_match_info', '_message', '_method', '_payload', '_payload_writer', '_post', '_protocol', '_read_bytes', '_rel_url', '_state', '_task', '_transport_peername', '_version', 'ascii', 'asyncio.Task[None]', 'backslashreplace', 'headers', 'host', 'http', 'https', 'method', 'multipart/form-data', 'path', 'peername', 'raw_headers', 'remote', 'scheme', 'sslcontext', 'text/', 'url', 'utf-8']

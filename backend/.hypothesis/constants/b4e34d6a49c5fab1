@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\specs\graphql\loaders.py
+# hypothesis_version: 6.137.1
+
+[1000, '__schema', 'after_load_schema', 'before_load_schema', 'data', 'json', 'query', 'timeout', 'utf8']

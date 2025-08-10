@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\Documents\Code Projects\PowerPoint React App\backend\app\api\slides.py
+# hypothesis_version: 6.137.1
+
+[422, 429, '/build', '/slides', 'Too Many Requests', 'Validation Error', 'body', 'bullets', 'description', 'pending', 'slides']

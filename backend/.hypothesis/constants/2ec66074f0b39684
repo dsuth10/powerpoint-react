@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\Documents\Code Projects\PowerPoint React App\backend\app\core\rate_limit.py
+# hypothesis_version: 6.137.1
+
+[100, 429, '100 per 15 minutes', 'Rate limit exceeded', 'x-forwarded-for']

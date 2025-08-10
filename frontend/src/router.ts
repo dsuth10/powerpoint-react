@@ -16,6 +16,9 @@ const routeTree = rootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
+  // v1 router option is defaultNotFoundComponent in latest; for 1.15 fallback to defaultComponent
+  // @ts-expect-error Compat for older router types
+  defaultNotFoundComponent: () => 'Page not found',
 })
 
 declare module '@tanstack/react-router' {

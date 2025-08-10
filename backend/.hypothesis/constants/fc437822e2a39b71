@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\models.py
+# hypothesis_version: 6.137.1
+
+['\n\n    <EMPTY>', ')', ', ', '/', '0', '1.0', '1.1', '4.0', '=', 'C', 'Case.call', 'Content-Length', 'D', 'P', 'User-Agent', '`operation`', 'after_call', 'before_call', 'before_generate_case', 'body', 'charset', 'cookie', 'cookies', 'coverage', 'data', 'description', 'error', 'explicit', 'failure', 'filter_case', 'flatmap_case', 'generate', 'header', 'headers', 'http', 'http://127.0.0.1', 'localhost', 'location', 'map_case', 'method', 'name', 'parameter', 'parameter_location', 'path', 'path_parameters', 'phase', 'query', 'raw', 'resolved', 'scope', 'skip', 'status_code', 'success', 'total', 'url', 'utf-8', 'verify', '~', '~0', '~1']

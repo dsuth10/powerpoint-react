@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\opc\oxml.py
+# hypothesis_version: 6.137.1
+
+['<Types xmlns="%s"/>', 'ContentType', 'Extension', 'Id', 'PartName', 'Target', 'TargetMode', 'Type', 'UTF-8', 'ct', 'ct:Default', 'ct:Override', 'ct:Types', 'pr', 'pr:Relationship', 'pr:Relationships', 'r']

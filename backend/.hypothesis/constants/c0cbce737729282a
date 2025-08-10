@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\h2\utilities.py
+# hypothesis_version: 6.137.1
+
+[b'1', b':', b':authority', b':method', b':path', b':protocol', b':scheme', b':status', b'; ', b'CONNECT', b'[A-Z]', b'authorization', b'connection', b'cookie', b'host', b'keep-alive', b'proxy-authorization', b'proxy-connection', b'te', b'trailers', b'transfer-encoding', b'upgrade', '1', ':', ':authority', ':method', ':path', ':protocol', ':scheme', ':status', 'authorization', 'connection', 'cookie', 'host', 'is_client', 'is_push_promise', 'is_response_header', 'is_trailer', 'keep-alive', 'proxy-authorization', 'proxy-connection', 'size_limit', 'te', 'trailers', 'transfer-encoding', 'upgrade', 'utf-8']

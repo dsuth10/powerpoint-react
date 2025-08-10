@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_runner.py
+# hypothesis_version: 6.137.1
+
+[60.0, 128, 8080, 8443, '0.0.0.0', 'AF_UNIX', 'AppRunner', 'BaseRunner', 'BaseSite', 'GracefulExit', 'NamedPipeSite', 'ServerRunner', 'SockSite', 'TCPSite', 'UnixSite', '_app', '_backlog', '_handle_signals', '_host', '_kwargs', '_name', '_path', '_port', '_reuse_address', '_reuse_port', '_runner', '_server', '_shutdown_timeout', '_sites', '_sock', '_ssl_context', '_web_server', 'http', 'https']

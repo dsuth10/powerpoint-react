@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\loguru\_colorama.py
+# hypothesis_version: 6.137.1
+
+['APPVEYOR', 'CI', 'CIRCLECI', 'GITHUB_ACTIONS', 'GITLAB_CI', 'PYCHARM_HOSTED', 'TERM', 'TRAVIS', 'nt']

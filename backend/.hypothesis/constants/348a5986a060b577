@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\chart\series.py
+# hypothesis_version: 6.137.1
+
+['c:areaChart', 'c:barChart', 'c:bubbleChart', 'c:doughnutChart', 'c:lineChart', 'c:pieChart', 'c:radarChart', 'c:scatterChart']

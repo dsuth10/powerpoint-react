@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_server.py
+# hypothesis_version: 6.137.1
+
+['Server', 'access_log_class', 'asyncio.Task[None]', 'debug']

@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\pptx\media.py
+# hypothesis_version: 6.137.1
+
+['.', 'asf', 'avi', 'mov', 'movie.%s', 'mp4', 'mpg', 'rb', 'swf', 'vid', 'wmv']

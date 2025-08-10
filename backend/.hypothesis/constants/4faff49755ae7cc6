@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\validation\rules\known_directives.py
+# hypothesis_version: 6.137.1
+
+['KnownDirectivesRule', 'enum_type_definition', 'enum_type_extension', 'field', 'field_definition', 'fragment_definition', 'fragment_spread', 'inline_fragment', 'mutation', 'operation_definition', 'query', 'schema_definition', 'schema_extension', 'subscription', 'union_type_extension', 'variable_definition']

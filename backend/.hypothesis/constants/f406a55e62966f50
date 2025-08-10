@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\schemathesis\runner\events.py
+# hypothesis_version: 6.137.1
+
+['Schema Loading Error', 'Test Execution Error', 'analysis_id', 'data', 'error', 'event_type', 'events_type', 'other', 'probes', 'schema']

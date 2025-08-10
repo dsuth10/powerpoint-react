@@ -15,9 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 # ----- Development image -----
 FROM base AS dev
 ENV NODE_ENV=development
-# Use non-root user for better security
-RUN useradd -m appuser && chown -R appuser:appuser /app
-USER appuser
 EXPOSE 5173
 CMD ["npm", "run", "dev"]
 

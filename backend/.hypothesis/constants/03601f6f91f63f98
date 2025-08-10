@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\pyutils\is_awaitable.py
+# hypothesis_version: 6.137.1
+
+['__await__', 'is_awaitable']

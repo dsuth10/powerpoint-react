@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import Field, conint, constr
+from pydantic import Field, conint, constr, AliasChoices
 
 from app.models.base import BaseModel
 from app.models.slides import SlidePlan
@@ -16,10 +16,11 @@ class ChatRequest(BaseModel):
         ..., description="The user prompt for slide outline generation."
     )
     slide_count: conint(ge=1, le=20) = Field(
-        ..., description="Desired number of slides (1-20)."
+        ..., description="Desired number of slides (1-20).",
+        validation_alias=AliasChoices("slideCount", "numSlides"),
     )
-    model: constr(min_length=1) = Field(
-        ..., description="LLM model identifier (e.g., 'openrouter/gpt-4o-mini')."
+    model: Optional[constr(min_length=1)] = Field(
+        None, description="LLM model identifier (e.g., 'openrouter/gpt-4o-mini')."
     )
     language: Optional[constr(min_length=2, max_length=5)] = Field(
         None, description="ISO 639-1 language code (e.g., 'en')."

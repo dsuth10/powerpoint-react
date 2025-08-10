@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\graphql\error\graphql_error.py
+# hypothesis_version: 6.137.1
+
+['GraphQLError', 'Node', 'Source', 'SourceLocation', 'extensions', 'locations', 'message', 'nodes', 'original_error', 'path', 'positions', 'source']

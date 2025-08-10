@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\loguru\_simple_sinks.py
+# hypothesis_version: 6.137.1
+
+['_tasks', 'complete', 'exception', 'extra', 'file', 'flush', 'function', 'level', 'line', 'name', 'stop']

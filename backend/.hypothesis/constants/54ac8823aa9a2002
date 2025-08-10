@@ -1,0 +1,4 @@
+# file: C:\Users\dsuth\AppData\Roaming\Python\Python312\site-packages\aiohttp\web_routedef.py
+# hypothesis_version: 6.137.1
+
+['AbstractRouteDef', 'RouteDef', 'RouteTableDef', 'StaticDef', 'add_', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'route', 'routes', 'static', 'view']

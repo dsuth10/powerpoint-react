@@ -38,13 +38,42 @@ export function useChat(sessionId?: string) {
           m.status = 'sent'
         })
         // Append assistant message with outline or text response
+        type ImageMeta = { url: string; altText?: string | null }
+        type Slide = { title: string; bullets?: string[]; image?: string | ImageMeta | null; notes?: string | null }
+        const slidesToMarkdown = (slides: Slide[]) =>
+          slides
+            .map((s, i) => {
+              const parts: string[] = []
+              parts.push(`### Slide ${i + 1}: ${s.title}`)
+              if (s.image) {
+                const url = typeof s.image === 'string' ? s.image : (s.image as ImageMeta).url
+                const alt = typeof s.image === 'string' ? s.title : (s.image as ImageMeta).altText || s.title
+                if (url) parts.push(`![${alt}](${url})`)
+              }
+              if (s.bullets && s.bullets.length) parts.push(s.bullets.map((b) => `- ${b}`).join('\n'))
+              if (s.notes) parts.push(`> ${s.notes}`)
+              return parts.join('\n')
+            })
+            .join('\n\n')
+
+        const slidesArray = Array.isArray(res)
+          ? (res as Slide[])
+          : res && typeof res === 'object' && 'slides' in (res as any) && Array.isArray((res as any).slides)
+            ? ((res as any).slides as Slide[])
+            : undefined
+        const contentMarkdown = slidesArray
+          ? slidesToMarkdown(slidesArray)
+          : typeof res === 'string'
+            ? res
+            : JSON.stringify(res, null, 2)
         addMessage({
           id: crypto.randomUUID(),
           sessionId: sid,
           role: 'assistant',
-          content: typeof res === 'string' ? res : JSON.stringify(res, null, 2),
+          content: contentMarkdown,
           createdAt: Date.now(),
           status: 'sent',
+          slides: slidesArray as any,
         })
       } catch (e) {
         updateMessage(sid, id, (m) => {

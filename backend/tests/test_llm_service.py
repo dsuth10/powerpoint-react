@@ -1,3 +1,4 @@
+import os
 import pytest
 import respx
 from httpx import Response
@@ -39,3 +40,24 @@ async def test_generate_outline_rate_limit():
     req = ChatRequest(prompt="AI", slide_count=3, model="openrouter/gpt-4o-mini", language="en")
     with pytest.raises(LLMError):
         await generate_outline(req)
+
+
+@pytest.mark.asyncio
+@pytest.mark.live
+@pytest.mark.live_llm
+async def test_generate_outline_live_llm(monkeypatch):
+    if not (os.getenv("RUN_LIVE_LLM") == "1" and os.getenv("OPENROUTER_API_KEY")):
+        pytest.skip("live LLM test requires RUN_LIVE_LLM=1 and OPENROUTER_API_KEY")
+    # ensure we do not mock http in this test
+    try:
+        respx_router = respx.get_router()
+        if respx_router and respx_router.is_started:
+            respx_router.stop()
+    except Exception:
+        pass
+
+    req = ChatRequest(prompt="Test live outline", slide_count=3, model="openrouter/gpt-4o-mini", language="en")
+    resp = await generate_outline(req)
+    assert resp.slides and len(resp.slides) == 3
+    for slide in resp.slides:
+        assert slide.title and isinstance(slide.bullets, list)

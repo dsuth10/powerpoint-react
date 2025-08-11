@@ -15,7 +15,10 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - `ImageMeta` (url with validation, altText, provider)
   - `PPTXJob` (UUID jobId, status enum, resultUrl, errorMessage)
   - `ErrorResponse` (errorCode, message, details)
-- Chat API updated to return `ChatResponse` from `POST /api/v1/chat/generate`
+- Chat API returns `SlidePlan[]` from `POST /api/v1/chat/generate` (simplified shape for FE)
+- LLM integration: OpenRouter `chat/completions` is the primary path with graceful fallback to legacy `/generate`; offline fallback remains for local dev
+- Image generation: Stability primary `v2/images/generations` (JSON) with a `v2beta/stable-image` fallback that saves bytes under `static/images` and serves via `/static/...`
+- Static hosting: `static/` ensured at startup and mounted at `/static`; public URLs built from `PUBLIC_BASE_URL`
 - CI/CD hardening: concurrency, npm/pip caching, coverage ≥ 90% gates, artifact uploads, k6 smoke, Docker build + Trivy scan (frontend & backend), SBOMs, CodeQL, deploy/release workflows
 - Make targets and PowerShell scripts for smoke/verify
 - Backend system improvements:
@@ -113,6 +116,34 @@ Notes:
 - If you omit `-p schemathesis` while disabling auto plugins, contract tests will fail due to a missing `case` fixture.
 - Tests do not call external LLMs when `OPENROUTER_API_KEY` is unset; the API returns a local fallback for speed.
 
+#### Optional live provider tests
+
+To run real calls against providers, set env flags and API keys. These tests are opt‑in and marked; they are skipped by default.
+
+PowerShell (Windows):
+
+```powershell
+cd backend
+$env:PYTHONPATH=(Get-Location).Path
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+$env:RUN_LIVE_LLM=1; $env:OPENROUTER_API_KEY="sk-or-..."; python -m pytest -q -k live_llm
+$env:RUN_LIVE_IMAGES=1; $env:STABILITY_API_KEY="sk-stability-..."; python -m pytest -q -k live_images
+```
+
+Bash:
+
+```sh
+cd backend
+PYTHONPATH=$(pwd) PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... \
+  python -m pytest -q -k live_llm
+PYTHONPATH=$(pwd) PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 RUN_LIVE_IMAGES=1 STABILITY_API_KEY=sk-stability-... \
+  python -m pytest -q -k live_images
+```
+
+Notes:
+- Live tests are labeled with `@pytest.mark.live` and more specific `live_llm` or `live_images` markers.
+- They only execute when corresponding `RUN_LIVE_*` flag and API key env var are present.
+
 ### Environment Variables
 - Frontend (dev): no env is required. The generated API client uses relative URLs and Vite proxies `/api` and `/ws` to the backend container.
 - Frontend (prod or when not using the dev proxy): optionally set `VITE_API_BASE_URL` (e.g., `http://localhost:8000`) in `frontend/.env.local` to direct the client.
@@ -140,7 +171,7 @@ Use the integrated Playwright MCP browser to exercise the app:
 - Start the stack: `docker compose up -d`
 - Open `http://localhost:5173`
 - Navigate to Chat and type a prompt, e.g., “Write a 3‑slide deck about observability pillars.”
-- Expected result in dev (no API key): an assistant reply containing a slides array (mock fallback) is rendered.
+- Expected result in dev (no API key): assistant reply renders as slide cards (title, bullets, optional image) via `SlidePreview`.
 - If requests fail after changing networking, run: `docker compose down -v && docker compose up -d`
 
 # Stage 1 Foundation Complete
@@ -196,11 +227,12 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
 
 ## API quick reference
 
-- `POST /api/v1/chat/generate` → `ChatResponse`
-  - Request body (`ChatRequest`): `{ prompt: string, slideCount: number (1–20), model: string, language?: string, context?: string }`
-  - Response: `{ slides: SlidePlan[], sessionId?: string }`
+- `POST /api/v1/chat/generate` → `SlidePlan[]`
+  - Request body (`ChatRequest`): `{ prompt: string, slideCount: number (1–20), model?: string, language?: string, context?: string }`
+  - Response: `SlidePlan[]`
   - `SlidePlan`: `{ title: string, bullets: string[], image?: ImageMeta, notes?: string }`
   - `ImageMeta`: `{ url: string, altText: string, provider: string }`
+  - Notes: Backend uses OpenRouter `chat/completions` primarily; falls back to legacy route or offline generation if providers fail
   - Possible errors: `429 Too Many Requests`
 - `POST /api/v1/auth/login` → `TokenPair`
   - Possible errors: `429 Too Many Requests`
@@ -213,6 +245,18 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
   - Filename: `presentation-<jobId>.pptx`
   - Possible errors: `404 Not Found`
 - `GET /metrics` → Prometheus text exposition format (`text/plain`)
+
+### Static hosting and image generation
+
+- Static assets are served from `/static` (filesystem: `backend/app/static/`)
+- Generated images (from Stability v2beta fallback) are saved under `/static/images/<uuid>.png`
+- Public URLs are constructed as `${PUBLIC_BASE_URL}/static/images/<filename>`
+
+Backend config (env) additions:
+- `PUBLIC_BASE_URL` (default `http://localhost:8000`)
+- `STATIC_URL_PATH` (default `/static`)
+- `STATIC_DIR` (default `/app/static` in container)
+- `STABILITY_BASE_URL` (now `https://api.stability.ai`)
 
 ### WebSocket (Socket.IO)
 

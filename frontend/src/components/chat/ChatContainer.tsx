@@ -29,7 +29,14 @@ export function ChatContainer() {
       </div>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto rounded border p-3 dark:border-gray-800">
         {messages.map((m) => (
-          <ChatMessage key={m.id} role={m.role} content={m.content} createdAt={m.createdAt} pending={m.status === 'pending'} />
+          <ChatMessage
+            key={m.id}
+            role={m.role}
+            content={m.content}
+            createdAt={m.createdAt}
+            pending={m.status === 'pending'}
+            slides={m.slides as any}
+          />
         ))}
         <div ref={bottomRef} />
       </div>

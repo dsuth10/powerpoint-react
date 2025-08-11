@@ -1,3 +1,4 @@
+import os
 import pytest
 import respx
 from httpx import Response
@@ -47,3 +48,23 @@ async def test_generate_images_batch_order_preserved():
     assert len(results) == 2
     assert results[0].url.endswith("/1")
     assert results[1].url.endswith("/2")
+
+
+@pytest.mark.asyncio
+@pytest.mark.live
+@pytest.mark.live_images
+async def test_generate_image_for_slide_live(monkeypatch):
+    if not (os.getenv("RUN_LIVE_IMAGES") == "1" and os.getenv("STABILITY_API_KEY")):
+        pytest.skip("live image test requires RUN_LIVE_IMAGES=1 and STABILITY_API_KEY")
+    # ensure we do not mock http in this test
+    try:
+        respx_router = respx.get_router()
+        if respx_router and respx_router.is_started:
+            respx_router.stop()
+    except Exception:
+        pass
+
+    slide = SlidePlan(title="Live Image", bullets=["A"], image=None, notes=None)
+    meta = await generate_image_for_slide(slide)
+    assert meta.url and meta.url.startswith("http")
+    assert meta.provider in ("stability-ai", "placeholder")

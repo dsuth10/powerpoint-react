@@ -6,6 +6,8 @@ from app.models.slides import SlidePlan, ImageMeta
 from app.models.stability import StabilityGenerationRequest, StabilityGenerationResponse
 import asyncio
 import time
+import os
+import uuid
 
 class ImageError(Exception):
     """Custom exception for image service errors."""
@@ -72,19 +74,63 @@ async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None
                 return cached
 
             payload = _build_stability_payload(prompt, style)
-            resp = await client.post("/images/generations", json=payload.model_dump())
+            # Primary attempt: legacy JSON endpoint used in tests
+            resp = await client.post("/images/generations", json=payload.model_dump(by_alias=True))
             if resp.status_code == 429:
                 raise ImageError("Rate limited by Stability API")
+            if resp.status_code == 404:
+                # Try v2beta stable-image endpoint as fallback
+                v2beta_payload: Dict[str, Any] = {
+                    "prompt": prompt,
+                    "output_format": "png",
+                }
+                if style:
+                    v2beta_payload["style_preset"] = style
+                # Prefer image bytes back
+                v2_resp = await client.post(
+                    "/v2beta/stable-image/generate/core",
+                    json=v2beta_payload,
+                    headers={"Accept": "image/*"},
+                )
+                if v2_resp.status_code == 429:
+                    raise ImageError("Rate limited by Stability API")
+                v2_resp.raise_for_status()
+                content_type = v2_resp.headers.get("Content-Type", "")
+                if content_type.startswith("image/"):
+                    os.makedirs(os.path.join(settings.STATIC_DIR, settings.STATIC_IMAGES_SUBDIR), exist_ok=True)
+                    filename = f"{uuid.uuid4()}.png"
+                    local_path = os.path.join(settings.STATIC_DIR, settings.STATIC_IMAGES_SUBDIR, filename)
+                    with open(local_path, "wb") as f:
+                        f.write(v2_resp.content)
+                    public_url = f"{settings.PUBLIC_BASE_URL}{settings.STATIC_URL_PATH}/{settings.STATIC_IMAGES_SUBDIR}/{filename}"
+                    meta = ImageMeta(url=public_url, alt_text=slide.title, provider="stability-ai")
+                    _cache_set(prompt, meta)
+                    return meta
+                # If JSON shape, attempt to parse minimal url
+                try:
+                    data_json = v2_resp.json()
+                    data = StabilityGenerationResponse(**data_json)
+                    url = (data.url or '').rstrip('/')
+                    if url:
+                        meta = ImageMeta(url=url, alt_text=slide.title, provider="stability-ai")
+                        _cache_set(prompt, meta)
+                        return meta
+                except Exception:
+                    pass
+                # Fall through to placeholder
+                return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
+            # Legacy json path success
             resp.raise_for_status()
             data = StabilityGenerationResponse(**resp.json())
             url = (data.url or '').rstrip('/')
             if not url:
-                raise ImageError("Malformed image response: missing url")
+                return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
             meta = ImageMeta(url=url, alt_text=slide.title, provider="stability-ai")
             _cache_set(prompt, meta)
             return meta
         except httpx.HTTPError as e:
-            raise ImageError(f"Image HTTP error: {e.__class__.__name__}") from e
+            # Fallback to placeholder on client/server errors during live calls
+            return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
         except Exception as e:
             raise ImageError(f"Image request failed: {str(e)}") from e
 

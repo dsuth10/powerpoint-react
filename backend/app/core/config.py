@@ -29,9 +29,15 @@ class Settings(BaseSettings):
 
     # Stability AI configuration
     STABILITY_API_KEY: str | None = None
-    STABILITY_BASE_URL: str = "https://api.stability.ai/v2"
+    STABILITY_BASE_URL: str = "https://api.stability.ai"
     STABILITY_TIMEOUT_SECONDS: int = 30
     STABILITY_PLACEHOLDER_URL: str = "https://placehold.co/600x400"
+
+    # Public/base URLs and static files
+    PUBLIC_BASE_URL: str = "http://localhost:8000"
+    STATIC_URL_PATH: str = "/static"
+    STATIC_DIR: str = "/app/static"
+    STATIC_IMAGES_SUBDIR: str = "images"
 
     # Image service behaviors
     IMAGE_CACHE_TTL_SECONDS: int = 1800  # 30 minutes

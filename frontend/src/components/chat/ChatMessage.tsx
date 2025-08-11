@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
+import SlidePreview from '@/components/chat/SlidePreview'
+import type { SlidePlan } from '@/lib/api'
+import { useMemo } from 'react'
 
 export type ChatMessageProps = {
   role: 'user' | 'assistant' | 'system'
@@ -7,11 +10,22 @@ export type ChatMessageProps = {
   createdAt?: number
   model?: string
   pending?: boolean
+  slides?: SlidePlan[]
 }
 
-export function ChatMessage({ role, content, createdAt, model, pending }: ChatMessageProps) {
+export function ChatMessage({ role, content, createdAt, model, pending, slides }: ChatMessageProps) {
   const isUser = role === 'user'
   const isAssistant = role === 'assistant'
+  const parsedSlides = useMemo(() => {
+    if (slides && slides.length) return slides
+    try {
+      const maybe = JSON.parse(content)
+      if (Array.isArray(maybe) && maybe.every((s) => s && typeof s === 'object' && 'title' in s)) {
+        return maybe as SlidePlan[]
+      }
+    } catch {}
+    return undefined
+  }, [content, slides])
 
   return (
     <motion.div
@@ -32,6 +46,8 @@ export function ChatMessage({ role, content, createdAt, model, pending }: ChatMe
           <div className="h-3 w-5/6 rounded bg-gray-300/60 dark:bg-gray-700" />
           <div className="h-3 w-2/3 rounded bg-gray-300/60 dark:bg-gray-700" />
         </div>
+      ) : parsedSlides && parsedSlides.length ? (
+        <SlidePreview slides={parsedSlides} />
       ) : (
         <div className="prose prose-sm max-w-none dark:prose-invert">
           <ReactMarkdown>{content}</ReactMarkdown>

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
@@ -12,6 +13,7 @@ from app.core.metrics import setup_metrics
 from fastapi.openapi.utils import get_openapi
 from app.core.auth import api_key_dependency
 from app.core.config import settings
+import os
 
 app = FastAPI(
     title="AI PowerPoint Generator API",
@@ -34,6 +36,8 @@ app.include_router(chat_router, prefix="/api/v1")
 app.include_router(slides_router, prefix="/api/v1")
 app.include_router(health_router, prefix="/api/v1")
 app.mount("/ws", socketio_ws_app)
+os.makedirs(settings.STATIC_DIR, exist_ok=True)
+app.mount(settings.STATIC_URL_PATH, StaticFiles(directory=settings.STATIC_DIR), name="static")
 
 add_error_handlers(app)
 

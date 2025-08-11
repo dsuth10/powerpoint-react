@@ -15,6 +15,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
+    env_file:
+      - backend/.env
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/api/v1/health').getcode()<400 else sys.exit(1)"]

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import type { SlidePlan } from '@/lib/api'
 
 export type ChatMessageRole = 'user' | 'assistant' | 'system'
 
@@ -11,6 +12,7 @@ export type ChatMessage = {
   content: string
   createdAt: number
   status?: 'pending' | 'sent' | 'error'
+  slides?: SlidePlan[]
 }
 
 export type ChatSession = {

@@ -5,6 +5,7 @@ import { useChatStore, selectMessagesBySession } from '@/stores/chat-store'
 import ChatMessage from '@/components/chat/ChatMessage'
 import ChatInput from '@/components/chat/ChatInput'
 import ModelSelector from '@/components/chat/ModelSelector'
+import GenerationControls from '@/components/slides/GenerationControls'
 
 export function ChatContainer() {
   const { sessionId } = useParams({ from: '/chat/$sessionId' })
@@ -38,6 +39,22 @@ export function ChatContainer() {
             slides={m.slides as any}
           />
         ))}
+        {/* Generation controls appear when the latest assistant message contains slides */}
+        {(() => {
+          const lastAssistantWithSlides = [...messages]
+            .reverse()
+            .find((m) => m.role === 'assistant' && Array.isArray(m.slides) && m.slides.length > 0)
+          if (!lastAssistantWithSlides) return null
+          const outline = (lastAssistantWithSlides.slides as any[]).map((s) => ({
+            title: s.title as string,
+            bullets: Array.isArray(s.bullets) ? (s.bullets as string[]) : [],
+          }))
+          return (
+            <div className="mt-3">
+              <GenerationControls outline={outline} />
+            </div>
+          )
+        })()}
         <div ref={bottomRef} />
       </div>
       <div className="mt-3">

@@ -54,6 +54,10 @@ export function GenerationControls({ outline }: { outline: Array<{ title: string
           try {
             const res = await mutation.mutateAsync(outline)
             start(res.job_id)
+            if (res.result_url) {
+              complete(res.result_url)
+              setProgress(100)
+            }
           } catch (e) {
             fail(e instanceof Error ? e.message : 'Failed to start generation')
           }
@@ -62,9 +66,7 @@ export function GenerationControls({ outline }: { outline: Array<{ title: string
         {mutation.isPending ? 'Starting…' : 'Start Generation'}
       </button>
       {gen.status === 'error' && <RetryButton onClick={() => reset()} />}
-      {gen.status === 'completed' && gen.jobId && (
-        <DownloadButton jobId={gen.jobId} />
-      )}
+      {gen.jobId && gen.status === 'completed' && <DownloadButton jobId={gen.jobId} />}
     </div>
   )
 }

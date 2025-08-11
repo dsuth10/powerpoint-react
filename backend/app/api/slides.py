@@ -11,6 +11,7 @@ from app.models.common import PPTXJob
 from app.models.slides import SlidePlan
 from app.core.rate_limit import rate_limit_dependency
 from app.core.config import settings
+from app.services import pptx as pptx_service
 
 router = APIRouter(prefix="/slides", tags=["slides"])
 
@@ -20,7 +21,6 @@ router = APIRouter(prefix="/slides", tags=["slides"])
     responses={429: {"description": "Too Many Requests"}, 422: {"description": "Validation Error"}},
 )
 async def build_slides(slides: List[dict], _: None = Depends(rate_limit_dependency)):
-    # In production, enqueue job and emit progress via WS. Here, mock job creation.
     # Normalize legacy shape where 'body' was a string instead of 'bullets' list
     normalized: List[SlidePlan] = []
     for s in slides:
@@ -29,8 +29,21 @@ async def build_slides(slides: List[dict], _: None = Depends(rate_limit_dependen
             s.pop("body", None)
         normalized.append(SlidePlan(**s))
 
+    # Synchronously build PPTX and return completed job with download URL
+    built_path = pptx_service.build_pptx(normalized, output_dir=settings.PPTX_TEMP_DIR)
+    # Rename to a fixed UUID-based name that matches download API contract
     job_id = UUID(str(uuid4()))
-    return PPTXJob(job_id=job_id, status="pending", result_url=None, error_message=None)
+    target_path = (Path(settings.PPTX_TEMP_DIR) / f"{job_id}.pptx")
+    try:
+        Path(built_path).replace(target_path)
+    except Exception:
+        # If rename fails, keep original file and attempt to parse UUID from it
+        try:
+            job_id = UUID(Path(built_path).stem)
+        except Exception:
+            pass
+    result_url = f"{settings.PUBLIC_BASE_URL}/api/v1/slides/download?jobId={job_id}"
+    return PPTXJob(job_id=job_id, status="completed", result_url=result_url, error_message=None)
 
 
 @router.get(

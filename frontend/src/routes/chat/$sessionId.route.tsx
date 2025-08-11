@@ -1,5 +1,6 @@
-import { Route, useParams, ErrorComponentProps } from '@tanstack/react-router'
+import { Route } from '@tanstack/react-router'
 import chatRoute from './index.route'
+import ChatPage from '../pages/ChatPage'
 import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 
@@ -12,13 +13,6 @@ async function getSession(sessionId: string): Promise<{ id: string }> {
   return { id: sessionId }
 }
 
-function ChatSessionPage() {
-  const { sessionId } = useParams({ from: '/chat/$sessionId' })
-  return (
-    <div className="text-xl font-semibold">Chat Session: {sessionId}</div>
-  )
-}
-
 const route = new Route({
   getParentRoute: () => chatRoute,
   path: '$sessionId',
@@ -27,22 +21,7 @@ const route = new Route({
     await getSession(sessionId)
     return null
   },
-  errorComponent: ({ error }: ErrorComponentProps) => {
-    const router = useRouter()
-    const [message] = useState(error instanceof Error ? error.message : 'Failed to load session')
-    return (
-      <div className="space-y-2">
-        <div className="text-red-600 font-medium">{message}</div>
-        <button
-          className="px-3 py-1 rounded bg-blue-600 text-white"
-          onClick={() => router.invalidate()}
-        >
-          Retry
-        </button>
-      </div>
-    )
-  },
-  component: ChatSessionPage,
+  component: ChatPage,
 })
 
 export default route; 

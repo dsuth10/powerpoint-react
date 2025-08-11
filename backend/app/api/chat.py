@@ -17,6 +17,14 @@ router = APIRouter(prefix="/chat", tags=["chat"])
     responses={429: {"description": "Too Many Requests"}},
 )
 async def generate_chat_outline(request: ChatRequest, _: None = Depends(rate_limit_dependency)):
+    # Immediate offline fallback when no API key configured
+    if not settings.OPENROUTER_API_KEY:
+        count = request.slide_count
+        title_base = request.prompt or "Slide"
+        return [
+            SlidePlan(title=f"{title_base}", bullets=["Bullet"])
+            for _ in range(count)
+        ]
     try:
         # Delegate to service; handle both ChatResponse and legacy dict mocks
         response = await llm_service.generate_outline(request)

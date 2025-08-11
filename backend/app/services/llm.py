@@ -48,7 +48,8 @@ def _parse_response(data: Dict[str, Any]) -> ChatResponse:
     # Expect { "slides": [{ title, bullets, image?, notes? }], "sessionId"? }
     slides_raw = data.get("slides", [])
     slides = [SlidePlan(**s) for s in slides_raw]
-    return ChatResponse(slides=slides, sessionId=data.get("sessionId"))
+    # Use field name for Pydantic init; alias is handled during serialization
+    return ChatResponse(slides=slides, session_id=data.get("sessionId"))
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5))
 async def _call_openrouter(request: ChatRequest) -> ChatResponse:
@@ -74,8 +75,14 @@ async def generate_outline(request: ChatRequest) -> ChatResponse:
     Calls the OpenRouter LLM API to generate a slide outline.
     Uses retry only for actual HTTP calls; returns immediately if API key is missing.
     """
-    # In tests/offline mode (no API key), fall back to a minimal mock so unit tests can stub HTTP
+    # In tests/offline mode (no API key), immediately return a local fallback
     if not settings.OPENROUTER_API_KEY:
-        # Allow the HTTP path to be exercised under respx mocks without a real key
-        return await _call_openrouter(request)
+        count = request.slide_count
+        title_base = request.prompt or "Slide"
+        slides = [
+            SlidePlan(title=f"{title_base}", bullets=["Bullet"])
+            for _ in range(count)
+        ]
+        return ChatResponse(slides=slides)
+    # Otherwise, call upstream
     return await _call_openrouter(request)

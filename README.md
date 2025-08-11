@@ -60,6 +60,11 @@ make up && sleep 5
 curl -f http://localhost:8000/api/v1/health && curl -f http://localhost:5173 || true
 ```
 
+Networking notes (dev):
+- The frontend dev server (Vite) proxies API and WebSocket calls to the backend container by service DNS.
+- Proxy targets: `/api` and `/ws` → `http://backend:8000` (see `frontend/vite.config.ts`).
+- If you change Docker networking or the proxy config, reset the stack to refresh DNS: `docker compose down -v && docker compose up -d`.
+
 ### Quality Checks
 
 - Lint & test frontend (coverage ≥ 90% enforced in CI):
@@ -109,12 +114,8 @@ Notes:
 - Tests do not call external LLMs when `OPENROUTER_API_KEY` is unset; the API returns a local fallback for speed.
 
 ### Environment Variables
-- Frontend expects `VITE_BACKEND_URL` and `VITE_WS_URL`. In Docker dev, these are provided by compose. For local overrides, create `frontend/.env.local` with:
-
-  ```env
-  VITE_BACKEND_URL=http://localhost:8000
-  VITE_WS_URL=ws://localhost:8000/ws
-  ```
+- Frontend (dev): no env is required. The generated API client uses relative URLs and Vite proxies `/api` and `/ws` to the backend container.
+- Frontend (prod or when not using the dev proxy): optionally set `VITE_API_BASE_URL` (e.g., `http://localhost:8000`) in `frontend/.env.local` to direct the client.
 
 - Backend keys (for live API calls). For simplest usage, just set your keys and run; no login/JWT required:
 
@@ -125,8 +126,22 @@ Notes:
   ```
 
   Notes:
-  - If keys are not set, the backend returns local fallbacks where applicable so you can still develop and run tests.
+  - If keys are not set, the backend now returns a deterministic local fallback for chat outline generation so you can develop and test end‑to‑end without external LLM access.
   - When deploying publicly, enable authentication and tighten CORS/Rate Limits.
+
+### Dev proxy details
+- Vite dev server proxies:
+  - `/api` → backend on `http://backend:8000`
+  - `/ws`  → backend on `http://backend:8000` (WebSocket path)
+- These are configured in `frontend/vite.config.ts`. The generated API client defaults to relative URLs in dev; in production builds, you can provide `VITE_API_BASE_URL`.
+
+### E2E smoke with Playwright MCP (Cursor)
+Use the integrated Playwright MCP browser to exercise the app:
+- Start the stack: `docker compose up -d`
+- Open `http://localhost:5173`
+- Navigate to Chat and type a prompt, e.g., “Write a 3‑slide deck about observability pillars.”
+- Expected result in dev (no API key): an assistant reply containing a slides array (mock fallback) is rendered.
+- If requests fail after changing networking, run: `docker compose down -v && docker compose up -d`
 
 # Stage 1 Foundation Complete
 

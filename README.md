@@ -16,7 +16,7 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - `PPTXJob` (UUID jobId, status enum, resultUrl, errorMessage)
   - `ErrorResponse` (errorCode, message, details)
 - Chat API returns `SlidePlan[]` from `POST /api/v1/chat/generate` (simplified shape for FE)
-- LLM integration: OpenRouter `chat/completions` is the primary path with graceful fallback to legacy `/generate`; offline fallback remains for local dev
+- LLM integration: OpenRouter `chat/completions` is the primary path with graceful fallback to legacy `/generate`; offline fallback remains for local dev. Optional attribution headers (`HTTP-Referer`, `X-Title`) are supported, and model IDs follow OpenRouter's current naming (e.g., `openai/gpt-4o-mini`).
 - Image generation: Stability primary `v2/images/generations` (JSON) with a `v2beta/stable-image` fallback that saves bytes under `static/images` and serves via `/static/...`
 - Static hosting: `static/` ensured at startup and mounted at `/static`; public URLs built from `PUBLIC_BASE_URL`
 - CI/CD hardening: concurrency, npm/pip caching, coverage ≥ 90% gates, artifact uploads, k6 smoke, Docker build + Trivy scan (frontend & backend), SBOMs, CodeQL, deploy/release workflows
@@ -114,7 +114,7 @@ PYTHONPATH=$(pwd) PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q -p schema
 
 Notes:
 - If you omit `-p schemathesis` while disabling auto plugins, contract tests will fail due to a missing `case` fixture.
-- Tests do not call external LLMs when `OPENROUTER_API_KEY` is unset; the API returns a local fallback for speed.
+- Tests do not call external LLMs when `OPENROUTER_API_KEY` is unset; the API returns a local fallback (titles like "Slide 1" with bullets `["Bullet"]`) for speed.
 
 #### Optional live provider tests
 
@@ -143,21 +143,52 @@ PYTHONPATH=$(pwd) PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 RUN_LIVE_IMAGES=1 STABILITY_A
 Notes:
 - Live tests are labeled with `@pytest.mark.live` and more specific `live_llm` or `live_images` markers.
 - They only execute when corresponding `RUN_LIVE_*` flag and API key env var are present.
+- To assert real upstream success (no silent fallback), set `OPENROUTER_REQUIRE_UPSTREAM=1` in the same shell before running live LLM tests.
+
+Examples (Windows):
+
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+$env:PYTHONPATH=(Get-Location).Path
+$env:RUN_LIVE_LLM=1; $env:OPENROUTER_API_KEY="sk-or-..."; $env:OPENROUTER_REQUIRE_UPSTREAM=1
+# Direct connectivity check
+python -m pytest -q -k test_openrouter_direct_chat_completions
+# Service and route live tests
+python -m pytest -q -k "test_generate_outline_live_llm or test_chat_generate_route_live_llm"
+```
+
+Examples (macOS/Linux):
+
+```sh
+cd backend
+PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE_UPSTREAM=1 \
+  python -m pytest -q -k test_openrouter_direct_chat_completions
+PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE_UPSTREAM=1 \
+  python -m pytest -q -k "test_generate_outline_live_llm or test_chat_generate_route_live_llm"
+```
 
 ### Environment Variables
 - Frontend (dev): no env is required. The generated API client uses relative URLs and Vite proxies `/api` and `/ws` to the backend container.
 - Frontend (prod or when not using the dev proxy): optionally set `VITE_API_BASE_URL` (e.g., `http://localhost:8000`) in `frontend/.env.local` to direct the client.
 
-- Backend keys (for live API calls). For simplest usage, just set your keys and run; no login/JWT required:
+- Backend keys (for live API calls). For simplest usage, put them in `backend/.env` (preferred) or export env vars; no login/JWT required:
 
   ```env
-  # .env (repo root) or environment variables
+  # backend/.env (preferred) or environment variables
   OPENROUTER_API_KEY=sk-or-...
   STABILITY_API_KEY=sk-stability-...
+  # Optional OpenRouter attribution headers (recommended)
+  OPENROUTER_HTTP_REFERER=https://your-site-or-repo
+  OPENROUTER_APP_TITLE=AI PowerPoint Generator
+  # Optional: require real upstream success in app/tests (disables silent fallback)
+  OPENROUTER_REQUIRE_UPSTREAM=0
   ```
 
   Notes:
   - If keys are not set, the backend now returns a deterministic local fallback for chat outline generation so you can develop and test end‑to‑end without external LLM access.
+  - Model IDs follow OpenRouter's current naming, e.g. `openai/gpt-4o-mini` (default) and `openai/gpt-4o`. Ensure any provided `model` is in the allowlist.
+  - Be careful with `.env` formatting: lines must start at column 0 (`OPENROUTER_API_KEY=...`)—leading spaces will prevent loading.
   - When deploying publicly, enable authentication and tighten CORS/Rate Limits.
 
 ### Dev proxy details

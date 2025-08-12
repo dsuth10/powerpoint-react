@@ -20,11 +20,16 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: str | None = None
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     OPENROUTER_TIMEOUT_SECONDS: int = 30
-    OPENROUTER_DEFAULT_MODEL: str = "openrouter/gpt-4o-mini"
+    OPENROUTER_DEFAULT_MODEL: str = "openai/gpt-4o-mini"
     OPENROUTER_ALLOWED_MODELS: List[str] = [
-        "openrouter/gpt-4o-mini",
-        "openrouter/gpt-4o",
+        "openai/gpt-4o-mini",
+        "openai/gpt-4o",
     ]
+    # Optional headers recommended by OpenRouter
+    OPENROUTER_HTTP_REFERER: str | None = None  # e.g., your site/repo URL
+    OPENROUTER_APP_TITLE: str | None = None     # e.g., "AI PowerPoint Generator"
+    # Test/ops flag: when true, do not silently fall back; raise on upstream failure
+    OPENROUTER_REQUIRE_UPSTREAM: bool = False
     LLM_LOG_PROMPTS: bool = False
 
     # Stability AI configuration

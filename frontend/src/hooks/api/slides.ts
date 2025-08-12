@@ -9,8 +9,12 @@ export function useBuildSlides() {
     mutationFn: async (payload: BuildSlidesPayload) => {
       const res = await buildSlidesApiV1SlidesBuildPost({ body: payload })
       if (res.error) throw res.error
-      // backend returns { job_id, status, result_url? }
-      return res.data as unknown as { job_id: string; status: string; result_url?: string | null }
+      // Normalize backend response supporting both camelCase and snake_case
+      const data = res.data as unknown as Record<string, unknown>
+      const jobId = (data['job_id'] ?? data['jobId']) as string
+      const status = (data['status'] ?? 'completed') as string
+      const resultUrl = (data['result_url'] ?? data['resultUrl']) as string | null | undefined
+      return { job_id: jobId, status, result_url: resultUrl }
     },
   })
 }

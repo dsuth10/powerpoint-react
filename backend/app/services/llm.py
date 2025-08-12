@@ -17,7 +17,11 @@ def _base_headers() -> dict[str, str]:
         "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}" if settings.OPENROUTER_API_KEY else "",
         "Content-Type": "application/json",
     }
-    # Add optional headers, e.g., org info if needed
+    # Add optional OpenRouter headers for attribution per their guidelines
+    if settings.OPENROUTER_HTTP_REFERER:
+        headers["HTTP-Referer"] = settings.OPENROUTER_HTTP_REFERER
+    if settings.OPENROUTER_APP_TITLE:
+        headers["X-Title"] = settings.OPENROUTER_APP_TITLE
     return headers
 
 def get_async_client() -> httpx.AsyncClient:
@@ -77,6 +81,8 @@ async def _call_openrouter(request: ChatRequest) -> ChatResponse:
                 "model": _select_model(request.model),
                 "messages": messages,
                 "temperature": 0.3,
+                # Encourage strict JSON output across providers
+                "response_format": {"type": "json_object"},
             }
             chat_resp = await client.post("/chat/completions", json=chat_payload)
             if chat_resp.status_code == 429:
@@ -119,20 +125,21 @@ async def generate_outline(request: ChatRequest) -> ChatResponse:
     # In tests/offline mode (no API key), immediately return a local fallback
     if not settings.OPENROUTER_API_KEY:
         count = request.slide_count
-        title_base = request.prompt or "Slide"
+        # Ensure titles respect max length constraints
         slides = [
-            SlidePlan(title=f"{title_base}", bullets=["Bullet"])
-            for _ in range(count)
+            SlidePlan(title=f"Slide {i+1}", bullets=["Bullet"])
+            for i in range(count)
         ]
         return ChatResponse(slides=slides)
-    # Otherwise, call upstream; on failure, fall back to offline minimal outline
+    # Otherwise, call upstream; on failure, optionally raise (require upstream) or fall back to offline minimal outline
     try:
         return await _call_openrouter(request)
     except (LLMError, RetryError):
+        if settings.OPENROUTER_REQUIRE_UPSTREAM:
+            raise
         count = request.slide_count
-        title_base = request.prompt or "Slide"
         slides = [
-            SlidePlan(title=f"{title_base}", bullets=["Bullet"])
-            for _ in range(count)
+            SlidePlan(title=f"Slide {i+1}", bullets=["Bullet"])
+            for i in range(count)
         ]
         return ChatResponse(slides=slides)

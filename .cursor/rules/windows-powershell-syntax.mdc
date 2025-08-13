@@ -1,0 +1,167 @@
+---
+description: Enforces Windows PowerShell syntax for all terminal commands in the AI-PowerPoint-Generator project
+globs: README.md, *.ps1, *.md, docs/**/*.md
+alwaysApply: true
+---
+
+# Windows PowerShell Syntax Enforcement
+
+This rule ensures that all terminal commands and examples in the AI-PowerPoint-Generator project use proper Windows PowerShell syntax, preventing common syntax errors that occur when using bash-style commands on Windows.
+
+## **Command Chaining**
+
+- **Use PowerShell syntax:** `;` instead of `&&` for command chaining
+- **Use PowerShell syntax:** `|` for piping instead of bash-style pipes
+
+```powershell
+# ✅ Good: PowerShell command chaining
+cd frontend; npm run dev
+cd backend; python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# ❌ Bad: Bash-style command chaining
+cd frontend && npm run dev
+cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+## **Directory Navigation**
+
+- **Always use Windows-style paths:** `cd backend` not `cd ./backend`
+- **Use PowerShell navigation:** `cd ..` for parent directory
+
+```powershell
+# ✅ Good: Windows directory navigation
+cd backend
+cd ..
+cd frontend
+
+# ❌ Bad: Unix-style paths
+cd ./backend
+cd ../
+cd ./frontend
+```
+
+## **Environment Variables**
+
+- **Use PowerShell syntax:** `$env:VARIABLE_NAME` instead of `export VARIABLE_NAME`
+- **Use PowerShell syntax:** `$env:PYTHONPATH=(Get-Location).Path`
+
+```powershell
+# ✅ Good: PowerShell environment variables
+$env:PYTHONPATH=(Get-Location).Path
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+$env:RUN_LIVE_LLM=1; $env:OPENROUTER_API_KEY="sk-or-..."
+
+# ❌ Bad: Bash-style environment variables
+export PYTHONPATH=$(pwd)
+export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+export RUN_LIVE_LLM=1 && export OPENROUTER_API_KEY="sk-or-..."
+```
+
+## **Process Management**
+
+- **Use PowerShell commands:** `Get-NetTCPConnection` instead of `netstat`
+- **Use PowerShell commands:** `taskkill /PID <PID> /F` instead of `kill`
+
+```powershell
+# ✅ Good: PowerShell process management
+Get-NetTCPConnection -LocalPort 8000
+taskkill /PID 32508 /F
+
+# ❌ Bad: Unix-style process management
+netstat -an | findstr :8000
+kill -9 32508
+```
+
+## **File Operations**
+
+- **Use PowerShell syntax:** `Start-Sleep -Seconds 5` instead of `sleep 5`
+- **Use PowerShell syntax:** `Get-Location` instead of `pwd`
+
+```powershell
+# ✅ Good: PowerShell file operations
+Start-Sleep -Seconds 5
+(Get-Location).Path
+
+# ❌ Bad: Unix-style operations
+sleep 5
+pwd
+```
+
+## **Docker Commands**
+
+- **Use Windows Docker syntax:** `docker-compose` (with hyphen) instead of `docker compose`
+- **Use PowerShell syntax for Docker commands**
+
+```powershell
+# ✅ Good: Windows Docker commands
+docker-compose up backend -d
+docker-compose down -v
+
+# ❌ Bad: Unix-style Docker commands
+docker compose up backend -d
+docker compose down -v
+```
+
+## **Backend Server Startup**
+
+- **Always run from backend directory:** `cd backend` first
+- **Use localhost binding:** `--host 127.0.0.1` instead of `--host 0.0.0.0`
+- **Use proper module path:** `app.main:app` when in backend directory
+
+```powershell
+# ✅ Good: Backend startup from correct directory
+cd backend
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+
+# ❌ Bad: Running from wrong directory or wrong host binding
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## **Testing Commands**
+
+- **Use PowerShell environment setup:** Always set PYTHONPATH correctly
+- **Use PowerShell syntax for test commands**
+
+```powershell
+# ✅ Good: PowerShell test setup
+cd backend
+$env:PYTHONPATH=(Get-Location).Path
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+python -m pytest -q -p schemathesis
+
+# ❌ Bad: Unix-style test setup
+cd backend
+export PYTHONPATH=$(pwd)
+export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+python -m pytest -q -p schemathesis
+```
+
+## **Documentation Requirements**
+
+- **All README examples must use PowerShell syntax**
+- **All script files must use PowerShell syntax**
+- **Cross-reference:** [README.md](mdc:README.md) for working examples
+
+## **Common Error Prevention**
+
+### **Module Import Errors**
+- **Root cause:** Running backend from wrong directory
+- **Solution:** Always `cd backend` before running uvicorn
+- **Reference:** [backend/app/main.py](mdc:backend/app/main.py)
+
+### **Port Binding Errors**
+- **Root cause:** Using `0.0.0.0` instead of `127.0.0.1`
+- **Solution:** Use `--host 127.0.0.1` for local development
+- **Reference:** [docker-compose.yml](mdc:docker-compose.yml)
+
+### **Command Syntax Errors**
+- **Root cause:** Using `&&` instead of `;`
+- **Solution:** Use PowerShell command chaining syntax
+- **Reference:** [scripts/smoke.ps1](mdc:scripts/smoke.ps1)
+
+## **Maintenance**
+
+- **Update examples** when new PowerShell patterns emerge
+- **Cross-reference** with [cursor_rules.mdc](mdc:.cursor/rules/cursor_rules.mdc)
+- **Test all commands** in PowerShell before documenting
+- **Review quarterly** for new PowerShell best practices

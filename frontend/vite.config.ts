@@ -16,12 +16,12 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://backend:8000',
+        target: 'http://localhost:8000',
         changeOrigin: true,
       },
       // Proxy Socket.IO/WebSocket traffic to backend
       '/ws': {
-        target: 'http://backend:8000',
+        target: 'http://localhost:8000',
         ws: true,
         changeOrigin: true,
       },

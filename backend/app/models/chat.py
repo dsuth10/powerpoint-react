@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from pydantic import Field, conint, constr, AliasChoices
@@ -34,6 +34,6 @@ class ChatResponse(BaseModel):
     """Response model for chat-based outline generation."""
 
     slides: List[SlidePlan] = Field(..., description="Generated slide plans.")
-    session_id: Optional[UUID] = Field(
+    session_id: Optional[Union[UUID, str]] = Field(
         None, alias="sessionId", description="Optional session identifier."
     )

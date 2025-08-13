@@ -1,7 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
 import { buildSlidesApiV1SlidesBuildPost } from '@/lib/api'
 
-export type BuildSlidesPayload = Array<{ title: string; bullets?: string[] }>
+export type BuildSlidesPayload = Array<{
+  title: string
+  bullets?: string[]
+  notes?: string
+  image?: { url: string; altText?: string; provider?: string } | string
+}>
 
 export function useBuildSlides() {
   return useMutation({

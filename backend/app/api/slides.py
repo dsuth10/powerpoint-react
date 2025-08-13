@@ -27,6 +27,30 @@ async def build_slides(slides: List[dict], _: None = Depends(rate_limit_dependen
         if "bullets" not in s and isinstance(s.get("body"), str):
             s = {**s, "bullets": [s.get("body")]}
             s.pop("body", None)
+        # Normalize image: accept string URL or incomplete dict and coerce to ImageMeta shape
+        if "image" in s and s["image"] is not None:
+            img = s["image"]
+            try:
+                if isinstance(img, str):
+                    s["image"] = {
+                        "url": img,
+                        "altText": s.get("title") or "image",
+                        "provider": "llm",
+                    }
+                elif isinstance(img, dict):
+                    url = img.get("url")
+                    if isinstance(url, str):
+                        if not img.get("altText"):
+                            img["altText"] = s.get("title") or "image"
+                        if not img.get("provider"):
+                            img["provider"] = "llm"
+                        s["image"] = img
+                    else:
+                        # Invalid image payload; drop it to avoid validation errors
+                        s.pop("image", None)
+            except Exception:
+                # If anything goes wrong during normalization, drop image to avoid breaking the build
+                s.pop("image", None)
         normalized.append(SlidePlan(**s))
 
     # Synchronously build PPTX and return completed job with download URL

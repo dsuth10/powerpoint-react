@@ -6,10 +6,11 @@ export type ModelSelectorProps = {
   options?: ModelOption[]
 }
 
+// Values must match backend allowlist in settings.OPENROUTER_ALLOWED_MODELS
+// to avoid fallback/minimal outlines
 const DEFAULT_MODELS: ModelOption[] = [
-  { value: 'gpt-4o', label: 'GPT‑4o' },
-  { value: 'claude-3.5', label: 'Claude 3.5' },
-  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+  { value: 'openai/gpt-4o-mini', label: 'GPT‑4o mini' },
+  { value: 'openai/gpt-4o', label: 'GPT‑4o' },
 ]
 
 export function ModelSelector({ value, onChange, options = DEFAULT_MODELS }: ModelSelectorProps) {

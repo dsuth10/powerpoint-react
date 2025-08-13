@@ -1,0 +1,18 @@
+2025-08-13 19:06:02,799 - asyncio - DEBUG - Using proactor: IocpProactor
+2025-08-13 19:06:02,803 - __main__ - INFO - Starting LLM Diagnostic Tests
+2025-08-13 19:06:02,803 - __main__ - INFO - Timestamp: 2025-08-13 19:06:02.803009
+2025-08-13 19:06:02,803 - __main__ - INFO - === Test 1: Environment Configuration ===
+2025-08-13 19:06:02,803 - __main__ - INFO - OPENROUTER_API_KEY present: False
+2025-08-13 19:06:02,803 - __main__ - INFO - STABILITY_API_KEY present: False
+2025-08-13 19:06:02,803 - __main__ - INFO - RUN_LIVE_LLM: False
+2025-08-13 19:06:02,803 - __main__ - INFO - RUN_LIVE_IMAGES: False
+2025-08-13 19:06:02,804 - __main__ - INFO - Settings OPENROUTER_API_KEY: True
+2025-08-13 19:06:02,804 - __main__ - INFO - Settings STABILITY_API_KEY: True
+2025-08-13 19:06:02,804 - __main__ - INFO - Settings OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+2025-08-13 19:06:02,804 - __main__ - INFO - Settings OPENROUTER_DEFAULT_MODEL: openai/gpt-4o-mini
+2025-08-13 19:06:02,804 - __main__ - INFO - Settings OPENROUTER_REQUIRE_UPSTREAM: True
+2025-08-13 19:06:02,804 - __main__ - INFO - === Test 2: Direct API Connectivity ===
+2025-08-13 19:06:02,804 - __main__ - INFO - === Test 3: Structured Slide Generation ===
+2025-08-13 19:06:02,804 - __main__ - INFO - === Test 4: Service Integration ===
+2025-08-13 19:06:02,804 - __main__ - INFO - === Test 5: Image Generation Specific ===
+2025-08-13 19:06:02,806 - __main__ - INFO - LLM Diagnostic Tests Complete

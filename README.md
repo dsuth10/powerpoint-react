@@ -35,6 +35,29 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 - `frontend/` – React 18 + Vite + TypeScript app
 - `backend/` – FastAPI app (entry: `backend/app/main.py`)
 
+## Quick Start
+
+**For Windows Users (Recommended):**
+```powershell
+# Start backend in Docker
+docker-compose up backend -d
+
+# Start frontend locally
+cd frontend
+npm run dev
+```
+
+**For macOS/Linux Users:**
+```bash
+# Start backend in Docker
+docker-compose up backend -d
+
+# Start frontend locally
+cd frontend && npm run dev
+```
+
+Then open http://localhost:5173 in your browser.
+
 ## Getting Started
 
 ### Prerequisites
@@ -49,7 +72,45 @@ cd frontend && npm install
 cd ../backend && pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-### Development (Docker Desktop)
+### Development Options
+
+#### Option 1: Docker Compose (Recommended)
+
+PowerShell (Windows):
+```powershell
+docker-compose up backend -d
+cd frontend
+npm run dev
+```
+
+Bash (macOS/Linux):
+```sh
+docker-compose up backend -d
+cd frontend && npm run dev
+```
+
+#### Option 2: Local Development (Windows)
+
+**Backend Setup:**
+```powershell
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+**Frontend Setup:**
+```powershell
+cd frontend
+npm run dev
+```
+
+**Important Notes for Windows:**
+- Use PowerShell syntax: `;` instead of `&&` for command chaining
+- Run backend from the `backend/` directory, not project root
+- Use `127.0.0.1` instead of `0.0.0.0` for host binding to avoid port conflicts
+- If you get "port already in use" errors, check for existing processes: `Get-NetTCPConnection -LocalPort 8000`
+
+#### Option 3: Full Docker Stack
 
 PowerShell (Windows):
 ```powershell
@@ -63,7 +124,7 @@ make up && sleep 5
 curl -f http://localhost:8000/api/v1/health && curl -f http://localhost:5173 || true
 ```
 
-Networking notes (dev):
+**Networking notes (dev):**
 - The frontend dev server (Vite) proxies API and WebSocket calls to the backend container by service DNS.
 - Proxy targets: `/api` and `/ws` → `http://backend:8000` (see `frontend/vite.config.ts`).
 - If you change Docker networking or the proxy config, reset the stack to refresh DNS: `docker compose down -v && docker compose up -d`.
@@ -111,6 +172,8 @@ Bash:
 cd backend
 PYTHONPATH=$(pwd) PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q -p schemathesis
 ```
+
+**Important:** Always run backend tests from the `backend/` directory to ensure proper module imports.
 
 Notes:
 - If you omit `-p schemathesis` while disabling auto plugins, contract tests will fail due to a missing `case` fixture.
@@ -171,6 +234,36 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 ### Environment Variables
 - Frontend (dev): no env is required. The generated API client uses relative URLs and Vite proxies `/api` and `/ws` to the backend container.
 - Frontend (prod or when not using the dev proxy): optionally set `VITE_API_BASE_URL` (e.g., `http://localhost:8000`) in `frontend/.env.local` to direct the client.
+
+### Troubleshooting
+
+#### Backend Won't Start
+**Error:** `ModuleNotFoundError: No module named 'app'`
+- **Solution:** Make sure you're running the backend from the `backend/` directory, not the project root
+- **Command:** `cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+
+**Error:** `[Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000)`
+- **Solution:** Port 8000 is already in use. Check for existing processes:
+  ```powershell
+  Get-NetTCPConnection -LocalPort 8000
+  taskkill /PID <PID> /F
+  ```
+- **Alternative:** Use a different port: `--port 8001`
+
+#### Frontend Can't Connect to Backend
+**Error:** `getaddrinfo ENOTFOUND backend`
+- **Solution:** The frontend is trying to connect to a Docker service name. For local development, update `frontend/vite.config.ts`:
+  ```javascript
+  proxy: {
+    '/api': 'http://localhost:8000',
+    '/ws': 'http://localhost:8000'
+  }
+  ```
+
+#### PowerShell Command Issues
+**Error:** `&&` is not a valid statement separator
+- **Solution:** Use PowerShell syntax: `;` instead of `&&`
+- **Example:** `cd frontend; npm run dev`
 
 - Backend keys (for live API calls). For simplest usage, put them in `backend/.env` (preferred) or export env vars; no login/JWT required:
 

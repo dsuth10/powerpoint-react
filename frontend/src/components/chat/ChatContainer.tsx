@@ -11,7 +11,7 @@ export function ChatContainer() {
   const { sessionId } = useParams({ from: '/chat/$sessionId' })
   const { sendMessage, ensureSession } = useChat(sessionId)
   const messages = useChatStore(useMemo(() => selectMessagesBySession(sessionId), [sessionId]))
-  const [model, setModel] = useState('gpt-4o')
+  const [model, setModel] = useState('openai/gpt-4o-mini')
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -48,6 +48,10 @@ export function ChatContainer() {
           const outline = (lastAssistantWithSlides.slides as any[]).map((s) => ({
             title: s.title as string,
             bullets: Array.isArray(s.bullets) ? (s.bullets as string[]) : [],
+            // Preserve detailed speaker notes for full, non-truncated content in notes pane
+            notes: typeof (s as any).notes === 'string' ? ((s as any).notes as string) : undefined,
+            // Pass through image; backend will normalize string vs object shapes
+            image: (s as any).image,
           }))
           return (
             <div className="mt-3">

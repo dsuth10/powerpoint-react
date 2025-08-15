@@ -1,14 +1,20 @@
 import httpx
 import logging
+import base64
+import os
+import uuid
+import time
 from typing import Any, Dict, List, Optional
 from tenacity import retry, stop_after_attempt, wait_exponential, wait_random, retry_if_exception
 from app.core.config import settings
 from app.models.slides import SlidePlan, ImageMeta
-from app.models.stability import StabilityGenerationRequest, StabilityGenerationResponse
+from app.models.stability import (
+    StabilityGenerationRequest, 
+    StabilityGenerationResponse,
+    TextPrompt,
+    ImageArtifact
+)
 import asyncio
-import time
-import os
-import uuid
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -36,6 +42,7 @@ def get_async_client() -> httpx.AsyncClient:
     return client
 
 def build_prompt(slide: SlidePlan, style: Optional[str] = None) -> str:
+    """Build a prompt for image generation based on slide content."""
     bullets = "; ".join(slide.bullets)
     base = f"Title: {slide.title}. Bullets: {bullets}."
     if style:
@@ -45,10 +52,52 @@ def build_prompt(slide: SlidePlan, style: Optional[str] = None) -> str:
     logger.info(f"Built image prompt for slide '{slide.title}': {prompt}")
     return prompt
 
-def _build_stability_payload(prompt: str, style: Optional[str] = None) -> StabilityGenerationRequest:
-    payload = StabilityGenerationRequest(prompt=prompt, stylePreset=style)
-    logger.info(f"Built Stability payload: {payload.model_dump(by_alias=True)}")
+def _build_stability_payload(prompt: str, style: Optional[str] = None) -> dict:
+    """Build the request payload for Stability AI API with snake_case field names."""
+    # Manually construct payload with snake_case field names
+    payload = {
+        "text_prompts": [{"text": prompt, "weight": 1.0}],
+        "cfg_scale": 7.0,
+        "height": 1024,
+        "width": 1024,
+        "samples": 1,
+        "steps": 30,
+        "style_preset": style,
+        "sampler": "K_DPM_2_ANCESTRAL",
+        "seed": 0,
+        "extras": None
+    }
+    
+    logger.info(f"Built Stability payload: {payload}")
     return payload
+
+def _save_base64_image(base64_data: str, slide_title: str) -> str:
+    """Save a base64 image to disk and return the public URL."""
+    try:
+        # Decode base64 data
+        image_data = base64.b64decode(base64_data)
+        
+        # Create static directory if it doesn't exist
+        static_dir = os.path.join(settings.STATIC_DIR, settings.STATIC_IMAGES_SUBDIR)
+        os.makedirs(static_dir, exist_ok=True)
+        
+        # Generate unique filename
+        filename = f"{uuid.uuid4()}.png"
+        local_path = os.path.join(static_dir, filename)
+        
+        # Save image to disk
+        with open(local_path, "wb") as f:
+            f.write(image_data)
+        
+        # Generate public URL
+        public_url = f"{settings.PUBLIC_BASE_URL}{settings.STATIC_URL_PATH}/{settings.STATIC_IMAGES_SUBDIR}/{filename}"
+        
+        logger.info(f"Saved image for slide '{slide_title}' to {local_path}")
+        return public_url
+        
+    except Exception as e:
+        logger.error(f"Error saving base64 image for slide '{slide_title}': {e}")
+        raise ImageError(f"Failed to save image: {str(e)}")
 
 _cache: dict[str, tuple[float, ImageMeta]] = {}
 
@@ -75,13 +124,13 @@ def _cache_set(key: str, value: ImageMeta) -> None:
     _cache[key] = (time.time(), value)
     logger.info(f"Cached image for key: {key}")
 
-
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5),
     retry=retry_if_exception(lambda e: not isinstance(e, ImageError)),
 )
 async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None) -> ImageMeta:
+    """Generate an image for a slide using the current Stability AI API."""
     logger.info(f"Generating image for slide: {slide.title}")
     logger.info(f"API Key present: {bool(settings.STABILITY_API_KEY)}")
     
@@ -95,89 +144,56 @@ async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None
                 return cached
 
             payload = _build_stability_payload(prompt, style)
-            logger.info(f"Sending request to Stability API for slide '{slide.title}'")
+            endpoint = f"/v1/generation/{settings.STABILITY_ENGINE_ID}/text-to-image"
             
-            # Primary attempt: legacy JSON endpoint used in tests
-            resp = await client.post("/images/generations", json=payload.model_dump(by_alias=True))
-            logger.info(f"Legacy endpoint response status: {resp.status_code}")
-            logger.info(f"Legacy endpoint response headers: {dict(resp.headers)}")
+            logger.info(f"Sending request to Stability API endpoint: {endpoint}")
+            logger.info(f"Request payload: {payload}")
             
-            if resp.status_code == 429:
+            response = await client.post(endpoint, json=payload)
+            
+            logger.info(f"Stability API response status: {response.status_code}")
+            logger.info(f"Stability API response headers: {dict(response.headers)}")
+            
+            if response.status_code == 429:
                 logger.error("Rate limited by Stability API")
                 raise ImageError("Rate limited by Stability API")
-            if resp.status_code == 404:
-                logger.info("Legacy endpoint returned 404, trying v2beta endpoint")
-                # Try v2beta stable-image endpoint as fallback
-                v2beta_payload: Dict[str, Any] = {
-                    "prompt": prompt,
-                    "output_format": "png",
-                }
-                if style:
-                    v2beta_payload["style_preset"] = style
-                
-                logger.info(f"V2beta payload: {v2beta_payload}")
-                
-                # Prefer image bytes back
-                v2_resp = await client.post(
-                    "/v2beta/stable-image/generate/core",
-                    json=v2beta_payload,
-                    headers={"Accept": "image/*"},
-                )
-                
-                logger.info(f"V2beta response status: {v2_resp.status_code}")
-                logger.info(f"V2beta response headers: {dict(v2_resp.headers)}")
-                
-                if v2_resp.status_code == 429:
-                    logger.error("V2beta rate limited by Stability API")
-                    raise ImageError("Rate limited by Stability API")
-                v2_resp.raise_for_status()
-                content_type = v2_resp.headers.get("Content-Type", "")
-                logger.info(f"V2beta content type: {content_type}")
-                
-                if content_type.startswith("image/"):
-                    logger.info("V2beta returned image content, saving to file")
-                    os.makedirs(os.path.join(settings.STATIC_DIR, settings.STATIC_IMAGES_SUBDIR), exist_ok=True)
-                    filename = f"{uuid.uuid4()}.png"
-                    local_path = os.path.join(settings.STATIC_DIR, settings.STATIC_IMAGES_SUBDIR, filename)
-                    with open(local_path, "wb") as f:
-                        f.write(v2_resp.content)
-                    public_url = f"{settings.PUBLIC_BASE_URL}{settings.STATIC_URL_PATH}/{settings.STATIC_IMAGES_SUBDIR}/{filename}"
-                    meta = ImageMeta(url=public_url, alt_text=slide.title, provider="stability-ai")
-                    _cache_set(prompt, meta)
-                    logger.info(f"Generated image for slide '{slide.title}': {meta}")
-                    return meta
-                
-                # If JSON shape, attempt to parse minimal url
-                try:
-                    logger.info("V2beta returned JSON, attempting to parse")
-                    data_json = v2_resp.json()
-                    logger.info(f"V2beta JSON response: {data_json}")
-                    data = StabilityGenerationResponse(**data_json)
-                    url = (data.url or '').rstrip('/')
-                    if url:
-                        meta = ImageMeta(url=url, alt_text=slide.title, provider="stability-ai")
-                        _cache_set(prompt, meta)
-                        logger.info(f"Generated image from V2beta JSON for slide '{slide.title}': {meta}")
-                        return meta
-                except Exception as e:
-                    logger.error(f"Failed to parse V2beta JSON response: {e}")
-                    pass
-                
-                # Fall through to placeholder
-                logger.warning(f"Falling back to placeholder for slide '{slide.title}'")
+            
+            if response.status_code == 400:
+                logger.error(f"Bad request to Stability API. Response: {response.text}")
+                logger.error(f"Request payload was: {payload}")
+                raise ImageError(f"Bad request to Stability API: {response.text}")
+            
+            response.raise_for_status()
+            
+            # Parse response
+            data = StabilityGenerationResponse(**response.json())
+            logger.info(f"Stability API response data: {data.model_dump()}")
+            
+            if not data.artifacts:
+                logger.warning(f"No artifacts in response for slide '{slide.title}', using placeholder")
                 return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
             
-            # Legacy json path success
-            resp.raise_for_status()
-            data = StabilityGenerationResponse(**resp.json())
-            logger.info(f"Legacy endpoint response data: {data.model_dump()}")
-            url = (data.url or '').rstrip('/')
-            if not url:
-                logger.warning(f"No URL in legacy response for slide '{slide.title}', using placeholder")
+            # Get the first artifact
+            artifact = data.artifacts[0]
+            
+            if artifact.finishReason != "SUCCESS":
+                logger.warning(f"Image generation failed for slide '{slide.title}': {artifact.finishReason}")
                 return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
-            meta = ImageMeta(url=url, alt_text=slide.title, provider="stability-ai")
+            
+            # Save the base64 image to disk
+            public_url = _save_base64_image(artifact.base64, slide.title)
+            
+            # Create image metadata
+            meta = ImageMeta(
+                url=public_url, 
+                alt_text=slide.title, 
+                provider="stability-ai"
+            )
+            
+            # Cache the result
             _cache_set(prompt, meta)
-            logger.info(f"Generated image from legacy endpoint for slide '{slide.title}': {meta}")
+            
+            logger.info(f"Generated image for slide '{slide.title}': {meta}")
             return meta
             
         except httpx.HTTPError as e:
@@ -189,6 +205,7 @@ async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None
             raise ImageError(f"Image request failed: {str(e)}") from e
 
 async def generate_images(slides: List[SlidePlan], style: Optional[str] = None) -> List[ImageMeta]:
+    """Generate images for multiple slides concurrently."""
     logger.info(f"Generating images for {len(slides)} slides")
     logger.info(f"API Key present: {bool(settings.STABILITY_API_KEY)}")
     

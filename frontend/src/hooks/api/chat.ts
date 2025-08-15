@@ -5,6 +5,7 @@ export type ChatGeneratePayload = {
   prompt: string
   model?: string
   slideCount: number
+  language?: string
 }
 
 export function useGenerateOutline() {

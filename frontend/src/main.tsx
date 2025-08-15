@@ -9,7 +9,6 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import QueryProvider from './providers/QueryProvider'
 import '@/lib/api/client'
-import '@/lib/api/config'
 import { router } from './router'
 import './index.css'
 

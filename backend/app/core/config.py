@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     # Stability AI configuration
     STABILITY_API_KEY: str | None = None
     STABILITY_BASE_URL: str = "https://api.stability.ai"
+    STABILITY_ENGINE_ID: str = "stable-diffusion-xl-1024-v1-0"
     STABILITY_TIMEOUT_SECONDS: int = 30
     STABILITY_PLACEHOLDER_URL: str = "https://placehold.co/600x400"
 

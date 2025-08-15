@@ -5,8 +5,9 @@
 
 This repository contains both the frontend (React + Vite + TypeScript) and backend (FastAPI) for the AI-PowerPoint-Generator project.
 
-## What’s new
+## What's new
 
+- **🆕 Stability AI API Integration Fixed (August 2025)**: Updated to use the current Stability AI v1 API with proper text-to-image generation, base64 image handling, and static file serving
 - Strict Pydantic v2 base model with camelCase JSON aliasing (`backend/app/models/base.py`)
 - PRD-aligned domain models:
   - `ChatRequest` (prompt, slideCount, model, …)
@@ -17,7 +18,7 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - `ErrorResponse` (errorCode, message, details)
 - Chat API returns `SlidePlan[]` from `POST /api/v1/chat/generate` (simplified shape for FE)
 - LLM integration: OpenRouter `chat/completions` is the primary path with graceful fallback to legacy `/generate`; offline fallback remains for local dev. Optional attribution headers (`HTTP-Referer`, `X-Title`) are supported, and model IDs follow OpenRouter's current naming (e.g., `openai/gpt-4o-mini`).
-- Image generation: Stability primary `v2/images/generations` (JSON) with a `v2beta/stable-image` fallback that saves bytes under `static/images` and serves via `/static/...`
+- **🆕 Image generation: Stability AI v1 API** with proper text-to-image generation using `/v1/generation/{engine_id}/text-to-image` endpoint, base64 image responses, and automatic static file serving
 - Static hosting: `static/` ensured at startup and mounted at `/static`; public URLs built from `PUBLIC_BASE_URL`
 - CI/CD hardening: concurrency, npm/pip caching, coverage ≥ 90% gates, artifact uploads, k6 smoke, Docker build + Trivy scan (frontend & backend), SBOMs, CodeQL, deploy/release workflows
 - Make targets and PowerShell scripts for smoke/verify
@@ -29,6 +30,27 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - LLM calls short-circuit offline (no API key) to keep local tests fast and deterministic
   - Download endpoint added: `GET /api/v1/slides/download?jobId=<uuid>` serves generated PPTX with correct headers
   - Real-time updates via Socket.IO mounted at `/ws` with events `slide:progress`, `slide:completed`, and `resume` (optional auth via JWT or `sessionId`)
+
+## Recent Updates (August 2025)
+
+### Stability AI API Integration Fixes
+
+**Problem Solved**: The application was using outdated Stability AI API endpoints (`/images/generations` and `/v2beta/stable-image/generate/core`) that returned 405 Method Not Allowed errors.
+
+**Solution Implemented**:
+1. **Updated API Endpoint**: Now uses the current Stability AI v1 API: `POST /v1/generation/{engine_id}/text-to-image`
+2. **Fixed Request Format**: Updated to use proper `text_prompts` array format instead of legacy `prompt` field
+3. **Base64 Image Handling**: Implemented proper handling of base64-encoded image responses
+4. **Static File Serving**: Images are automatically saved to `/app/static/images/` and served via `/static/images/`
+5. **Field Name Compatibility**: Resolved camelCase vs snake_case field name issues for API compatibility
+
+**Technical Changes**:
+- `backend/app/models/stability.py`: Updated models for current API structure
+- `backend/app/services/images.py`: Complete rewrite for v1 API integration
+- `backend/app/core/config.py`: Added `STABILITY_ENGINE_ID` configuration
+- Static file serving: Images are now properly accessible via HTTP
+
+**Result**: The application now successfully generates AI-powered images for slides using the current Stability AI API, with proper error handling and fallbacks to placeholder images when needed.
 
 ## Project Structure
 
@@ -260,6 +282,13 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
   }
   ```
 
+#### Image Generation Issues
+**Error:** `405 Method Not Allowed` from Stability AI API
+- **Solution:** This has been fixed in the latest update. The application now uses the current Stability AI v1 API. If you're still seeing this error, ensure you're using the latest code and have a valid `STABILITY_API_KEY`.
+
+**Error:** Images not loading or showing as placeholders
+- **Solution:** Check that your `STABILITY_API_KEY` is valid and the backend can access the Stability AI API. Images are automatically saved to `/app/static/images/` and served via `/static/images/`.
+
 #### PowerShell Command Issues
 **Error:** `&&` is not a valid statement separator
 - **Solution:** Use PowerShell syntax: `;` instead of `&&`
@@ -373,14 +402,16 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
 ### Static hosting and image generation
 
 - Static assets are served from `/static` (filesystem: `backend/app/static/`)
-- Generated images (from Stability v2beta fallback) are saved under `/static/images/<uuid>.png`
+- Generated images from Stability AI v1 API are saved under `/static/images/<uuid>.png`
 - Public URLs are constructed as `${PUBLIC_BASE_URL}/static/images/<filename>`
+- Images are automatically generated using the current Stability AI text-to-image API
 
 Backend config (env) additions:
 - `PUBLIC_BASE_URL` (default `http://localhost:8000`)
 - `STATIC_URL_PATH` (default `/static`)
 - `STATIC_DIR` (default `/app/static` in container)
-- `STABILITY_BASE_URL` (now `https://api.stability.ai`)
+- `STABILITY_BASE_URL` (default `https://api.stability.ai`)
+- `STABILITY_ENGINE_ID` (default `stable-diffusion-xl-1024-v1-0`)
 
 ### WebSocket (Socket.IO)
 

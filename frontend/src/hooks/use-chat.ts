@@ -33,7 +33,12 @@ export function useChat(sessionId?: string) {
       }
       addMessage(userMsg)
       try {
-        const res = await genMutation.mutateAsync({ prompt: content, model, slideCount: 5 })
+        const res = await genMutation.mutateAsync({ 
+          prompt: content, 
+          model, 
+          slideCount: 5,
+          language: 'en'
+        })
         updateMessage(sid, id, (m) => {
           m.status = 'sent'
         })

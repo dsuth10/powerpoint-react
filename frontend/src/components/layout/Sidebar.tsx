@@ -1,39 +1,49 @@
-import { Link, useRouterState } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Link, useLocation } from '@tanstack/react-router'
+import { MessageSquare, Presentation, Settings } from 'lucide-react'
+import { useChatStore } from '@/stores/chat-store'
 
-export function Sidebar() {
-  const [open, setOpen] = useState(true)
-  const activePath = useRouterState({ select: (s) => s.location.pathname })
-
-  const linkClass = (to: string) =>
-    `block rounded px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
-      activePath.startsWith(to)
-        ? 'bg-gray-100 font-medium dark:bg-gray-800'
-        : 'text-gray-700 dark:text-gray-300'
+export default function Sidebar() {
+  const location = useLocation()
+  const currentSessionId = useChatStore((s) => s.currentSessionId)
+  
+  const linkClass = (path: string) => {
+    const isActive = location.pathname.startsWith(path)
+    return `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+      isActive 
+        ? 'bg-primary text-primary-foreground' 
+        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
     }`
+  }
+
+  // Determine the slides link based on whether we have a current session
+  const slidesLink = currentSessionId ? `/slides/${currentSessionId}` : '/slides'
 
   return (
-    <nav aria-label="Sidebar" className="h-full w-64 border-r bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
-      <button
-        className="mb-3 inline-flex rounded border px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls="sidebar-links"
-      >
-        {open ? 'Collapse' : 'Expand'}
-      </button>
-      <div id="sidebar-links" role="navigation" className={open ? 'space-y-1' : 'hidden'}>
-        <Link to="/chat" className={linkClass('/chat')}>
-          Chat
-        </Link>
-        <Link to="/slides" className={linkClass('/slides')}>
-          Slides
-        </Link>
+    <div className="w-64 bg-card border-r h-full">
+      <div className="p-6">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          AI Slides
+        </h1>
       </div>
-    </nav>
+      
+      <nav className="px-4 space-y-2">
+        <Link to="/chat" className={linkClass('/chat')}>
+          <MessageSquare className="w-5 h-5" />
+          <span>Chat</span>
+        </Link>
+        
+        <Link to={slidesLink} className={linkClass('/slides')}>
+          <Presentation className="w-5 h-5" />
+          <span>Slides</span>
+        </Link>
+        
+        <Link to="/settings" className={linkClass('/settings')}>
+          <Settings className="w-5 h-5" />
+          <span>Settings</span>
+        </Link>
+      </nav>
+    </div>
   )
 }
-
-export default Sidebar
 
 

@@ -1,11 +1,19 @@
-import { Route } from '@tanstack/react-router'
+import { Route, lazyRouteComponent } from '@tanstack/react-router'
 import rootRoute from '../__root.route'
 
-// Parent route for chat. Do not perform redirects here because this route
-// also matches nested paths like `/chat/:sessionId` and would cause loops.
-const route = new Route({
+// Route for /chat (no sessionId) - will show ChatPage directly
+const chatRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/chat',
+  component: lazyRouteComponent(() => import('../pages/ChatPage')),
 })
 
-export default route; 
+// Route for /chat/$sessionId  
+const chatSessionRoute = new Route({
+  getParentRoute: () => chatRoute,
+  path: '$sessionId',
+  component: lazyRouteComponent(() => import('../pages/ChatPage')),
+})
+
+export { chatSessionRoute }
+export default chatRoute 

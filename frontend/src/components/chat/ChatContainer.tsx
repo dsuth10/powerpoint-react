@@ -8,7 +8,9 @@ import ModelSelector from '@/components/chat/ModelSelector'
 import GenerationControls from '@/components/slides/GenerationControls'
 
 export function ChatContainer() {
+  console.log('ChatContainer rendering')
   const { sessionId } = useParams({ from: '/chat/$sessionId' })
+  console.log('sessionId:', sessionId)
   const { sendMessage, ensureSession } = useChat(sessionId)
   const messages = useChatStore(useMemo(() => selectMessagesBySession(sessionId), [sessionId]))
   const [model, setModel] = useState('openai/gpt-4o-mini')

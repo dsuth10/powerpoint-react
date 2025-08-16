@@ -17,7 +17,9 @@ export default function Sidebar() {
     }`
   }
 
-  // Determine the slides link based on whether we have a current session
+  // Determine the links based on whether we have a current session
+  // Always use the current session from the store, fallback to base routes
+  const chatLink = currentSessionId ? `/chat/${currentSessionId}` : '/chat'
   const slidesLink = currentSessionId ? `/slides/${currentSessionId}` : '/slides'
 
   return (
@@ -29,7 +31,7 @@ export default function Sidebar() {
       </div>
       
       <nav className="px-4 space-y-2">
-        <Link to="/chat" className={linkClass('/chat')}>
+        <Link to={chatLink} className={linkClass('/chat')}>
           <MessageSquare className="w-5 h-5" />
           <span>Chat</span>
         </Link>

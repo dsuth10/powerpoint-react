@@ -126,7 +126,7 @@ def _cache_set(key: str, value: ImageMeta) -> None:
 
 @retry(
     stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=0.5, min=0.5, max=4) + wait_random(0, 0.5),
+    wait=wait_exponential(multiplier=1, min=2, max=10) + wait_random(0, 1),
     retry=retry_if_exception(lambda e: not isinstance(e, ImageError)),
 )
 async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None) -> ImageMeta:
@@ -155,13 +155,13 @@ async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None
             logger.info(f"Stability API response headers: {dict(response.headers)}")
             
             if response.status_code == 429:
-                logger.error("Rate limited by Stability API")
-                raise ImageError("Rate limited by Stability API")
+                logger.warning("Rate limited by Stability API - returning placeholder")
+                return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
             
             if response.status_code == 400:
                 logger.error(f"Bad request to Stability API. Response: {response.text}")
                 logger.error(f"Request payload was: {payload}")
-                raise ImageError(f"Bad request to Stability API: {response.text}")
+                return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
             
             response.raise_for_status()
             
@@ -202,7 +202,7 @@ async def generate_image_for_slide(slide: SlidePlan, style: Optional[str] = None
             return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
         except Exception as e:
             logger.error(f"Exception generating image for slide '{slide.title}': {e}")
-            raise ImageError(f"Image request failed: {str(e)}") from e
+            return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder")
 
 async def generate_images(slides: List[SlidePlan], style: Optional[str] = None) -> List[ImageMeta]:
     """Generate images for multiple slides concurrently."""
@@ -213,8 +213,9 @@ async def generate_images(slides: List[SlidePlan], style: Optional[str] = None) 
         logger.warning("No Stability API key found, returning placeholders")
         return [ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=slide.title, provider="placeholder") for slide in slides]
     
-    sem = asyncio.Semaphore(settings.IMAGE_MAX_CONCURRENCY)
-    logger.info(f"Using semaphore with max concurrency: {settings.IMAGE_MAX_CONCURRENCY}")
+    # Reduce concurrency to avoid rate limiting
+    sem = asyncio.Semaphore(min(settings.IMAGE_MAX_CONCURRENCY, 2))
+    logger.info(f"Using semaphore with max concurrency: {min(settings.IMAGE_MAX_CONCURRENCY, 2)}")
 
     async def _one(s: SlidePlan) -> ImageMeta:
         async with sem:
@@ -223,9 +224,6 @@ async def generate_images(slides: List[SlidePlan], style: Optional[str] = None) 
                 result = await generate_image_for_slide(s, style)
                 logger.info(f"Completed image generation for slide '{s.title}': {result}")
                 return result
-            except ImageError as e:
-                logger.error(f"ImageError for slide '{s.title}': {e}")
-                return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=s.title, provider="placeholder")
             except Exception as e:
                 logger.error(f"Unexpected error for slide '{s.title}': {e}")
                 return ImageMeta(url=settings.STABILITY_PLACEHOLDER_URL, alt_text=s.title, provider="placeholder")

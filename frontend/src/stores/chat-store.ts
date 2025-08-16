@@ -42,7 +42,14 @@ export const useChatStore = create<ChatStore>()(
     immer((set, get) => ({
       sessions: {},
       messagesBySession: {},
-      currentSessionId: null,
+      currentSessionId: (() => {
+        // Try to get from localStorage on initialization
+        try {
+          return localStorage.getItem('chatSessionId') || null
+        } catch {
+          return null
+        }
+      })(),
       startSession: (sessionId) => {
         const id = sessionId ?? Math.random().toString(36).slice(2, 10)
         set((draft) => {
@@ -52,6 +59,12 @@ export const useChatStore = create<ChatStore>()(
           }
           draft.currentSessionId = id
         })
+        // Persist to localStorage
+        try {
+          localStorage.setItem('chatSessionId', id)
+        } catch {
+          // Ignore localStorage errors
+        }
         return id
       },
       continueSession: (sessionId) => {
@@ -62,6 +75,12 @@ export const useChatStore = create<ChatStore>()(
           }
           draft.currentSessionId = sessionId
         })
+        // Persist to localStorage
+        try {
+          localStorage.setItem('chatSessionId', sessionId)
+        } catch {
+          // Ignore localStorage errors
+        }
       },
       addMessage: (msg) =>
         set((draft) => {

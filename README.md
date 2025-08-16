@@ -7,7 +7,14 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 
 ## What's new
 
+- **🆕 Complete User Flow Implementation (August 2025)**: Full Chat → Slides navigation with session continuity, outline persistence, and seamless PowerPoint generation workflow
 - **🆕 Stability AI API Integration Fixed (August 2025)**: Updated to use the current Stability AI v1 API with proper text-to-image generation, base64 image handling, and static file serving
+- **✅ Working User Experience**: 
+  - Seamless navigation between Chat and Slides sections with session persistence
+  - Clear button labels ("Build PowerPoint" instead of confusing "Start Generation")
+  - Real-time progress tracking during PowerPoint generation
+  - Proper route parameters and state management across sections
+  - Session-based outline persistence and retrieval
 - Strict Pydantic v2 base model with camelCase JSON aliasing (`backend/app/models/base.py`)
 - PRD-aligned domain models:
   - `ChatRequest` (prompt, slideCount, model, …)
@@ -32,6 +39,27 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - Real-time updates via Socket.IO mounted at `/ws` with events `slide:progress`, `slide:completed`, and `resume` (optional auth via JWT or `sessionId`)
 
 ## Recent Updates (August 2025)
+
+### Complete User Flow Implementation ✅
+
+**Problem Solved**: The application had broken navigation between Chat and Slides sections, confusing button labels, missing session continuity, and state isolation issues.
+
+**Solution Implemented**:
+1. **Seamless Chat → Slides Navigation**: Sidebar automatically passes current sessionId when navigating to Slides section
+2. **Session Continuity**: Chat store maintains currentSessionId and session state across navigation
+3. **Clear Button Labels**: Changed from "Start Generation" to "Build PowerPoint" for clarity
+4. **Outline Persistence**: Slide outlines persist when switching between Chat and Slides sections
+5. **Proper Route Parameters**: Implemented `/slides` and `/slides/:sessionId` routes with proper parameter handling
+6. **State Management**: Fixed state isolation issues between sections
+
+**Technical Changes**:
+- `frontend/src/routes/pages/SlidesPage.tsx`: Complete implementation with outline retrieval from chat store
+- `frontend/src/components/layout/Sidebar.tsx`: Automatic sessionId passing in navigation links
+- `frontend/src/stores/chat-store.ts`: Session management and outline persistence
+- `frontend/src/components/slides/GenerationControls.tsx`: Clear "Build PowerPoint" button labels
+- `frontend/src/routes/slides/index.route.tsx`: Proper route configuration for session-based navigation
+
+**Result**: Users can now seamlessly generate slide outlines in Chat, navigate to Slides section, and build PowerPoint files with real-time progress tracking. The complete user flow is fully functional.
 
 ### Stability AI API Integration Fixes
 
@@ -79,6 +107,26 @@ cd frontend && npm run dev
 ```
 
 Then open http://localhost:5173 in your browser.
+
+## 🚀 User Flow Guide
+
+The application now provides a complete, seamless user experience:
+
+### **Recommended User Flow**
+1. **Start in Chat**: Navigate to Chat section and enter a prompt (e.g., "Create a 5-slide presentation about renewable energy")
+2. **Review Outline**: Generated slides appear as preview cards with titles and bullet points
+3. **Refine if Needed**: Ask follow-up questions to improve the outline
+4. **Switch to Slides**: Click "Slides" in the sidebar to see the complete outline
+5. **Generate PPTX**: Click "Build PowerPoint" button to start generation
+6. **Monitor Progress**: Watch real-time progress updates during generation
+7. **Download**: Click "Download PPTX" when generation is complete
+
+### **Key Features**
+- ✅ **Session Continuity**: Your chat session and slide outlines persist when switching between sections
+- ✅ **Clear Navigation**: Sidebar automatically includes your current session when navigating to Slides
+- ✅ **Real-time Progress**: WebSocket connection provides live updates during PowerPoint generation
+- ✅ **Multiple Sessions**: Create and manage multiple chat sessions with different slide outlines
+- ✅ **Error Recovery**: Retry buttons and clear error messages for failed operations
 
 ## Getting Started
 
@@ -325,6 +373,7 @@ Use the integrated Playwright MCP browser to exercise the app:
 - Open `http://localhost:5173`
 - Navigate to Chat and type a prompt, e.g., “Write a 3‑slide deck about observability pillars.”
 - Expected result in dev (no API key): assistant reply renders as slide cards (title, bullets, optional image) via `SlidePreview`.
+- **Test the Complete Flow**: After generating slides in Chat, click "Slides" in the sidebar to navigate to the Slides section and test PowerPoint generation.
 - If requests fail after changing networking, run: `docker compose down -v && docker compose up -d`
 
 # Stage 1 Foundation Complete

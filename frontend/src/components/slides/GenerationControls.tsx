@@ -22,10 +22,6 @@ export default function GenerationControls({ outline, sessionId }: GenerationCon
     
     const socket = createGenerationSocket()
     
-    const onStarted = ({ jobId }: { jobId: string }) => {
-      if (jobId === gen.jobId) gen.setProgress(1)
-    }
-    
     const onProgress = ({ jobId, progress }: { jobId: string; progress: number }) => {
       if (jobId === gen.jobId) gen.setProgress(progress)
     }
@@ -38,16 +34,14 @@ export default function GenerationControls({ outline, sessionId }: GenerationCon
       if (jobId === gen.jobId) gen.fail(message)
     }
     
-    socket.on('generation_started', onStarted)
-    socket.on('generation_progress', onProgress)
-    socket.on('generation_complete', onComplete)
-    socket.on('generation_error', onError)
+    socket.on('slide:progress', onProgress)
+    socket.on('slide:completed', onComplete)
+    socket.on('error', onError)
     
     return () => {
-      socket.off('generation_started', onStarted)
-      socket.off('generation_progress', onProgress)
-      socket.off('generation_complete', onComplete)
-      socket.off('generation_error', onError)
+      socket.off('slide:progress', onProgress)
+      socket.off('slide:completed', onComplete)
+      socket.off('error', onError)
       socket.disconnect()
     }
   }, [gen.status, gen.jobId])
@@ -62,7 +56,7 @@ export default function GenerationControls({ outline, sessionId }: GenerationCon
         image: (slide as any).image_prompt,
       }))
 
-      const result = await mutation.mutateAsync(slides)
+      const result = await mutation.mutateAsync({ payload: slides, sessionId })
       gen.start(result.job_id)
       
       // If result is immediately available, mark as complete

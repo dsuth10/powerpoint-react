@@ -14,18 +14,17 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
-    // Temporarily disable proxy to force direct API calls
-    // proxy: {
-    //   '/api': {
-    //     target: 'http://localhost:8000',
-    //     changeOrigin: true,
-    //   },
-    //   // Proxy Socket.IO/WebSocket traffic to backend
-    //   '/ws': {
-    //     target: 'http://localhost:8000',
-    //     ws: true,
-    //     changeOrigin: true,
-    //   },
-    // },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      // Proxy Socket.IO/WebSocket traffic to backend
+      '/ws': {
+        target: 'http://localhost:8000',
+        ws: true,
+        changeOrigin: true,
+      },
+    },
   },
 })

@@ -11,8 +11,11 @@ export type BuildSlidesPayload = Array<{
 export function useBuildSlides() {
   return useMutation({
     mutationKey: ['slides-build'],
-    mutationFn: async (payload: BuildSlidesPayload) => {
-      const res = await buildSlidesApiV1SlidesBuildPost({ body: payload })
+    mutationFn: async ({ payload, sessionId }: { payload: BuildSlidesPayload; sessionId?: string }) => {
+      const res = await buildSlidesApiV1SlidesBuildPost({ 
+        body: payload,
+        query: sessionId ? { sessionId } : undefined
+      })
       if (res.error) throw res.error
       // Normalize backend response supporting both camelCase and snake_case
       const data = res.data as unknown as Record<string, unknown>

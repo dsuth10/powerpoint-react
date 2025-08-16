@@ -12,6 +12,7 @@ from app.models.slides import SlidePlan
 from app.core.rate_limit import rate_limit_dependency
 from app.core.config import settings
 from app.services import pptx as pptx_service
+from app.socketio_app import emit_progress, emit_completed
 
 router = APIRouter(prefix="/slides", tags=["slides"])
 
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/slides", tags=["slides"])
     response_model=PPTXJob,
     responses={429: {"description": "Too Many Requests"}, 422: {"description": "Validation Error"}},
 )
-async def build_slides(slides: List[dict], _: None = Depends(rate_limit_dependency)):
+async def build_slides(slides: List[dict], session_id: str = Query(None, alias="sessionId"), _: None = Depends(rate_limit_dependency)):
     # Normalize legacy shape where 'body' was a string instead of 'bullets' list
     normalized: List[SlidePlan] = []
     for s in slides:
@@ -53,10 +54,23 @@ async def build_slides(slides: List[dict], _: None = Depends(rate_limit_dependen
                 s.pop("image", None)
         normalized.append(SlidePlan(**s))
 
-    # Synchronously build PPTX and return completed job with download URL
-    built_path = pptx_service.build_pptx(normalized, output_dir=settings.PPTX_TEMP_DIR)
-    # Rename to a fixed UUID-based name that matches download API contract
+    # Generate job ID
     job_id = UUID(str(uuid4()))
+    
+    # Emit initial progress
+    if session_id:
+        await emit_progress(session_id, {"jobId": str(job_id), "progress": 10})
+    
+    # Build PPTX with progress updates
+    def progress_callback(current: int, total: int):
+        if session_id:
+            progress = int((current / total) * 80) + 10  # 10-90% range
+            # Note: This would need to be async, but build_pptx is sync
+            # For now, we'll emit progress after completion
+    
+    built_path = pptx_service.build_pptx(normalized, output_dir=settings.PPTX_TEMP_DIR, on_progress=progress_callback)
+    
+    # Rename to a fixed UUID-based name that matches download API contract
     target_path = (Path(settings.PPTX_TEMP_DIR) / f"{job_id}.pptx")
     try:
         Path(built_path).replace(target_path)
@@ -66,7 +80,14 @@ async def build_slides(slides: List[dict], _: None = Depends(rate_limit_dependen
             job_id = UUID(Path(built_path).stem)
         except Exception:
             pass
+    
     result_url = f"{settings.PUBLIC_BASE_URL}/api/v1/slides/download?jobId={job_id}"
+    
+    # Emit completion event
+    if session_id:
+        await emit_progress(session_id, {"jobId": str(job_id), "progress": 100})
+        await emit_completed(session_id, {"jobId": str(job_id), "fileUrl": result_url})
+    
     return PPTXJob(job_id=job_id, status="completed", result_url=result_url, error_message=None)
 
 

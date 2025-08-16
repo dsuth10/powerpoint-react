@@ -1,9 +1,11 @@
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { MessageSquare, Presentation, Settings } from 'lucide-react'
 import { useChatStore } from '@/stores/chat-store'
 
 export default function Sidebar() {
-  const location = useLocation()
+  const router = useRouter()
+  const location = router.state.location
   const currentSessionId = useChatStore((s) => s.currentSessionId)
   
   const linkClass = (path: string) => {

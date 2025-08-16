@@ -13,14 +13,4 @@ import { type Config, type ClientOptions as DefaultClientOptions, createClient, 
  */
 export type CreateClientConfig<T extends DefaultClientOptions = ClientOptions> = (override?: Config<DefaultClientOptions & T>) => Config<Required<DefaultClientOptions> & T>;
 
-// Use Docker service name when running in Docker, localhost when running locally
-const env = (import.meta as any).env || {}
-const isDev = !!env?.DEV
-const isDocker = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-const baseUrl: string = isDocker ? 'http://backend:8000' : (isDev ? 'http://localhost:8000' : (env?.VITE_API_BASE_URL || ''))
-
-console.log('Creating API client with base URL:', baseUrl, { isDev, isDocker, hostname: window.location.hostname })
-
-export const client = createClient(createConfig<ClientOptions>({
-  baseUrl: baseUrl || undefined
-}));
+export const client = createClient(createConfig<ClientOptions>());

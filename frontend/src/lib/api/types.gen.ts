@@ -291,7 +291,12 @@ export type BuildSlidesApiV1SlidesBuildPostData = {
         [key: string]: unknown;
     }>;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Sessionid
+         */
+        sessionId?: string;
+    };
     url: '/api/v1/slides/build';
 };
 

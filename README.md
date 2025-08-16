@@ -127,6 +127,7 @@ The application now provides a complete, seamless user experience:
 - ✅ **Real-time Progress**: WebSocket connection provides live updates during PowerPoint generation
 - ✅ **Multiple Sessions**: Create and manage multiple chat sessions with different slide outlines
 - ✅ **Error Recovery**: Retry buttons and clear error messages for failed operations
+- ✅ **Proxy Configuration**: Vite dev server properly proxies API and WebSocket calls to backend
 
 ## Getting Started
 
@@ -322,13 +323,28 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 
 #### Frontend Can't Connect to Backend
 **Error:** `getaddrinfo ENOTFOUND backend`
-- **Solution:** The frontend is trying to connect to a Docker service name. For local development, update `frontend/vite.config.ts`:
+- **Solution:** The frontend is trying to connect to a Docker service name. For local development, the proxy configuration in `frontend/vite.config.ts` should be enabled:
   ```javascript
   proxy: {
-    '/api': 'http://localhost:8000',
-    '/ws': 'http://localhost:8000'
+    '/api': {
+      target: 'http://localhost:8000',
+      changeOrigin: true,
+    },
+    '/ws': {
+      target: 'http://localhost:8000',
+      ws: true,
+      changeOrigin: true,
+    },
   }
   ```
+
+**Error:** `Port 5173 is already in use`
+- **Solution:** Another development server is running. Check for existing processes:
+  ```powershell
+  Get-NetTCPConnection -LocalPort 5173
+  taskkill /PID <PID> /F
+  ```
+- **Alternative:** Use a different port: `npm run dev -- --port 5174`
 
 #### Image Generation Issues
 **Error:** `405 Method Not Allowed` from Stability AI API
@@ -341,6 +357,16 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 **Error:** `&&` is not a valid statement separator
 - **Solution:** Use PowerShell syntax: `;` instead of `&&`
 - **Example:** `cd frontend; npm run dev`
+
+#### TanStack Router Import Issues
+**Error:** `useLocation is not exported from '@tanstack/react-router'`
+- **Solution:** This is a version compatibility issue. The application uses `useRouter` instead:
+  ```typescript
+  import { useRouter } from '@tanstack/react-router'
+  const router = useRouter()
+  const location = router.state.location
+  ```
+- **Note:** The application has been updated to use the correct TanStack Router v2 API
 
 - Backend keys (for live API calls). For simplest usage, put them in `backend/.env` (preferred) or export env vars; no login/JWT required:
 
@@ -370,10 +396,14 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 ### E2E smoke with Playwright MCP (Cursor)
 Use the integrated Playwright MCP browser to exercise the app:
 - Start the stack: `docker compose up -d`
+- Start frontend locally: `cd frontend; npm run dev`
 - Open `http://localhost:5173`
 - Navigate to Chat and type a prompt, e.g., “Write a 3‑slide deck about observability pillars.”
 - Expected result in dev (no API key): assistant reply renders as slide cards (title, bullets, optional image) via `SlidePreview`.
 - **Test the Complete Flow**: After generating slides in Chat, click "Slides" in the sidebar to navigate to the Slides section and test PowerPoint generation.
+- **Note**: WebSocket connections may show connection errors in dev mode, but API calls work correctly through the proxy.
+
+
 - If requests fail after changing networking, run: `docker compose down -v && docker compose up -d`
 
 # Stage 1 Foundation Complete

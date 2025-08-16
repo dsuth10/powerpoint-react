@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app.services.pptx import build_pptx
 from app.models.slides import SlidePlan, ImageMeta
 from pathlib import Path

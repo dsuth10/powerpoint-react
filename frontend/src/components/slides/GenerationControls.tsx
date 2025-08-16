@@ -1,39 +1,48 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
+import { Play, Pause, RotateCcw } from 'lucide-react'
+import { useSlideGenerationStore } from '@/stores/slide-generation-store'
 import { useBuildSlides } from '@/hooks/api/slides'
-import { useSlideGenerationStore, selectGeneration } from '@/stores/slide-generation-store'
 import { createGenerationSocket } from '@/lib/slide-generation-socket'
-import DownloadButton from '@/components/slides/DownloadButton'
-import RetryButton from '@/components/slides/RetryButton'
+import type { SlideOutline } from '@/lib/api/client/types.gen'
+import DownloadButton from './DownloadButton'
+import RetryButton from './RetryButton'
 
-export function GenerationControls({ outline }: { outline: Array<{ title: string; bullets?: string[] }> }) {
-  const gen = useSlideGenerationStore(selectGeneration)
-  const start = useSlideGenerationStore((s) => s.start)
-  const setProgress = useSlideGenerationStore((s) => s.setProgress)
-  const complete = useSlideGenerationStore((s) => s.complete)
-  const fail = useSlideGenerationStore((s) => s.fail)
-  const reset = useSlideGenerationStore((s) => s.reset)
+interface GenerationControlsProps {
+  outline: SlideOutline[]
+  sessionId: string
+}
 
+export default function GenerationControls({ outline, sessionId }: GenerationControlsProps) {
+  const gen = useSlideGenerationStore()
   const mutation = useBuildSlides()
 
+  // Setup WebSocket connection for progress updates
   useEffect(() => {
     if (gen.status !== 'generating') return
+    
     const socket = createGenerationSocket()
+    
     const onStarted = ({ jobId }: { jobId: string }) => {
-      if (jobId === gen.jobId) setProgress(1)
+      if (jobId === gen.jobId) gen.setProgress(1)
     }
+    
     const onProgress = ({ jobId, progress }: { jobId: string; progress: number }) => {
-      if (jobId === gen.jobId) setProgress(progress)
+      if (jobId === gen.jobId) gen.setProgress(progress)
     }
+    
     const onComplete = ({ jobId, fileUrl }: { jobId: string; fileUrl?: string }) => {
-      if (jobId === gen.jobId) complete(fileUrl)
+      if (jobId === gen.jobId) gen.complete(fileUrl)
     }
+    
     const onError = ({ jobId, message }: { jobId: string; message: string }) => {
-      if (jobId === gen.jobId) fail(message)
+      if (jobId === gen.jobId) gen.fail(message)
     }
+    
     socket.on('generation_started', onStarted)
     socket.on('generation_progress', onProgress)
     socket.on('generation_complete', onComplete)
     socket.on('generation_error', onError)
+    
     return () => {
       socket.off('generation_started', onStarted)
       socket.off('generation_progress', onProgress)
@@ -41,36 +50,61 @@ export function GenerationControls({ outline }: { outline: Array<{ title: string
       socket.off('generation_error', onError)
       socket.disconnect()
     }
-  }, [complete, fail, gen.jobId, gen.status, setProgress])
+  }, [gen.status, gen.jobId])
 
-  const canStart = outline.length > 0 && gen.status !== 'generating' && !mutation.isPending
+  const handleGenerate = async () => {
+    try {
+      // Convert outline to the expected format
+      const slides = outline.map((slide) => ({
+        title: slide.title,
+        bullets: slide.bullets || [],
+        notes: (slide as any).speaker_notes,
+        image: (slide as any).image_prompt,
+      }))
+
+      const result = await mutation.mutateAsync(slides)
+      gen.start(result.job_id)
+      
+      // If result is immediately available, mark as complete
+      if (result.result_url) {
+        gen.complete(result.result_url)
+        gen.setProgress(100)
+      }
+    } catch (error) {
+      gen.fail(error instanceof Error ? error.message : 'Failed to start generation')
+    }
+  }
+
+  const canGenerate = outline.length > 0 && gen.status !== 'generating' && !mutation.isPending
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        className="inline-flex items-center rounded bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={!canStart}
-        onClick={async () => {
-          try {
-            const res = await mutation.mutateAsync(outline)
-            start(res.job_id)
-            if (res.result_url) {
-              complete(res.result_url)
-              setProgress(100)
-            }
-          } catch (e) {
-            fail(e instanceof Error ? e.message : 'Failed to start generation')
-          }
-        }}
-      >
-        {mutation.isPending ? 'Starting…' : 'Start Generation'}
-      </button>
-      {gen.status === 'error' && <RetryButton onClick={() => reset()} />}
+      {canGenerate && (
+        <button
+          onClick={handleGenerate}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          disabled={!canGenerate}
+        >
+          <Play className="w-4 h-4" />
+          {mutation.isPending ? 'Initializing…' : 'Build PowerPoint'}
+        </button>
+      )}
+
+      {gen.status === 'generating' && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            Building... {gen.progress}%
+          </span>
+        </div>
+      )}
+
+      {gen.status === 'error' && (
+        <RetryButton onClick={() => gen.reset()} />
+      )}
+
       {gen.jobId && gen.status === 'completed' && <DownloadButton jobId={gen.jobId} />}
     </div>
   )
 }
-
-export default GenerationControls
 
 

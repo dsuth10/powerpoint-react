@@ -49,13 +49,14 @@ export function ChatContainer() {
             title: s.title as string,
             bullets: Array.isArray(s.bullets) ? (s.bullets as string[]) : [],
             // Preserve detailed speaker notes for full, non-truncated content in notes pane
-            notes: typeof (s as any).notes === 'string' ? ((s as any).notes as string) : undefined,
-            // Pass through image; backend will normalize string vs object shapes
-            image: (s as any).image,
+            speaker_notes: typeof (s as any).notes === 'string' ? ((s as any).notes as string) : undefined,
+            // Pass through image prompt for image generation
+            image_prompt: typeof (s as any).image === 'string' ? ((s as any).image as string) : undefined,
           }))
           return (
-            <div className="mt-3">
-              <GenerationControls outline={outline} />
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Ready to build PowerPoint:</span>
+              <GenerationControls outline={outline} sessionId={sessionId} />
             </div>
           )
         })()}

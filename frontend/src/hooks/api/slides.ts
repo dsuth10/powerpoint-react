@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { buildSlidesApiV1SlidesBuildPost } from '@/lib/api'
+import { useAuthStore } from '@/stores/auth'
 
 export type BuildSlidesPayload = Array<{
   title: string
@@ -9,12 +10,15 @@ export type BuildSlidesPayload = Array<{
 }>
 
 export function useBuildSlides() {
+  const getAuthHeaders = useAuthStore((state) => state.getAuthHeaders)
+  
   return useMutation({
     mutationKey: ['slides-build'],
     mutationFn: async ({ payload, sessionId }: { payload: BuildSlidesPayload; sessionId?: string }) => {
       const res = await buildSlidesApiV1SlidesBuildPost({ 
         body: payload,
-        query: sessionId ? { sessionId } : undefined
+        query: sessionId ? { sessionId } : undefined,
+        headers: getAuthHeaders()
       })
       if (res.error) throw res.error
       // Normalize backend response supporting both camelCase and snake_case

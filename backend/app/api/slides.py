@@ -11,7 +11,6 @@ from app.models.slides import SlidePlan, ImageMeta, PowerPointRequest, PowerPoin
 from app.core.rate_limit import rate_limit_dependency
 from app.core.config import settings
 from app.services import pptx as pptx_service
-from app.socketio_app import emit_progress, emit_completed
 from app.services.images import generate_images
 from app.services.pptx import build_pptx
 from app.services.image_providers.registry import get_provider_status, list_providers, get_available_providers
@@ -109,10 +108,33 @@ async def build_slides(
     pptx_service.process_slides_async(job_id, payload, session_id)
     
     return PPTXJob(
-        job_id=job_id,
+        job_id=UUID(job_id),
         status="pending",
         message="Building PowerPoint presentation...",
     )
+
+
+@router.get("/job/{job_id}")
+async def get_job_status(
+    job_id: UUID,
+    current_user: str = Depends(get_current_user),
+) -> dict:
+    """
+    Get the status of a PowerPoint generation job.
+    """
+    job_info = pptx_service.jobs.get(str(job_id))
+    if not job_info:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return {
+        "job_id": str(job_id),
+        "status": job_info["status"],
+        "progress": job_info.get("progress", 0),
+        "total": job_info.get("total", 1),
+        "message": job_info.get("message", ""),
+        "error": job_info.get("error"),
+        "file_path": job_info.get("file_path"),
+    }
 
 
 @router.get("/download/{job_id}")

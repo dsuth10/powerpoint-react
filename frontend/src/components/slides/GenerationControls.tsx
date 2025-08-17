@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
-import { Play, Pause, RotateCcw } from 'lucide-react'
-import { useSlideGenerationStore } from '@/stores/slide-generation-store'
+import { useEffect, useState } from 'react'
+import { Play } from 'lucide-react'
 import { useBuildSlides } from '@/hooks/api/slides'
-import { createGenerationSocket } from '@/lib/slide-generation-socket'
-import DownloadButton from './DownloadButton'
+import { useSlideGenerationStore } from '@/stores/slide-generation-store'
+import { DownloadManager } from '@/lib/download-manager'
+import { useAuthStore } from '@/stores/auth'
 import RetryButton from './RetryButton'
-import { useState } from 'react'
+import DownloadButton from './DownloadButton'
 
 // Use the same type as SlideGenerator
 export type SlideOutline = { title: string; bullets?: string[] }
@@ -16,44 +16,55 @@ interface GenerationControlsProps {
 }
 
 export default function GenerationControls({ outline, sessionId }: GenerationControlsProps) {
-  const gen = useSlideGenerationStore()
   const mutation = useBuildSlides()
-  const [selectedProvider, setSelectedProvider] = useState<string>('auto')
-  
+  const gen = useSlideGenerationStore()
+  const [selectedProvider, setSelectedProvider] = useState<string>('dalle') // Changed from 'auto' to 'dalle'
+
   const handleProviderChange = (provider: string) => {
     setSelectedProvider(provider)
     // Update the store with the selected provider
     useSlideGenerationStore.getState().setImageProvider(provider)
   }
 
-  // Setup WebSocket connection for progress updates
+  // Real polling for job status from backend
   useEffect(() => {
-    if (gen.status !== 'generating') return
-    
-    const socket = createGenerationSocket()
-    
-    const onProgress = ({ jobId, progress }: { jobId: string; progress: number }) => {
-      if (jobId === gen.jobId) gen.setProgress(progress)
-    }
-    
-    const onComplete = ({ jobId, fileUrl }: { jobId: string; fileUrl?: string }) => {
-      if (jobId === gen.jobId) gen.complete(fileUrl)
-    }
-    
-    const onError = ({ jobId, message }: { jobId: string; message: string }) => {
-      if (jobId === gen.jobId) gen.fail(message)
-    }
-    
-    socket.on('slide:progress', onProgress)
-    socket.on('slide:completed', onComplete)
-    socket.on('error', onError)
-    
-    return () => {
-      socket.off('slide:progress', onProgress)
-      socket.off('slide:completed', onComplete)
-      socket.off('error', onError)
-      socket.disconnect()
-    }
+    if (gen.status !== 'generating' || !gen.jobId) return
+
+    const pollInterval = setInterval(async () => {
+      try {
+        // Poll the actual job status from the backend
+        const response = await fetch(`http://localhost:8000/api/v1/slides/job/${gen.jobId}`, {
+          headers: {
+            'Authorization': `Bearer ${useAuthStore.getState().accessToken}`,
+          }
+        })
+        
+        if (response.ok) {
+          const jobData = await response.json()
+          const progress = jobData.progress || 0
+          const total = jobData.total || 1
+          const percentage = Math.round((progress / total) * 100)
+          
+          gen.setProgress(percentage)
+          
+          if (jobData.status === 'completed') {
+            gen.complete()
+            clearInterval(pollInterval)
+            console.log('PowerPoint generation completed! Click "Download PPTX" to download.')
+          } else if (jobData.status === 'failed') {
+            gen.fail(jobData.error || 'PowerPoint generation failed')
+            clearInterval(pollInterval)
+          }
+        } else {
+          console.error('Failed to poll job status:', response.status)
+        }
+      } catch (error) {
+        console.error('Error polling job status:', error)
+        // Don't fail immediately, just log the error and continue polling
+      }
+    }, 2000) // Poll every 2 seconds
+
+    return () => clearInterval(pollInterval)
   }, [gen.status, gen.jobId])
 
   const handleGenerate = async () => {
@@ -93,9 +104,9 @@ export default function GenerationControls({ outline, sessionId }: GenerationCon
           onChange={(e) => handleProviderChange(e.target.value)}
           className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="auto">Auto (Best Available)</option>
-          <option value="stability-ai">Stability AI</option>
+          <option value="auto">Auto (DALL-E Preferred)</option>
           <option value="dalle">DALL-E</option>
+          <option value="stability-ai">Stability AI</option>
         </select>
       </div>
       
@@ -123,7 +134,12 @@ export default function GenerationControls({ outline, sessionId }: GenerationCon
           <RetryButton onClick={() => gen.reset()} />
         )}
 
-        {gen.jobId && gen.status === 'completed' && <DownloadButton jobId={gen.jobId} />}
+        {gen.status === 'completed' && gen.jobId && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-green-600 font-medium">✅ PowerPoint ready!</span>
+            <DownloadButton jobId={gen.jobId} />
+          </div>
+        )}
       </div>
     </div>
   )

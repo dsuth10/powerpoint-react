@@ -35,7 +35,7 @@ export const useSlideGenerationStore = create<SlideGenerationStore>()(
       error: undefined,
       resultUrl: undefined,
       downloading: false,
-      imageProvider: 'auto',
+      imageProvider: 'dalle', // Changed from 'auto' to 'dalle'
       start: (jobId) =>
         set((d) => {
           d.status = 'generating'

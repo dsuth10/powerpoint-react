@@ -9,8 +9,7 @@ export function DownloadButton({ jobId, disabled }: { jobId: string; disabled?: 
   const onClick = async () => {
     try {
       setLoading(true)
-      const url = new URL('http://localhost:8000/api/v1/slides/download')
-      url.searchParams.set('jobId', jobId)
+      const url = new URL(`http://localhost:8000/api/v1/slides/download/${jobId}`)
       await DownloadManager.download(url.toString(), {
         filename: `presentation-${jobId}.pptx`,
         retry: { attempts: 3, baseMs: 500, maxMs: 4000 },

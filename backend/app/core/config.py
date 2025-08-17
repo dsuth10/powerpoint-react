@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     DALLE_PLACEHOLDER_URL: str = "https://placehold.co/600x400"
 
     # Image provider selection
-    DEFAULT_IMAGE_PROVIDER: str = "stability-ai"  # Options: "stability-ai", "dalle"
-    IMAGE_PROVIDER_FALLBACK_ORDER: List[str] = ["stability-ai", "dalle"]
+    DEFAULT_IMAGE_PROVIDER: str = "dalle"  # Options: "stability-ai", "dalle"
+    IMAGE_PROVIDER_FALLBACK_ORDER: List[str] = ["dalle", "stability-ai"]
 
     # Public/base URLs and static files
     PUBLIC_BASE_URL: str = "http://localhost:8000"

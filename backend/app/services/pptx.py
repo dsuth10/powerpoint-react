@@ -1,7 +1,8 @@
 import io
 import uuid
+import asyncio
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Dict, Any
 
 import requests
 from pptx import Presentation
@@ -14,6 +15,8 @@ from app.models.slides import SlidePlan, ImageMeta
 
 BRANDED_PLACEHOLDER = settings.STABILITY_PLACEHOLDER_URL
 
+# Job management storage
+jobs: Dict[str, Dict[str, Any]] = {}
 
 class TemplateError(Exception):
     pass
@@ -138,3 +141,29 @@ def build_pptx(
     out_path = out_dir / f"{uuid.uuid4()}.pptx"
     prs.save(str(out_path))
     return out_path
+
+
+async def process_slides_async(job_id: str, slides: List[SlidePlan], session_id: Optional[str] = None) -> None:
+    """
+    Process slides asynchronously and update job status.
+    """
+    try:
+        # Update job status to processing
+        jobs[job_id]["status"] = "processing"
+        
+        # Build PowerPoint with progress tracking
+        def progress_callback(completed: int, total: int):
+            jobs[job_id]["progress"] = completed
+            jobs[job_id]["total"] = total
+        
+        pptx_path = build_pptx(slides, on_progress=progress_callback)
+        
+        # Update job status to completed
+        jobs[job_id]["status"] = "completed"
+        jobs[job_id]["file_path"] = str(pptx_path)
+        jobs[job_id]["progress"] = jobs[job_id]["total"]
+        
+    except Exception as e:
+        # Update job status to failed
+        jobs[job_id]["status"] = "failed"
+        jobs[job_id]["error"] = str(e)

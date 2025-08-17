@@ -15,6 +15,9 @@ class PPTXJob(BaseModel):
     status: Literal["pending", "in_progress", "completed", "failed"] = Field(
         ..., description="Job status."
     )
+    message: Optional[str] = Field(
+        None, description="Status message for the job."
+    )
     result_url: Optional[AnyUrl] = Field(
         None, alias="resultUrl", description="URL to download the generated PPTX file."
     )

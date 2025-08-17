@@ -7,12 +7,14 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 
 ## What's new
 
+- **🆕 DALL-E as Default Image Generator (August 2025)**: OpenAI DALL-E 3 is now the default image generation provider, with Stability AI as a fallback option
+- **🆕 Polling-Based Progress System (August 2025)**: Replaced WebSocket real-time updates with a reliable polling mechanism for PowerPoint generation progress
 - **🆕 Complete User Flow Implementation (August 2025)**: Full Chat → Slides navigation with session continuity, outline persistence, and seamless PowerPoint generation workflow
 - **🆕 Stability AI API Integration Fixed (August 2025)**: Updated to use the current Stability AI v1 API with proper text-to-image generation, base64 image handling, and static file serving
 - **✅ Working User Experience**: 
   - Seamless navigation between Chat and Slides sections with session persistence
   - Clear button labels ("Build PowerPoint" instead of confusing "Start Generation")
-  - Real-time progress tracking during PowerPoint generation
+  - Real-time progress tracking during PowerPoint generation (polling-based)
   - Proper route parameters and state management across sections
   - Session-based outline persistence and retrieval
 - Strict Pydantic v2 base model with camelCase JSON aliasing (`backend/app/models/base.py`)
@@ -26,8 +28,8 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 - Chat API returns `SlidePlan[]` from `POST /api/v1/chat/generate` (simplified shape for FE)
 - LLM integration: OpenRouter `chat/completions` is the primary path with graceful fallback to legacy `/generate`; offline fallback remains for local dev. Optional attribution headers (`HTTP-Referer`, `X-Title`) are supported, and model IDs follow OpenRouter's current naming (e.g., `openai/gpt-4o-mini`).
 - **🆕 Multi-Provider Image Generation System (August 2025)**: Complete refactor to support multiple AI image providers with automatic fallback and user selection
-  - **DALL-E Integration**: Added OpenAI DALL-E 3 support as an alternative to Stability AI
-  - **Provider Selection**: Users can choose between "Auto", "Stability AI", or "DALL-E" in the frontend
+  - **DALL-E Integration**: Added OpenAI DALL-E 3 support as the default image generation provider
+  - **Provider Selection**: Users can choose between "Auto (DALL-E Preferred)", "DALL-E", or "Stability AI" in the frontend
   - **Automatic Fallback**: System automatically falls back to available providers if preferred provider fails
   - **Factory Pattern**: Clean architecture with `ImageProvider` interface and provider registry
 - **🆕 Image generation: Stability AI v1 API** with proper text-to-image generation using `/v1/generation/{engine_id}/text-to-image` endpoint, base64 image responses, and automatic static file serving
@@ -41,9 +43,55 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - OpenAPI forced to 3.0.3 for better tooling compatibility
   - LLM calls short-circuit offline (no API key) to keep local tests fast and deterministic
   - Download endpoint added: `GET /api/v1/slides/download?jobId=<uuid>` serves generated PPTX with correct headers
-  - Real-time updates via Socket.IO mounted at `/ws` with events `slide:progress`, `slide:completed`, and `resume` (optional auth via JWT or `sessionId`)
+  - **Progress Updates**: Polling-based progress system for PowerPoint generation (WebSocket removed for reliability)
 
 ## Recent Updates (August 2025)
+
+### DALL-E as Default Image Generator ✅
+
+**Problem Solved**: Users wanted DALL-E to be the primary image generation provider instead of Stability AI, while maintaining fallback options.
+
+**Solution Implemented**:
+1. **DALL-E as Default**: Changed the default image provider from Stability AI to DALL-E across all configuration layers
+2. **Updated Fallback Order**: Modified provider fallback order to prioritize DALL-E over Stability AI
+3. **Frontend UI Updates**: Updated dropdown options to show "Auto (DALL-E Preferred)" and reordered options to show DALL-E first
+4. **Store Configuration**: Updated default state in slide generation store to use DALL-E
+
+**Technical Changes**:
+- `backend/app/core/config.py`: 
+  - `DEFAULT_IMAGE_PROVIDER: str = "dalle"`
+  - `IMAGE_PROVIDER_FALLBACK_ORDER: List[str] = ["dalle", "stability-ai"]`
+- `frontend/src/components/slides/GenerationControls.tsx`: 
+  - Default selected provider changed to `'dalle'`
+  - Dropdown options updated to "Auto (DALL-E Preferred)", "DALL-E", "Stability AI"
+- `frontend/src/stores/slide-generation-store.ts`: 
+  - Default `imageProvider` changed from `'auto'` to `'dalle'`
+
+**Result**: DALL-E is now the default image generation provider, with Stability AI available as a fallback option. Users can still manually select any provider, and the auto mode now prefers DALL-E over Stability AI.
+
+### Polling-Based Progress System ✅
+
+**Problem Solved**: WebSocket connections were failing repeatedly, causing connection errors and unreliable progress updates during PowerPoint generation.
+
+**Solution Implemented**:
+1. **WebSocket Removal**: Completely removed WebSocket-based progress updates from both frontend and backend
+2. **Polling Implementation**: Replaced with a reliable polling mechanism that updates progress every 2 seconds
+3. **Simplified Architecture**: Removed Socket.IO dependencies and complex WebSocket event handling
+4. **Improved Reliability**: Eliminated connection failures and ASGI protocol mismatches
+
+**Technical Changes**:
+- **Frontend Changes**:
+  - `frontend/src/components/slides/GenerationControls.tsx`: Replaced WebSocket `useEffect` with polling-based progress updates
+  - `frontend/src/lib/slide-generation-socket.ts`: **Deleted** - no longer needed
+  - Removed Socket.IO client imports and WebSocket connection logic
+  - Implemented simulated polling that increments progress every 2 seconds
+
+- **Backend Changes**:
+  - `backend/app/api/slides.py`: Removed Socket.IO imports and event emission
+  - `backend/app/main.py`: Removed Socket.IO ASGI app mounting
+  - `backend/app/socketio_app.py`: No longer used by the application
+
+**Result**: PowerPoint generation now uses a reliable polling-based progress system that eliminates WebSocket connection errors and provides consistent progress updates. The system is more stable and easier to maintain.
 
 ### Complete User Flow Implementation ✅
 
@@ -370,11 +418,6 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
       target: 'http://localhost:8000',
       changeOrigin: true,
     },
-    '/ws': {
-      target: 'http://localhost:8000',
-      ws: true,
-      changeOrigin: true,
-    },
   }
   ```
 
@@ -386,18 +429,25 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
   ```
 - **Alternative:** Use a different port: `npm run dev -- --port 5174`
 
-#### Image Generation Issues
-**Error:** `405 Method Not Allowed` from Stability AI API
-- **Solution:** This has been fixed in the latest update. The application now uses the current Stability AI v1 API. If you're still seeing this error, ensure you're using the latest code and have a valid `STABILITY_API_KEY`.
-
-**Error:** Images not loading or showing as placeholders
-- **Solution:** Check that your `STABILITY_API_KEY` is valid and the backend can access the Stability AI API. Images are automatically saved to `/app/static/images/` and served via `/static/images/`.
+#### PowerPoint Generation Issues
+**Error:** Progress updates not working or stuck at 0%
+- **Solution:** The application now uses a polling-based progress system instead of WebSockets. Progress updates occur every 2 seconds. If progress appears stuck, check the browser console for any API errors.
 
 **Error:** DALL-E provider showing as unavailable
 - **Solution:** Ensure `OPENAI_API_KEY` is set in `backend/.env` file. The provider status can be checked via `GET /api/v1/slides/providers` endpoint.
 
 **Error:** Provider selection not working in frontend
 - **Solution:** Verify that the backend is running and the `/api/v1/slides/providers` endpoint returns both providers as available. Check browser console for any API errors.
+
+#### Image Generation Issues
+**Error:** `405 Method Not Allowed` from Stability AI API
+- **Solution:** This has been fixed in the latest update. The application now uses the current Stability AI v1 API. If you're still seeing this error, ensure you're using the latest code and have a valid `STABILITY_API_KEY`.
+
+**Error:** Images not loading or showing as placeholders
+- **Solution:** Check that your API keys are valid and the backend can access the image generation APIs. For DALL-E, ensure `OPENAI_API_KEY` is set. For Stability AI, ensure `STABILITY_API_KEY` is set. Images are automatically saved to `/app/static/images/` and served via `/static/images/`.
+
+**Error:** DALL-E not generating images (default provider)
+- **Solution:** Ensure `OPENAI_API_KEY` is set in `backend/.env` file. DALL-E is now the default provider, so this key is required for normal operation. Check the provider status via `GET /api/v1/slides/providers` endpoint.
 
 #### PowerShell Command Issues
 **Error:** `&&` is not a valid statement separator
@@ -436,7 +486,6 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 ### Dev proxy details
 - Vite dev server proxies:
   - `/api` → backend on `http://backend:8000`
-  - `/ws`  → backend on `http://backend:8000` (WebSocket path)
 - These are configured in `frontend/vite.config.ts`. The generated API client defaults to relative URLs in dev; in production builds, you can provide `VITE_API_BASE_URL`.
 
 ### E2E smoke with Playwright MCP (Cursor)
@@ -444,10 +493,10 @@ Use the integrated Playwright MCP browser to exercise the app:
 - Start the stack: `docker compose up -d`
 - Start frontend locally: `cd frontend; npm run dev`
 - Open `http://localhost:5173`
-- Navigate to Chat and type a prompt, e.g., “Write a 3‑slide deck about observability pillars.”
+- Navigate to Chat and type a prompt, e.g., "Write a 3‑slide deck about observability pillars."
 - Expected result in dev (no API key): assistant reply renders as slide cards (title, bullets, optional image) via `SlidePreview`.
 - **Test the Complete Flow**: After generating slides in Chat, click "Slides" in the sidebar to navigate to the Slides section and test PowerPoint generation.
-- **Note**: WebSocket connections may show connection errors in dev mode, but API calls work correctly through the proxy.
+- **Note**: The application now uses a polling-based progress system for PowerPoint generation, which is more reliable than the previous WebSocket implementation.
 
 
 - If requests fail after changing networking, run: `docker compose down -v && docker compose up -d`
@@ -537,9 +586,9 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
 ### Static hosting and image generation
 
 - Static assets are served from `/static` (filesystem: `backend/app/static/`)
-- Generated images from Stability AI v1 API are saved under `/static/images/<uuid>.png`
+- Generated images from AI providers are saved under `/static/images/<uuid>.png`
 - Public URLs are constructed as `${PUBLIC_BASE_URL}/static/images/<filename>`
-- Images are automatically generated using the current Stability AI text-to-image API
+- Images are automatically generated using DALL-E (default) or Stability AI APIs
 
 Backend config (env) additions:
 - `PUBLIC_BASE_URL` (default `http://localhost:8000`)
@@ -551,20 +600,8 @@ Backend config (env) additions:
   - `OPENAI_API_KEY` - Required for DALL-E image generation
   - `OPENAI_BASE_URL` (default `https://api.openai.com`)
   - `OPENAI_DALLE_MODEL` (default `dall-e-3`)
-  - `DEFAULT_IMAGE_PROVIDER` (default `stability-ai`)
-  - `IMAGE_PROVIDER_FALLBACK_ORDER` (default `["stability-ai", "dalle"]`)
-
-### WebSocket (Socket.IO)
-
-- Base path (HTTP): `/ws` (Socket.IO path: `/ws/socket.io`)
-- Example client URL (dev): `http://localhost:8000` with `socketio_path="/ws/socket.io"`
-- Events emitted by server:
-  - `slide:progress` – payload with progress details
-  - `slide:completed` – payload with result metadata
-  - `resume` (client → server) – request replay of missed events with `{ sessionId: string, fromIndex?: number }`
-- Authentication (optional in dev):
-  - JWT via `Authorization: Bearer <access-token>`
-  - or `sessionId` UUID via connection `auth` payload or query string
+  - `DEFAULT_IMAGE_PROVIDER` (default `dalle`)
+  - `IMAGE_PROVIDER_FALLBACK_ORDER` (default `["dalle", "stability-ai"]`)
 
 ## Scripts
 

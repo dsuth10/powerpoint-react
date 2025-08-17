@@ -5,7 +5,6 @@ from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
 from app.api.slides import router as slides_router
 from app.api.health import router as health_router
-from app.socketio_app import ws_app as socketio_ws_app
 from app.core.errors import add_error_handlers
 from app.core.rate_limit import rate_limit_dependency
 from app.core.logging import setup_logging, set_request_id
@@ -35,7 +34,6 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(chat_router, prefix="/api/v1")
 app.include_router(slides_router, prefix="/api/v1")
 app.include_router(health_router, prefix="/api/v1")
-app.mount("/ws", socketio_ws_app)
 os.makedirs(settings.STATIC_DIR, exist_ok=True)
 app.mount(settings.STATIC_URL_PATH, StaticFiles(directory=settings.STATIC_DIR), name="static")
 

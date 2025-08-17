@@ -60,12 +60,26 @@ async def connect(sid, environ, auth=None):
             if not (api_key_ok or user_ok):
                 return False
 
+        # In development mode, be more permissive
+        if settings.PROJECT_ENV == "development":
+            # Allow connections if any auth method is present, or allow anonymous connections
+            if user_ok or session_ok or api_key_ok:
+                return True
+            # For development, allow anonymous connections
+            return True
+
         # Otherwise, allow if any of JWT or sessionId present (or in dev allow anon)
         if not (user_ok or session_ok) and settings.PROJECT_ENV == "production":
             # In prod, require at least a session or JWT if API key not required
             return False
 
-    except Exception:
+        return True
+
+    except Exception as e:
+        # In development, log the error but allow the connection
+        if settings.PROJECT_ENV == "development":
+            print(f"Socket.IO auth error (allowing in dev): {e}")
+            return True
         return False
 
 

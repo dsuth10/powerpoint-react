@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import type { SlidePlan } from '@/lib/api/types.gen'
 
 export type Slide = {
   id: string
@@ -9,7 +10,7 @@ export type Slide = {
 }
 
 type SlidesState = {
-  slides: Slide[]
+  slides: SlidePlan[]
   currentIndex: number
   generating: boolean
   progress: number // 0..100
@@ -19,11 +20,12 @@ type SlidesState = {
 type SlidesActions = {
   initGeneration: () => void
   updateProgress: (value: number) => void
-  setSlides: (slides: Slide[]) => void
+  setSlides: (slides: SlidePlan[]) => void
   setError: (msg?: string) => void
   next: () => void
   prev: () => void
-  updateSlide: (id: string, updater: (s: Slide) => void) => void
+  updateSlide: (index: number, updatedSlide: SlidePlan) => void
+  updateSlideById: (id: string, updater: (s: Slide) => void) => void
 }
 
 export type SlidesStore = SlidesState & SlidesActions
@@ -68,10 +70,16 @@ export const useSlidesStore = create<SlidesStore>()(
         set((draft) => {
           if (draft.currentIndex > 0) draft.currentIndex -= 1
         }),
-      updateSlide: (id, updater) =>
+      updateSlide: (index, updatedSlide) =>
         set((draft) => {
-          const s = draft.slides.find((sl) => sl.id === id)
-          if (s) updater(s)
+          if (index >= 0 && index < draft.slides.length) {
+            draft.slides[index] = updatedSlide
+          }
+        }),
+      updateSlideById: (id, updater) =>
+        set((draft) => {
+          const s = draft.slides.find((sl) => sl.title === id) // Using title as ID for now
+          if (s) updater(s as any) // Type assertion for backward compatibility
         }),
     })),
     { name: 'slides-store' },

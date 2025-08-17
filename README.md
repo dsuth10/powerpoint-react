@@ -7,6 +7,12 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 
 ## What's new
 
+- **🆕 AI-Assisted Slide Editing (August 2025)**: Complete slide editing functionality with AI-powered text and image editing capabilities
+  - **Text Editing**: AI-assisted editing of slide titles, bullet points, and speaker notes with context awareness
+  - **Image Replacement**: AI-generated image replacement using DALL-E or Stability AI with custom prompts
+  - **Batch Operations**: Edit multiple slides simultaneously with comprehensive error handling
+  - **Preview Mode**: Preview edits before applying changes to slides
+  - **Real-time Validation**: Field-level validation with cross-field requirements (e.g., bullet_index required for bullet edits)
 - **🆕 DALL-E as Default Image Generator (August 2025)**: OpenAI DALL-E 3 is now the default image generation provider, with Stability AI as a fallback option
 - **🆕 Polling-Based Progress System (August 2025)**: Replaced WebSocket real-time updates with a reliable polling mechanism for PowerPoint generation progress
 - **🆕 Complete User Flow Implementation (August 2025)**: Full Chat → Slides navigation with session continuity, outline persistence, and seamless PowerPoint generation workflow
@@ -17,6 +23,7 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - Real-time progress tracking during PowerPoint generation (polling-based)
   - Proper route parameters and state management across sections
   - Session-based outline persistence and retrieval
+  - AI-assisted slide editing with context-aware text improvements and image replacement
 - Strict Pydantic v2 base model with camelCase JSON aliasing (`backend/app/models/base.py`)
 - PRD-aligned domain models:
   - `ChatRequest` (prompt, slideCount, model, …)
@@ -32,6 +39,11 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - **Provider Selection**: Users can choose between "Auto (DALL-E Preferred)", "DALL-E", or "Stability AI" in the frontend
   - **Automatic Fallback**: System automatically falls back to available providers if preferred provider fails
   - **Factory Pattern**: Clean architecture with `ImageProvider` interface and provider registry
+- **🆕 Slide Editing API Endpoints (August 2025)**: New API endpoints for AI-assisted slide editing
+  - **Single Edit**: `POST /api/v1/slides/edit` - Edit individual slide content (title, bullet, notes, image)
+  - **Batch Edit**: `POST /api/v1/slides/edit-batch` - Edit multiple slides simultaneously
+  - **Preview Edit**: `POST /api/v1/slides/edit-preview` - Preview changes without applying them
+  - **Validation**: Comprehensive field validation with cross-field requirements and error handling
 - **🆕 Image generation: Stability AI v1 API** with proper text-to-image generation using `/v1/generation/{engine_id}/text-to-image` endpoint, base64 image responses, and automatic static file serving
 - Static hosting: `static/` ensured at startup and mounted at `/static`; public URLs built from `PUBLIC_BASE_URL`
 - CI/CD hardening: concurrency, npm/pip caching, coverage ≥ 90% gates, artifact uploads, k6 smoke, Docker build + Trivy scan (frontend & backend), SBOMs, CodeQL, deploy/release workflows
@@ -244,13 +256,15 @@ The application now provides a complete, seamless user experience:
 2. **Review Outline**: Generated slides appear as preview cards with titles and bullet points
 3. **Refine if Needed**: Ask follow-up questions to improve the outline
 4. **Switch to Slides**: Click "Slides" in the sidebar to see the complete outline
-5. **Generate PPTX**: Click "Build PowerPoint" button to start generation
-6. **Monitor Progress**: Watch real-time progress updates during generation (polls backend every 2 seconds)
-7. **Download**: When generation completes, click "Download PPTX" button that appears with "✅ PowerPoint ready!" message
+5. **Edit Slides (Optional)**: Use the "Edit Slide" button to refine titles, bullet points, notes, or replace images with AI assistance
+6. **Generate PPTX**: Click "Build PowerPoint" button to start generation
+7. **Monitor Progress**: Watch real-time progress updates during generation (polls backend every 2 seconds)
+8. **Download**: When generation completes, click "Download PPTX" button that appears with "✅ PowerPoint ready!" message
 
 ### **Key Features**
 - ✅ **Session Continuity**: Your chat session and slide outlines persist when switching between sections
 - ✅ **Clear Navigation**: Sidebar automatically includes your current session when navigating to Slides
+- ✅ **AI-Assisted Editing**: Edit slide titles, bullet points, notes, and images with AI assistance for better content
 - ✅ **Real-time Progress**: Polling-based system provides live updates during PowerPoint generation
 - ✅ **Manual Download**: Clear download button appears when generation is complete
 - ✅ **Multiple Sessions**: Create and manage multiple chat sessions with different slide outlines
@@ -485,6 +499,12 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 **Error:** Provider selection not working in frontend
 - **Solution:** Verify that the backend is running and the `/api/v1/slides/providers` endpoint returns both providers as available. Check browser console for any API errors.
 
+**Error:** Slide editing not working or validation errors
+- **Solution:** Ensure you have a valid `OPENROUTER_API_KEY` set in `backend/.env` file for AI-assisted text editing. The editing functionality requires LLM access for AI-powered improvements. Check browser console for any validation errors or API failures.
+
+**Error:** Edit button not appearing in Slides section
+- **Solution:** The edit functionality is integrated into the Slides section. Ensure you're using the latest version of the application and that the backend is running properly. The edit button should appear for each slide in the Slides section.
+
 #### Image Generation Issues
 **Error:** `405 Method Not Allowed` from Stability AI API
 - **Solution:** This has been fixed in the latest update. The application now uses the current Stability AI v1 API. If you're still seeing this error, ensure you're using the latest code and have a valid `STABILITY_API_KEY`.
@@ -542,6 +562,7 @@ Use the integrated Playwright MCP browser to exercise the app:
 - Navigate to Chat and type a prompt, e.g., "Write a 3‑slide deck about observability pillars."
 - Expected result in dev (no API key): assistant reply renders as slide cards (title, bullets, optional image) via `SlidePreview`.
 - **Test the Complete Flow**: After generating slides in Chat, click "Slides" in the sidebar to navigate to the Slides section and test PowerPoint generation.
+- **Test Slide Editing**: Use the "Edit Slide" button in the Slides section to test AI-assisted editing of titles, bullet points, notes, and images.
 - **Note**: The application now uses a polling-based progress system for PowerPoint generation, which is more reliable than the previous WebSocket implementation.
 
 
@@ -623,6 +644,18 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
   - Query params: `provider?` (optional: `stability-ai`, `dalle`, or omit for auto)
   - Request body: `SlidePlan[]` array
   - Response: `ImageMeta[]` array with generated image URLs
+- `POST /api/v1/slides/edit` → Edit slide content with AI assistance
+  - Request body: `EditSlideRequest` with slide_index, target (title/bullet/notes/image), content, and optional fields
+  - Response: `EditSlideResponse` with updated slide and success status
+  - Possible errors: `400 Validation Error`, `429 Too Many Requests`
+- `POST /api/v1/slides/edit-batch` → Edit multiple slides simultaneously
+  - Request body: `BatchEditRequest` with array of `EditSlideRequest` objects
+  - Response: `BatchEditResponse` with results for each edit operation
+  - Possible errors: `400 Validation Error`, `429 Too Many Requests`
+- `POST /api/v1/slides/edit-preview` → Preview slide edits without applying
+  - Request body: Same as single edit endpoint
+  - Response: `EditSlideResponse` with preview of changes
+  - Possible errors: `400 Validation Error`, `429 Too Many Requests`
 - `GET /api/v1/slides/download/{job_id}` → PPTX file download
   - Content-Type: `application/vnd.openxmlformats-officedocument.presentationml.presentation`
   - Filename: `presentation-{job_id}.pptx`
@@ -652,6 +685,14 @@ Backend config (env) additions:
   - `OPENAI_DALLE_MODEL` (default `dall-e-3`)
   - `DEFAULT_IMAGE_PROVIDER` (default `dalle`)
   - `IMAGE_PROVIDER_FALLBACK_ORDER` (default `["dalle", "stability-ai"]`)
+- **Slide Editing Configuration**:
+  - `TEXT_EDITING_MODEL` (default `openai/gpt-4o-mini`) - LLM model for text editing
+  - `TEXT_EDITING_TEMPERATURE` (default `0.3`) - Creativity level for text editing
+  - `TEXT_EDITING_MAX_TOKENS` (default `500`) - Maximum tokens for text editing responses
+  - `EDIT_RATE_LIMIT_PER_MINUTE` (default `30`) - Rate limit for single edit operations
+  - `BATCH_EDIT_RATE_LIMIT_PER_MINUTE` (default `10`) - Rate limit for batch edit operations
+  - `MAX_EDIT_CONTENT_LENGTH` (default `1000`) - Maximum content length for edit requests
+  - `MAX_BATCH_EDITS` (default `10`) - Maximum number of edits in a batch operation
 
 ## Scripts
 

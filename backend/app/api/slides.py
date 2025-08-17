@@ -3,17 +3,22 @@ from __future__ import annotations
 from typing import List, Optional
 from uuid import uuid4, UUID
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from fastapi.responses import FileResponse
 
 from app.models.common import PPTXJob
-from app.models.slides import SlidePlan, ImageMeta, PowerPointRequest, PowerPointResponse
+from app.models.slides import (
+    SlidePlan, ImageMeta, PowerPointRequest, PowerPointResponse,
+    EditSlideRequest, EditSlideResponse, BatchEditRequest, BatchEditResponse, EditTarget
+)
 from app.core.rate_limit import rate_limit_dependency
 from app.core.config import settings
 from app.services import pptx as pptx_service
 from app.services.images import generate_images
 from app.services.pptx import build_pptx
 from app.services.image_providers.registry import get_provider_status, list_providers, get_available_providers
+from app.services.text_editing import TextEditingService, TextEditingError
+from app.services.image_editing import ImageEditingService, ImageEditingError
 from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/slides", tags=["slides"])
@@ -161,3 +166,134 @@ async def download_pptx(
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         filename=f"presentation-{job_id}.pptx",
     )
+
+@router.post("/edit", response_model=EditSlideResponse)
+async def edit_slide_content(
+    request: EditSlideRequest,
+    slides: List[SlidePlan] = Body(..., description="Current slides to edit"),
+    current_user: str = Depends(get_current_user),
+    _: None = Depends(rate_limit_dependency),
+) -> EditSlideResponse:
+    """
+    Edit a specific piece of content on a slide.
+    Supports editing titles, bullet points, notes, and images.
+    """
+    try:
+        # Validate slide index
+        if request.slide_index >= len(slides):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Slide index {request.slide_index} is out of range (0-{len(slides)-1})"
+            )
+        
+        slide = slides[request.slide_index]
+        updated_slide = slide.model_copy()
+        
+        # Handle different edit types
+        if request.target == EditTarget.TITLE:
+            text_service = TextEditingService()
+            new_title = await text_service.edit_slide_title(slide, request.content)
+            updated_slide.title = new_title
+            
+        elif request.target == EditTarget.BULLET:
+            if request.bullet_index is None:
+                raise HTTPException(status_code=400, detail="bullet_index is required for bullet edits")
+            
+            if request.bullet_index >= len(slide.bullets):
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Bullet index {request.bullet_index} is out of range (0-{len(slide.bullets)-1})"
+                )
+            
+            text_service = TextEditingService()
+            new_bullets = await text_service.edit_slide_bullet(slide, request.bullet_index, request.content)
+            updated_slide.bullets = new_bullets
+            
+        elif request.target == EditTarget.NOTES:
+            text_service = TextEditingService()
+            new_notes = await text_service.edit_slide_notes(slide, request.content)
+            updated_slide.notes = new_notes
+            
+        elif request.target == EditTarget.IMAGE:
+            if not request.image_prompt:
+                raise HTTPException(status_code=400, detail="image_prompt is required for image edits")
+            
+            image_service = ImageEditingService()
+            new_image = await image_service.edit_slide_image(
+                slide, 
+                request.image_prompt, 
+                request.provider
+            )
+            updated_slide.image = new_image
+        
+        return EditSlideResponse(
+            success=True,
+            slide_index=request.slide_index,
+            target=request.target,
+            updated_slide=updated_slide,
+            message=f"Successfully edited {request.target.value} on slide {request.slide_index + 1}",
+            image_meta=updated_slide.image if request.target == EditTarget.IMAGE else None
+        )
+        
+    except (TextEditingError, ImageEditingError) as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unexpected error in edit_slide_content: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.post("/edit-batch", response_model=BatchEditResponse)
+async def edit_multiple_slides(
+    request: BatchEditRequest,
+    slides: List[SlidePlan] = Body(..., description="Current slides to edit"),
+    current_user: str = Depends(get_current_user),
+    _: None = Depends(rate_limit_dependency),
+) -> BatchEditResponse:
+    """
+    Edit multiple slides in a single request.
+    More efficient than multiple single edit requests.
+    """
+    results = []
+    errors = []
+    
+    for edit_request in request.edits:
+        try:
+            # Validate slide index
+            if edit_request.slide_index >= len(slides):
+                errors.append(f"Slide index {edit_request.slide_index} is out of range")
+                continue
+            
+            # Create single edit request and reuse logic
+            single_response = await edit_slide_content(
+                request=edit_request,
+                slides=slides,
+                current_user=current_user
+            )
+            results.append(single_response)
+            
+        except HTTPException as e:
+            errors.append(f"Edit failed for slide {edit_request.slide_index}: {e.detail}")
+        except Exception as e:
+            errors.append(f"Unexpected error for slide {edit_request.slide_index}: {str(e)}")
+    
+    success = len(errors) == 0
+    return BatchEditResponse(
+        success=success,
+        results=results,
+        errors=errors
+    )
+
+@router.post("/edit-preview", response_model=EditSlideResponse)
+async def preview_slide_edit(
+    request: EditSlideRequest,
+    slides: List[SlidePlan] = Body(..., description="Current slides to preview edit"),
+    current_user: str = Depends(get_current_user),
+) -> EditSlideResponse:
+    """
+    Preview an edit without applying it.
+    Useful for showing users what the edit would look like.
+    """
+    # Same logic as edit_slide_content but with preview flag
+    # This allows frontend to show preview before committing
+    return await edit_slide_content(request, slides, current_user)

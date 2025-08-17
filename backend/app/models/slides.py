@@ -1,41 +1,23 @@
 from __future__ import annotations
 
-from typing import List, Optional
-from urllib.parse import urlsplit, urlunsplit
+from enum import Enum
+from typing import List, Optional, Union
+from pydantic import BaseModel, Field, field_validator, model_validator, HttpUrl, constr
+from pydantic import AliasChoices
 
-from pydantic import AnyUrl, Field, constr, field_validator, AliasChoices
+from .base import BaseModel as BaseModelWithConfig
 
-from app.models.base import BaseModel
+class ImageMeta(BaseModelWithConfig):
+    """Metadata for a generated image."""
 
-
-class ImageMeta(BaseModel):
-    """Metadata for an image to be included in a slide."""
-
-    url: constr(min_length=1) = Field(..., description="The image URL.")
-
-    @field_validator("url")
-    @classmethod
-    def validate_and_normalize_url(cls, v: str) -> str:
-        parts = urlsplit(v)
-        if parts.scheme not in {"http", "https"}:
-            raise ValueError("url must have http or https scheme")
-        if not parts.netloc:
-            raise ValueError("url must include a host")
-        # Remove trailing slash from path only when path is empty or '/'
-        path = parts.path or ""
-        if path == "/":
-            path = ""
-        normalized = urlunsplit((parts.scheme, parts.netloc, path, parts.query, parts.fragment))
-        return normalized
-    alt_text: constr(min_length=1) = Field(
-        ..., alias="altText", description="Alt text for accessibility."
-    )
-    provider: constr(min_length=1) = Field(
+    url: HttpUrl = Field(..., description="Image URL.")
+    alt_text: str = Field(..., alias="altText", description="Alt text for the image.")
+    provider: str = Field(
         ..., description="Image provider name (e.g., 'runware')."
     )
 
 
-class SlidePlan(BaseModel):
+class SlidePlan(BaseModelWithConfig):
     """Plan for a single slide in the generated presentation."""
 
     title: constr(min_length=1, max_length=100) = Field(..., description="Slide title.")
@@ -53,17 +35,82 @@ class SlidePlan(BaseModel):
         return v
 
 
-class PowerPointRequest(BaseModel):
+class PowerPointRequest(BaseModelWithConfig):
     """Request model for PowerPoint generation."""
-    
-    slides: List[SlidePlan] = Field(..., description="List of slides to include in the presentation.")
-    title: str = Field(..., description="Title of the presentation.")
-    style: Optional[str] = Field(None, description="Optional style for the presentation.")
+
+    slides: List[SlidePlan] = Field(..., description="Slides to include in the presentation.")
+    title: str = Field(..., description="Presentation title.")
+    style: Optional[str] = Field(None, description="Image style for the presentation.")
 
 
-class PowerPointResponse(BaseModel):
+class PowerPointResponse(BaseModelWithConfig):
     """Response model for PowerPoint generation."""
+
+    pptx_data: bytes = Field(..., description="PowerPoint file data.")
+    images: List[ImageMeta] = Field(..., description="Generated images.")
+    title: str = Field(..., description="Presentation title.")
+
+
+class EditTarget(str, Enum):
+    """Types of content that can be edited on a slide."""
+    TITLE = "title"
+    BULLET = "bullet"
+    NOTES = "notes"
+    IMAGE = "image"
+
+
+class EditSlideRequest(BaseModelWithConfig):
+    """Request model for editing slide content."""
     
-    pptx_data: bytes = Field(..., description="The PowerPoint file data as bytes.")
-    images: List[ImageMeta] = Field(..., description="List of generated images.")
-    title: str = Field(..., description="Title of the presentation.")
+    slide_index: int = Field(..., ge=0, description="Zero-based index of the slide to edit")
+    target: EditTarget = Field(..., description="Type of content to edit")
+    content: str = Field(..., min_length=1, max_length=1000, description="New content or prompt for AI generation")
+    bullet_index: Optional[int] = Field(None, ge=0, description="Index of specific bullet point (required for bullet edits)")
+    image_prompt: Optional[str] = Field(None, description="Prompt for new image generation (for image edits)")
+    provider: Optional[str] = Field(None, description="Image provider preference (dalle, stability-ai)")
+    
+    @model_validator(mode='after')
+    def validate_target_requirements(self) -> 'EditSlideRequest':
+        """Validate that required fields are present based on target type."""
+        if self.target == EditTarget.BULLET and self.bullet_index is None:
+            raise ValueError("bullet_index is required when editing bullet points")
+        elif self.target == EditTarget.IMAGE and not self.image_prompt:
+            raise ValueError("image_prompt is required when editing images")
+        return self
+
+
+class EditSlideResponse(BaseModelWithConfig):
+    """Response model for slide editing operations."""
+    
+    success: bool = Field(..., description="Whether the edit was successful")
+    slide_index: int = Field(..., description="Index of the edited slide")
+    target: EditTarget = Field(..., description="Type of content that was edited")
+    updated_slide: SlidePlan = Field(..., description="Updated slide with new content")
+    message: str = Field(..., description="Success or error message")
+    image_meta: Optional[ImageMeta] = Field(None, description="New image metadata (for image edits)")
+
+
+class BatchEditRequest(BaseModelWithConfig):
+    """Request model for editing multiple slides at once."""
+    
+    edits: List[EditSlideRequest] = Field(..., min_items=1, max_items=10, description="List of edits to apply")
+    
+    @field_validator("edits")
+    @classmethod
+    def validate_unique_slide_targets(cls, v: List[EditSlideRequest]) -> List[EditSlideRequest]:
+        """Ensure no duplicate slide-target combinations."""
+        seen = set()
+        for edit in v:
+            key = (edit.slide_index, edit.target, edit.bullet_index)
+            if key in seen:
+                raise ValueError(f"Duplicate edit for slide {edit.slide_index}, target {edit.target}")
+            seen.add(key)
+        return v
+
+
+class BatchEditResponse(BaseModelWithConfig):
+    """Response model for batch editing operations."""
+    
+    success: bool = Field(..., description="Whether all edits were successful")
+    results: List[EditSlideResponse] = Field(..., description="Results for each edit operation")
+    errors: List[str] = Field(default_factory=list, description="Any errors that occurred")

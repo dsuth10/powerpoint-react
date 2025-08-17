@@ -32,6 +32,19 @@ class Settings(BaseSettings):
     OPENROUTER_REQUIRE_UPSTREAM: bool = False
     LLM_LOG_PROMPTS: bool = False
 
+    # Text editing settings
+    TEXT_EDITING_MODEL: str = "openai/gpt-4o-mini"
+    TEXT_EDITING_TEMPERATURE: float = 0.3
+    TEXT_EDITING_MAX_TOKENS: int = 500
+    
+    # Edit rate limiting
+    EDIT_RATE_LIMIT_PER_MINUTE: int = 30
+    BATCH_EDIT_RATE_LIMIT_PER_MINUTE: int = 10
+    
+    # Edit validation
+    MAX_EDIT_CONTENT_LENGTH: int = 1000
+    MAX_BATCH_EDITS: int = 10
+
     # Stability AI configuration
     STABILITY_API_KEY: str | None = None
     STABILITY_BASE_URL: str = "https://api.stability.ai"

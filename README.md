@@ -168,6 +168,45 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 
 **Result**: Users now have full control over image generation with multiple provider options, automatic fallback for reliability, and a clean interface for selecting their preferred AI image generation service.
 
+### PowerPoint Download Functionality Fix ✅
+
+**Problem Solved**: After generating a PowerPoint, the percentage went up to 100% but the file didn't automatically download to the user's Downloads folder as it used to.
+
+**Solution Implemented**:
+1. **Added DownloadButton Component**: Integrated the existing `DownloadButton` component into the UI with proper error handling and retry logic
+2. **Fixed Download URL Format**: Corrected the download endpoint from `/download?jobId=` to `/download/{job_id}` to match the backend API path parameter format
+3. **Added Job Status Endpoint**: Created `/api/v1/slides/job/{job_id}` endpoint to provide real-time job status and progress tracking
+4. **Implemented Real Polling System**: Replaced simulated progress with actual backend polling that checks job status every 2 seconds
+5. **Enhanced User Experience**: Added clear success indication with "✅ PowerPoint ready!" message and manual download button
+
+**Technical Changes**:
+- **Backend Changes**:
+  - `backend/app/api/slides.py`: Added `get_job_status` endpoint for real-time job monitoring
+  - Job status endpoint returns progress, status, error messages, and file path information
+
+- **Frontend Changes**:
+  - `frontend/src/components/slides/GenerationControls.tsx`: 
+    - Added real polling system that checks backend job status
+    - Integrated `DownloadButton` component with success messaging
+    - Removed automatic download in favor of reliable manual download
+  - `frontend/src/components/slides/DownloadButton.tsx`: 
+    - Fixed download URL format to use path parameters instead of query parameters
+    - Enhanced error handling with retry functionality
+
+**Result**: PowerPoint generation now provides:
+- **Real-time progress tracking** from the backend
+- **Clear success indication** when PowerPoint is ready
+- **Reliable manual download** with proper error handling
+- **Better user control** over when to download files
+
+**User Experience**: 
+- When PowerPoint generation completes, users see "✅ PowerPoint ready!" 
+- A "Download PPTX" button appears for manual download
+- Downloads go directly to the user's Downloads folder
+- Clear error messages if download fails with retry option
+
+**Note**: The automatic download was replaced with manual download for better reliability and user control. This eliminates timing issues and provides clearer feedback to users.
+
 ## Project Structure
 
 - `frontend/` – React 18 + Vite + TypeScript app
@@ -206,16 +245,17 @@ The application now provides a complete, seamless user experience:
 3. **Refine if Needed**: Ask follow-up questions to improve the outline
 4. **Switch to Slides**: Click "Slides" in the sidebar to see the complete outline
 5. **Generate PPTX**: Click "Build PowerPoint" button to start generation
-6. **Monitor Progress**: Watch real-time progress updates during generation
-7. **Download**: Click "Download PPTX" when generation is complete
+6. **Monitor Progress**: Watch real-time progress updates during generation (polls backend every 2 seconds)
+7. **Download**: When generation completes, click "Download PPTX" button that appears with "✅ PowerPoint ready!" message
 
 ### **Key Features**
 - ✅ **Session Continuity**: Your chat session and slide outlines persist when switching between sections
 - ✅ **Clear Navigation**: Sidebar automatically includes your current session when navigating to Slides
-- ✅ **Real-time Progress**: WebSocket connection provides live updates during PowerPoint generation
+- ✅ **Real-time Progress**: Polling-based system provides live updates during PowerPoint generation
+- ✅ **Manual Download**: Clear download button appears when generation is complete
 - ✅ **Multiple Sessions**: Create and manage multiple chat sessions with different slide outlines
 - ✅ **Error Recovery**: Retry buttons and clear error messages for failed operations
-- ✅ **Proxy Configuration**: Vite dev server properly proxies API and WebSocket calls to backend
+- ✅ **Proxy Configuration**: Vite dev server properly proxies API calls to backend
 
 ## Getting Started
 
@@ -431,7 +471,13 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 
 #### PowerPoint Generation Issues
 **Error:** Progress updates not working or stuck at 0%
-- **Solution:** The application now uses a polling-based progress system instead of WebSockets. Progress updates occur every 2 seconds. If progress appears stuck, check the browser console for any API errors.
+- **Solution:** The application now uses a real polling-based progress system that checks the backend job status every 2 seconds. If progress appears stuck, check the browser console for any API errors or backend logs.
+
+**Error:** Download button not appearing after generation completes
+- **Solution:** Ensure the PowerPoint generation has fully completed. The download button appears with "✅ PowerPoint ready!" message when generation is done. If the button doesn't appear, check the browser console for any errors.
+
+**Error:** Download fails with 404 error
+- **Solution:** The download URL format has been updated to use path parameters. Ensure you're using the latest version of the application. The correct format is `/api/v1/slides/download/{job_id}`.
 
 **Error:** DALL-E provider showing as unavailable
 - **Solution:** Ensure `OPENAI_API_KEY` is set in `backend/.env` file. The provider status can be checked via `GET /api/v1/slides/providers` endpoint.
@@ -577,9 +623,13 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
   - Query params: `provider?` (optional: `stability-ai`, `dalle`, or omit for auto)
   - Request body: `SlidePlan[]` array
   - Response: `ImageMeta[]` array with generated image URLs
-- `GET /api/v1/slides/download?jobId=<uuid>` → PPTX file download
+- `GET /api/v1/slides/download/{job_id}` → PPTX file download
   - Content-Type: `application/vnd.openxmlformats-officedocument.presentationml.presentation`
-  - Filename: `presentation-<jobId>.pptx`
+  - Filename: `presentation-{job_id}.pptx`
+  - Possible errors: `404 Not Found`
+- `GET /api/v1/slides/job/{job_id}` → Job status and progress
+  - Returns: `{"job_id": "uuid", "status": "pending|processing|completed|failed", "progress": 0-100, "total": 1, "message": "string", "error": "string", "file_path": "string"}`
+  - Used for real-time progress tracking during PowerPoint generation
   - Possible errors: `404 Not Found`
 - `GET /metrics` → Prometheus text exposition format (`text/plain`)
 

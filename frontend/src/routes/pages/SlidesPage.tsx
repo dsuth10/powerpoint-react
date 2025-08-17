@@ -2,7 +2,9 @@ import { useParams } from '@tanstack/react-router'
 import { useChatStore } from '@/stores/chat-store'
 import SlideGenerator from '@/components/slides/SlideGenerator'
 import GenerationProgress from '@/components/slides/GenerationProgress'
-import type { SlideOutline } from '@/lib/api/client/types.gen'
+
+// Use the same type as SlideGenerator
+export type SlideOutline = { title: string; bullets?: string[] }
 
 export default function SlidesPage() {
   // Get sessionId from route params - will use conditional param handling

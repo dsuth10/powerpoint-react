@@ -1,113 +1,141 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 from uuid import uuid4, UUID
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.responses import FileResponse
-from pathlib import Path
 
 from app.models.common import PPTXJob
-from app.models.slides import SlidePlan
+from app.models.slides import SlidePlan, ImageMeta, PowerPointRequest, PowerPointResponse
 from app.core.rate_limit import rate_limit_dependency
 from app.core.config import settings
 from app.services import pptx as pptx_service
 from app.socketio_app import emit_progress, emit_completed
+from app.services.images import generate_images
+from app.services.pptx import build_pptx
+from app.services.image_providers.registry import get_provider_status, list_providers, get_available_providers
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/slides", tags=["slides"])
 
-@router.post(
-    "/build",
-    response_model=PPTXJob,
-    responses={429: {"description": "Too Many Requests"}, 422: {"description": "Validation Error"}},
-)
-async def build_slides(slides: List[dict], session_id: str = Query(None, alias="sessionId"), _: None = Depends(rate_limit_dependency)):
-    # Normalize legacy shape where 'body' was a string instead of 'bullets' list
-    normalized: List[SlidePlan] = []
-    for s in slides:
-        if "bullets" not in s and isinstance(s.get("body"), str):
-            s = {**s, "bullets": [s.get("body")]}
-            s.pop("body", None)
-        # Normalize image: accept string URL or incomplete dict and coerce to ImageMeta shape
-        if "image" in s and s["image"] is not None:
-            img = s["image"]
-            try:
-                if isinstance(img, str):
-                    s["image"] = {
-                        "url": img,
-                        "altText": s.get("title") or "image",
-                        "provider": "llm",
-                    }
-                elif isinstance(img, dict):
-                    url = img.get("url")
-                    if isinstance(url, str):
-                        if not img.get("altText"):
-                            img["altText"] = s.get("title") or "image"
-                        if not img.get("provider"):
-                            img["provider"] = "llm"
-                        s["image"] = img
-                    else:
-                        # Invalid image payload; drop it to avoid validation errors
-                        s.pop("image", None)
-            except Exception:
-                # If anything goes wrong during normalization, drop image to avoid breaking the build
-                s.pop("image", None)
-        normalized.append(SlidePlan(**s))
-
-    # Generate job ID
-    job_id = UUID(str(uuid4()))
-    
-    # Emit initial progress
-    if session_id:
-        await emit_progress(session_id, {"jobId": str(job_id), "progress": 10})
-    
-    # Build PPTX with progress updates
-    def progress_callback(current: int, total: int):
-        if session_id:
-            progress = int((current / total) * 80) + 10  # 10-90% range
-            # Note: This would need to be async, but build_pptx is sync
-            # For now, we'll emit progress after completion
-    
-    built_path = pptx_service.build_pptx(normalized, output_dir=settings.PPTX_TEMP_DIR, on_progress=progress_callback)
-    
-    # Rename to a fixed UUID-based name that matches download API contract
-    target_path = (Path(settings.PPTX_TEMP_DIR) / f"{job_id}.pptx")
+@router.get("/providers", response_model=dict)
+async def get_image_providers():
+    """Get available image providers and their status."""
     try:
-        Path(built_path).replace(target_path)
-    except Exception:
-        # If rename fails, keep original file and attempt to parse UUID from it
-        try:
-            job_id = UUID(Path(built_path).stem)
-        except Exception:
-            pass
-    
-    result_url = f"{settings.PUBLIC_BASE_URL}/api/v1/slides/download?jobId={job_id}"
-    
-    # Emit completion event
-    if session_id:
-        await emit_progress(session_id, {"jobId": str(job_id), "progress": 100})
-        await emit_completed(session_id, {"jobId": str(job_id), "fileUrl": result_url})
-    
-    return PPTXJob(job_id=job_id, status="completed", result_url=result_url, error_message=None)
+        status = get_provider_status()
+        available = get_available_providers()
+        
+        return {
+            "providers": status,
+            "available": list(available.keys()),
+            "all_registered": list_providers()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get providers: {str(e)}")
 
+@router.post("/generate", response_model=PowerPointResponse)
+async def generate_powerpoint(
+    request: PowerPointRequest,
+    provider: Optional[str] = Query(None, description="Image provider to use (stability-ai, dalle)"),
+    current_user: str = Depends(get_current_user)
+):
+    """Generate a PowerPoint presentation with images."""
+    try:
+        # Generate images for slides
+        images = await generate_images(request.slides, request.style, provider)
+        
+        # Update slides with generated images
+        slides_with_images = []
+        for i, slide in enumerate(request.slides):
+            slide_with_image = slide.model_copy()
+            if i < len(images):
+                slide_with_image.image = images[i]
+            slides_with_images.append(slide_with_image)
+        
+        # Create PowerPoint
+        pptx_path = build_pptx(slides_with_images)
+        
+        # Read the file data
+        with open(pptx_path, 'rb') as f:
+            pptx_data = f.read()
+        
+        return PowerPointResponse(
+            pptx_data=pptx_data,
+            images=images,
+            title=request.title
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate PowerPoint: {str(e)}")
 
-@router.get(
-    "/download",
-    responses={404: {"description": "File Not Found"}},
-)
-def download_pptx(job_id: UUID = Query(..., alias="jobId")):
+@router.post("/generate-images", response_model=List[ImageMeta])
+async def generate_slide_images(
+    slides: List[SlidePlan],
+    style: Optional[str] = Query(None, description="Image style"),
+    provider: Optional[str] = Query(None, description="Image provider to use (stability-ai, dalle)"),
+    current_user: str = Depends(get_current_user)
+):
+    """Generate images for slides only."""
+    try:
+        images = await generate_images(slides, style, provider)
+        return images
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate images: {str(e)}")
+
+@router.post("/build", response_model=PPTXJob)
+async def build_slides(
+    payload: List[SlidePlan],
+    session_id: Optional[str] = None,
+    current_user: str = Depends(get_current_user),
+    _: None = Depends(rate_limit_dependency),
+) -> PPTXJob:
     """
-    Serve a generated PPTX file by job ID.
-
-    Looks for a file named "{jobId}.pptx" in the configured temporary directory.
-    Returns 404 if the file does not exist.
+    Build a PowerPoint presentation from slide plans.
+    Returns a job ID for tracking progress.
     """
-    file_path = Path(settings.PPTX_TEMP_DIR) / f"{job_id}.pptx"
-    if not file_path.exists():
+    job_id = str(uuid4())
+    
+    # Store job info for progress tracking
+    pptx_service.jobs[job_id] = {
+        "status": "pending",
+        "progress": 0,
+        "total": len(payload),
+        "session_id": session_id,
+    }
+    
+    # Start async processing
+    pptx_service.process_slides_async(job_id, payload, session_id)
+    
+    return PPTXJob(
+        job_id=job_id,
+        status="pending",
+        message="Building PowerPoint presentation...",
+    )
+
+
+@router.get("/download/{job_id}")
+async def download_pptx(
+    job_id: UUID,
+    current_user: str = Depends(get_current_user),
+) -> FileResponse:
+    """
+    Download a completed PowerPoint presentation.
+    """
+    job_info = pptx_service.jobs.get(str(job_id))
+    if not job_info:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    if job_info["status"] != "completed":
+        raise HTTPException(status_code=400, detail="Job not completed")
+    
+    file_path = job_info.get("file_path")
+    if not file_path:
         raise HTTPException(status_code=404, detail="File not found")
-
+    
     return FileResponse(
-        path=str(file_path),
+        path=file_path,
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         filename=f"presentation-{job_id}.pptx",
     )

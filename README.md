@@ -25,6 +25,11 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - `ErrorResponse` (errorCode, message, details)
 - Chat API returns `SlidePlan[]` from `POST /api/v1/chat/generate` (simplified shape for FE)
 - LLM integration: OpenRouter `chat/completions` is the primary path with graceful fallback to legacy `/generate`; offline fallback remains for local dev. Optional attribution headers (`HTTP-Referer`, `X-Title`) are supported, and model IDs follow OpenRouter's current naming (e.g., `openai/gpt-4o-mini`).
+- **🆕 Multi-Provider Image Generation System (August 2025)**: Complete refactor to support multiple AI image providers with automatic fallback and user selection
+  - **DALL-E Integration**: Added OpenAI DALL-E 3 support as an alternative to Stability AI
+  - **Provider Selection**: Users can choose between "Auto", "Stability AI", or "DALL-E" in the frontend
+  - **Automatic Fallback**: System automatically falls back to available providers if preferred provider fails
+  - **Factory Pattern**: Clean architecture with `ImageProvider` interface and provider registry
 - **🆕 Image generation: Stability AI v1 API** with proper text-to-image generation using `/v1/generation/{engine_id}/text-to-image` endpoint, base64 image responses, and automatic static file serving
 - Static hosting: `static/` ensured at startup and mounted at `/static`; public URLs built from `PUBLIC_BASE_URL`
 - CI/CD hardening: concurrency, npm/pip caching, coverage ≥ 90% gates, artifact uploads, k6 smoke, Docker build + Trivy scan (frontend & backend), SBOMs, CodeQL, deploy/release workflows
@@ -79,6 +84,41 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 - Static file serving: Images are now properly accessible via HTTP
 
 **Result**: The application now successfully generates AI-powered images for slides using the current Stability AI API, with proper error handling and fallbacks to placeholder images when needed.
+
+### Multi-Provider Image Generation System ✅
+
+**Problem Solved**: Users wanted the ability to choose between different AI image generation providers and have automatic fallback when one provider is unavailable or rate-limited.
+
+**Solution Implemented**:
+1. **DALL-E 3 Integration**: Added OpenAI DALL-E 3 as a second image generation provider alongside Stability AI
+2. **Provider Selection UI**: Added dropdown in Slides section allowing users to choose "Auto", "Stability AI", or "DALL-E"
+3. **Automatic Fallback Logic**: System automatically selects the best available provider based on configuration and availability
+4. **Clean Architecture**: Implemented factory pattern with `ImageProvider` interface for easy addition of new providers
+5. **Provider Registry**: Centralized provider management with automatic registration and status checking
+
+**Technical Changes**:
+- **Backend Architecture**:
+  - `backend/app/services/image_providers/__init__.py`: Abstract `ImageProvider` interface and `ImageProviderFactory`
+  - `backend/app/services/image_providers/stability.py`: Stability AI provider implementation
+  - `backend/app/services/image_providers/dalle.py`: DALL-E provider implementation with OpenAI API integration
+  - `backend/app/services/image_providers/registry.py`: Provider registration and selection logic
+  - `backend/app/services/images.py`: Refactored to use provider factory pattern
+  - `backend/app/core/config.py`: Added DALL-E configuration (`OPENAI_API_KEY`, `OPENAI_DALLE_MODEL`, etc.)
+  - `backend/app/api/slides.py`: Added `/slides/providers` endpoint for provider status
+
+- **Frontend Integration**:
+  - `frontend/src/components/slides/GenerationControls.tsx`: Added provider selection dropdown
+  - `frontend/src/stores/slide-generation-store.ts`: Added `imageProvider` state management
+  - Provider selection persists during PowerPoint generation
+
+**Configuration**:
+- **DALL-E Setup**: Add `OPENAI_API_KEY` to `backend/.env` file
+- **Provider Priority**: Configurable via `DEFAULT_IMAGE_PROVIDER` and `IMAGE_PROVIDER_FALLBACK_ORDER` in backend config
+- **API Endpoints**: 
+  - `GET /api/v1/slides/providers` - Returns available providers and their status
+  - `POST /api/v1/slides/generate` - Accepts optional `provider` parameter
+
+**Result**: Users now have full control over image generation with multiple provider options, automatic fallback for reliability, and a clean interface for selecting their preferred AI image generation service.
 
 ## Project Structure
 
@@ -353,6 +393,12 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 **Error:** Images not loading or showing as placeholders
 - **Solution:** Check that your `STABILITY_API_KEY` is valid and the backend can access the Stability AI API. Images are automatically saved to `/app/static/images/` and served via `/static/images/`.
 
+**Error:** DALL-E provider showing as unavailable
+- **Solution:** Ensure `OPENAI_API_KEY` is set in `backend/.env` file. The provider status can be checked via `GET /api/v1/slides/providers` endpoint.
+
+**Error:** Provider selection not working in frontend
+- **Solution:** Verify that the backend is running and the `/api/v1/slides/providers` endpoint returns both providers as available. Check browser console for any API errors.
+
 #### PowerShell Command Issues
 **Error:** `&&` is not a valid statement separator
 - **Solution:** Use PowerShell syntax: `;` instead of `&&`
@@ -470,8 +516,18 @@ To guarantee a consistent, working, and cross-platform development and CI enviro
   - Possible errors: `429 Too Many Requests`
 - `POST /api/v1/auth/refresh` → `TokenPair`
   - Possible errors: `401 Unauthorized`, `429 Too Many Requests`
+- `GET /api/v1/slides/providers` → Provider status
+  - Returns: `{"providers": {"stability-ai": true, "dalle": true}, "available": ["stability-ai", "dalle"]}`
 - `POST /api/v1/slides/build` → `PPTXJob`
   - Possible errors: `422 Validation Error`, `429 Too Many Requests`
+- `POST /api/v1/slides/generate` → PowerPoint with images
+  - Query params: `provider?` (optional: `stability-ai`, `dalle`, or omit for auto)
+  - Request body: `PowerPointRequest` with slides and title
+  - Response: `PowerPointResponse` with PPTX data and image metadata
+- `POST /api/v1/slides/generate-images` → Generate images only
+  - Query params: `provider?` (optional: `stability-ai`, `dalle`, or omit for auto)
+  - Request body: `SlidePlan[]` array
+  - Response: `ImageMeta[]` array with generated image URLs
 - `GET /api/v1/slides/download?jobId=<uuid>` → PPTX file download
   - Content-Type: `application/vnd.openxmlformats-officedocument.presentationml.presentation`
   - Filename: `presentation-<jobId>.pptx`
@@ -491,6 +547,12 @@ Backend config (env) additions:
 - `STATIC_DIR` (default `/app/static` in container)
 - `STABILITY_BASE_URL` (default `https://api.stability.ai`)
 - `STABILITY_ENGINE_ID` (default `stable-diffusion-xl-1024-v1-0`)
+- **Image Provider Configuration**:
+  - `OPENAI_API_KEY` - Required for DALL-E image generation
+  - `OPENAI_BASE_URL` (default `https://api.openai.com`)
+  - `OPENAI_DALLE_MODEL` (default `dall-e-3`)
+  - `DEFAULT_IMAGE_PROVIDER` (default `stability-ai`)
+  - `IMAGE_PROVIDER_FALLBACK_ORDER` (default `["stability-ai", "dalle"]`)
 
 ### WebSocket (Socket.IO)
 

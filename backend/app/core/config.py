@@ -39,6 +39,17 @@ class Settings(BaseSettings):
     STABILITY_TIMEOUT_SECONDS: int = 30
     STABILITY_PLACEHOLDER_URL: str = "https://placehold.co/600x400"
 
+    # OpenAI / DALL-E configuration
+    OPENAI_API_KEY: str | None = None
+    OPENAI_BASE_URL: str = "https://api.openai.com"
+    OPENAI_TIMEOUT_SECONDS: int = 30
+    OPENAI_DALLE_MODEL: str = "dall-e-3"
+    DALLE_PLACEHOLDER_URL: str = "https://placehold.co/600x400"
+
+    # Image provider selection
+    DEFAULT_IMAGE_PROVIDER: str = "stability-ai"  # Options: "stability-ai", "dalle"
+    IMAGE_PROVIDER_FALLBACK_ORDER: List[str] = ["stability-ai", "dalle"]
+
     # Public/base URLs and static files
     PUBLIC_BASE_URL: str = "http://localhost:8000"
     STATIC_URL_PATH: str = "/static"

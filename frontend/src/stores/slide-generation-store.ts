@@ -11,6 +11,7 @@ type State = {
   error?: string
   resultUrl?: string
   downloading: boolean
+  imageProvider: string
 }
 
 type Actions = {
@@ -20,6 +21,7 @@ type Actions = {
   fail: (message: string) => void
   reset: () => void
   setDownloading: (downloading: boolean) => void
+  setImageProvider: (provider: string) => void
 }
 
 export type SlideGenerationStore = State & Actions
@@ -33,6 +35,7 @@ export const useSlideGenerationStore = create<SlideGenerationStore>()(
       error: undefined,
       resultUrl: undefined,
       downloading: false,
+      imageProvider: 'auto',
       start: (jobId) =>
         set((d) => {
           d.status = 'generating'
@@ -68,6 +71,10 @@ export const useSlideGenerationStore = create<SlideGenerationStore>()(
       setDownloading: (downloading) =>
         set((d) => {
           d.downloading = downloading
+        }),
+      setImageProvider: (provider) =>
+        set((d) => {
+          d.imageProvider = provider
         }),
     })),
     { name: 'slide-generation-store' },

@@ -51,3 +51,19 @@ class SlidePlan(BaseModel):
         if not v:
             raise ValueError("bullets must contain at least one item")
         return v
+
+
+class PowerPointRequest(BaseModel):
+    """Request model for PowerPoint generation."""
+    
+    slides: List[SlidePlan] = Field(..., description="List of slides to include in the presentation.")
+    title: str = Field(..., description="Title of the presentation.")
+    style: Optional[str] = Field(None, description="Optional style for the presentation.")
+
+
+class PowerPointResponse(BaseModel):
+    """Response model for PowerPoint generation."""
+    
+    pptx_data: bytes = Field(..., description="The PowerPoint file data as bytes.")
+    images: List[ImageMeta] = Field(..., description="List of generated images.")
+    title: str = Field(..., description="Title of the presentation.")

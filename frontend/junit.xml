@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="4" failures="4" errors="0" time="2.805">
+    <testsuite name="src/App.jest.test.tsx" timestamp="2025-08-17T10:04:39.701Z" hostname="Couch" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/App.jest.test.tsx" name="src/App.jest.test.tsx" time="0">
+            <failure message="expect is not defined" type="ReferenceError">
+ReferenceError: expect is not defined
+ ❯ ../../../Code%20Projects/PowerPoint%20React%20App/node_modules/@testing-library/jest-dom/dist/index.mjs:10:1
+ ❯ vitest.setup.ts:1:31
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/App.test.tsx" timestamp="2025-08-17T10:04:39.705Z" hostname="Couch" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/App.test.tsx" name="src/App.test.tsx" time="0">
+            <failure message="expect is not defined" type="ReferenceError">
+ReferenceError: expect is not defined
+ ❯ ../../../Code%20Projects/PowerPoint%20React%20App/node_modules/@testing-library/jest-dom/dist/index.mjs:10:1
+ ❯ vitest.setup.ts:1:31
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/slides/BatchEditControls.test.tsx" timestamp="2025-08-17T10:04:39.706Z" hostname="Couch" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/components/slides/BatchEditControls.test.tsx" name="src/components/slides/BatchEditControls.test.tsx" time="0">
+            <failure message="expect is not defined" type="ReferenceError">
+ReferenceError: expect is not defined
+ ❯ ../../../Code%20Projects/PowerPoint%20React%20App/node_modules/@testing-library/jest-dom/dist/index.mjs:10:1
+ ❯ vitest.setup.ts:1:31
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/slides/EditControls.test.tsx" timestamp="2025-08-17T10:04:39.708Z" hostname="Couch" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/components/slides/EditControls.test.tsx" name="src/components/slides/EditControls.test.tsx" time="0">
+            <failure message="expect is not defined" type="ReferenceError">
+ReferenceError: expect is not defined
+ ❯ ../../../Code%20Projects/PowerPoint%20React%20App/node_modules/@testing-library/jest-dom/dist/index.mjs:10:1
+ ❯ vitest.setup.ts:1:31
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

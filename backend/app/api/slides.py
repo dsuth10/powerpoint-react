@@ -101,6 +101,19 @@ async def build_slides(
     """
     job_id = str(uuid4())
     
+    # Log the incoming payload for debugging
+    print("=" * 80)
+    print(f"=== BUILD ENDPOINT CALLED ===")
+    print(f"Job ID: {job_id}")
+    print(f"Number of slides: {len(payload)}")
+    for idx, slide in enumerate(payload):
+        print(f"Slide {idx + 1}: title='{slide.title}', has_image={slide.image is not None}")
+        if slide.image:
+            print(f"  Image data: url={slide.image.url}, alt={slide.image.altText}, provider={slide.image.provider}")
+        else:
+            print(f"  NO IMAGE DATA!")
+    print("=" * 80)
+    
     # Store job info for progress tracking
     pptx_service.jobs[job_id] = {
         "status": "pending",
@@ -110,7 +123,8 @@ async def build_slides(
     }
     
     # Start async processing
-    pptx_service.process_slides_async(job_id, payload, session_id)
+    import asyncio
+    asyncio.create_task(pptx_service.process_slides_async(job_id, payload, session_id))
     
     return PPTXJob(
         job_id=UUID(job_id),

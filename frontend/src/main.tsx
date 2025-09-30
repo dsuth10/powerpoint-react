@@ -8,6 +8,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import QueryProvider from './providers/QueryProvider'
+import { ToastProvider } from './providers/ToastProvider'
 import '@/lib/api/client'
 import { router } from './router'
 import './index.css'
@@ -15,7 +16,9 @@ import './index.css'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryProvider>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </QueryProvider>
   </StrictMode>,
 )

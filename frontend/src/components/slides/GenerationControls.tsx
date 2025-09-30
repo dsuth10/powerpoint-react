@@ -69,13 +69,25 @@ export default function GenerationControls({ outline, sessionId }: GenerationCon
 
   const handleGenerate = async () => {
     try {
-      // Convert outline to the expected format
+      // DEBUG: Log the outline structure
+      console.log('=== OUTLINE DATA ===')
+      console.log('Outline:', outline)
+      outline.forEach((slide, idx) => {
+        console.log(`Slide ${idx + 1}:`, slide)
+        console.log(`  Has image?`, (slide as any).image !== undefined)
+        console.log(`  Image value:`, (slide as any).image)
+      })
+      
+      // Convert outline to the expected format with image metadata
       const slides = outline.map((slide) => ({
         title: slide.title,
         bullets: slide.bullets || [],
-        notes: (slide as any).speaker_notes,
-        image: (slide as any).image_prompt,
+        notes: (slide as any).speaker_notes || (slide as any).notes,
+        image: (slide as any).image, // ImageMeta object with url, altText, provider
       }))
+      
+      console.log('=== MAPPED SLIDES ===')
+      console.log('Slides to send:', slides)
 
       const result = await mutation.mutateAsync({ 
         payload: slides, 

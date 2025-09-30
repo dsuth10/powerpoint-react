@@ -1,8 +1,16 @@
 import { useMutation } from '@tanstack/react-query'
 import { buildSlidesApiV1SlidesBuildPost } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
-import { apiClient } from '@/lib/api/client.gen'
+import { client as apiClient } from '@/lib/api/client.gen'
 import type { SlidePlan, ImageMeta } from '@/lib/api/types.gen'
+
+// Helper function to handle API responses
+const handleApiResponse = async <T>(response: any): Promise<T> => {
+  if (response.error) {
+    throw new Error(response.error.message || 'API request failed')
+  }
+  return response.data as T
+}
 
 export type BuildSlidesPayload = Array<{
   title: string
@@ -42,10 +50,11 @@ export const generateSlideImages = async (
   if (style) params.append('style', style)
   if (provider) params.append('provider', provider)
 
-  const response = await apiClient.POST(`/slides/generate-images?${params}`, {
+  const response = await apiClient.post({
+    url: `/api/v1/slides/generate-images?${params}`,
     body: slides,
   })
-  return response
+  return handleApiResponse<ImageMeta[]>(response)
 }
 
 export const buildSlides = async (
@@ -55,10 +64,11 @@ export const buildSlides = async (
   const params = new URLSearchParams()
   if (sessionId) params.append('session_id', sessionId)
 
-  const response = await apiClient.POST(`/slides/build?${params}`, {
+  const response = await apiClient.post({
+    url: `/api/v1/slides/build?${params}`,
     body: slides,
   })
-  return response
+  return handleApiResponse<{ job_id: string; status: string; message: string }>(response)
 }
 
 export const getJobStatus = async (jobId: string): Promise<{
@@ -70,15 +80,25 @@ export const getJobStatus = async (jobId: string): Promise<{
   error?: string
   file_path?: string
 }> => {
-  const response = await apiClient.GET(`/slides/job/${jobId}`)
-  return response
+  const response = await apiClient.get({
+    url: `/api/v1/slides/job/${jobId}`,
+  })
+  return handleApiResponse<{
+    job_id: string
+    status: string
+    progress: number
+    total: number
+    message: string
+    error?: string
+    file_path?: string
+  }>(response)
 }
 
 export const downloadPptx = async (jobId: string): Promise<Blob> => {
-  const response = await apiClient.GET(`/slides/download/${jobId}`, {
-    responseType: 'blob',
+  const response = await apiClient.get({
+    url: `/api/v1/slides/download/${jobId}`,
   })
-  return response
+  return handleApiResponse<Blob>(response)
 }
 
 // Edit API hooks
@@ -117,10 +137,11 @@ export const editSlideContent = async ({
   request: EditSlideRequest; 
   slides: SlidePlan[] 
 }): Promise<EditSlideResponse> => {
-  const response = await apiClient.POST('/slides/edit', {
+  const response = await apiClient.post({
+    url: '/api/v1/slides/edit',
     body: { request, slides }
   })
-  return response
+  return handleApiResponse<EditSlideResponse>(response)
 }
 
 export const editMultipleSlides = async ({ 
@@ -130,10 +151,11 @@ export const editMultipleSlides = async ({
   request: BatchEditRequest; 
   slides: SlidePlan[] 
 }): Promise<BatchEditResponse> => {
-  const response = await apiClient.POST('/slides/edit-batch', {
+  const response = await apiClient.post({
+    url: '/api/v1/slides/edit-batch',
     body: { request, slides }
   })
-  return response
+  return handleApiResponse<BatchEditResponse>(response)
 }
 
 export const previewSlideEdit = async ({ 
@@ -143,10 +165,11 @@ export const previewSlideEdit = async ({
   request: EditSlideRequest; 
   slides: SlidePlan[] 
 }): Promise<EditSlideResponse> => {
-  const response = await apiClient.POST('/slides/edit-preview', {
+  const response = await apiClient.post({
+    url: '/api/v1/slides/edit-preview',
     body: { request, slides }
   })
-  return response
+  return handleApiResponse<EditSlideResponse>(response)
 }
 
 

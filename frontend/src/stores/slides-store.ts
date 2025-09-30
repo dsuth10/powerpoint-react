@@ -9,12 +9,27 @@ export type Slide = {
   content?: string
 }
 
+export type EditOperation = {
+  id: string
+  slideIndex: number
+  target: 'title' | 'bullet' | 'notes' | 'image'
+  content: string
+  timestamp: Date
+  originalSlide: SlidePlan
+  updatedSlide: SlidePlan
+}
+
 type SlidesState = {
   slides: SlidePlan[]
   currentIndex: number
   generating: boolean
   progress: number // 0..100
   error?: string
+  editing: {
+    isEditing: boolean
+    editingSlideIndex: number | null
+    editHistory: EditOperation[]
+  }
 }
 
 type SlidesActions = {
@@ -26,6 +41,13 @@ type SlidesActions = {
   prev: () => void
   updateSlide: (index: number, updatedSlide: SlidePlan) => void
   updateSlideById: (id: string, updater: (s: Slide) => void) => void
+  
+  // Editing actions
+  startEditing: (slideIndex: number) => void
+  cancelEditing: () => void
+  applyEdit: (editOperation: EditOperation) => void
+  undoLastEdit: () => void
+  updateSlideOptimistically: (slideIndex: number, updates: Partial<SlidePlan>) => void
 }
 
 export type SlidesStore = SlidesState & SlidesActions
@@ -37,6 +59,11 @@ export const useSlidesStore = create<SlidesStore>()(
       currentIndex: 0,
       generating: false,
       progress: 0,
+      editing: {
+        isEditing: false,
+        editingSlideIndex: null,
+        editHistory: []
+      },
       initGeneration: () =>
         set((draft) => {
           draft.generating = true
@@ -81,6 +108,56 @@ export const useSlidesStore = create<SlidesStore>()(
           const s = draft.slides.find((sl) => sl.title === id) // Using title as ID for now
           if (s) updater(s as any) // Type assertion for backward compatibility
         }),
+      
+      // Editing actions
+      startEditing: (slideIndex) =>
+        set((draft) => {
+          draft.editing.isEditing = true
+          draft.editing.editingSlideIndex = slideIndex
+        }),
+      cancelEditing: () =>
+        set((draft) => {
+          draft.editing.isEditing = false
+          draft.editing.editingSlideIndex = null
+        }),
+      applyEdit: (editOperation) =>
+        set((draft) => {
+          // Update the slide
+          if (editOperation.slideIndex >= 0 && editOperation.slideIndex < draft.slides.length) {
+            draft.slides[editOperation.slideIndex] = editOperation.updatedSlide
+          }
+          
+          // Add to edit history
+          draft.editing.editHistory.push(editOperation)
+          
+          // Limit history to last 10 operations
+          if (draft.editing.editHistory.length > 10) {
+            draft.editing.editHistory = draft.editing.editHistory.slice(-10)
+          }
+          
+          // Close editing mode
+          draft.editing.isEditing = false
+          draft.editing.editingSlideIndex = null
+        }),
+      undoLastEdit: () =>
+        set((draft) => {
+          const lastEdit = draft.editing.editHistory[draft.editing.editHistory.length - 1]
+          if (lastEdit) {
+            // Restore original slide
+            if (lastEdit.slideIndex >= 0 && lastEdit.slideIndex < draft.slides.length) {
+              draft.slides[lastEdit.slideIndex] = lastEdit.originalSlide
+            }
+            
+            // Remove from history
+            draft.editing.editHistory = draft.editing.editHistory.slice(0, -1)
+          }
+        }),
+      updateSlideOptimistically: (slideIndex, updates) =>
+        set((draft) => {
+          if (slideIndex >= 0 && slideIndex < draft.slides.length) {
+            draft.slides[slideIndex] = { ...draft.slides[slideIndex], ...updates }
+          }
+        }),
     })),
     { name: 'slides-store' },
   ),
@@ -90,5 +167,9 @@ export const selectCurrentSlide = (s: SlidesStore) =>
   s.slides.length ? s.slides[Math.min(s.currentIndex, s.slides.length - 1)] : undefined
 export const selectProgress = (s: SlidesStore) => s.progress
 export const selectIsGenerating = (s: SlidesStore) => s.generating
+export const selectIsEditing = (s: SlidesStore) => s.editing.isEditing
+export const selectEditingSlideIndex = (s: SlidesStore) => s.editing.editingSlideIndex
+export const selectEditHistory = (s: SlidesStore) => s.editing.editHistory
+export const selectSlides = (s: SlidesStore) => s.slides
 
 

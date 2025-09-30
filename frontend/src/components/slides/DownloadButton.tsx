@@ -1,18 +1,23 @@
 import { useState } from 'react'
 import ErrorState from '@/components/ui/ErrorState'
 import { DownloadManager } from '@/lib/download-manager'
+import { useAuthStore } from '@/stores/auth'
 
 export function DownloadButton({ jobId, disabled }: { jobId: string; disabled?: boolean }) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const getAuthHeaders = useAuthStore((state) => state.getAuthHeaders)
 
   const onClick = async () => {
     try {
       setLoading(true)
       const url = new URL(`http://localhost:8000/api/v1/slides/download/${jobId}`)
+      const authHeaders = getAuthHeaders()
+      
       await DownloadManager.download(url.toString(), {
         filename: `presentation-${jobId}.pptx`,
         retry: { attempts: 3, baseMs: 500, maxMs: 4000 },
+        headers: authHeaders,
       })
       setError(null)
     } catch (e) {

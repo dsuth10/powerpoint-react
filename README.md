@@ -7,7 +7,24 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 
 ## What's new
 
-- **🆕 AI-Assisted Slide Editing (August 2025)**: Complete slide editing functionality with AI-powered text and image editing capabilities
+- **🆕 Resumable Downloads with Range Requests (September 2025)**: Advanced download manager with resumable download support, persistent chunk storage, and automatic resume on network failures
+  - **Range Request Support**: Downloads can resume from where they left off using HTTP Range headers
+  - **IndexedDB Persistence**: Downloaded chunks are automatically saved every 2 seconds for crash recovery
+  - **Automatic Resume**: On retry or restart, downloads continue from the last saved byte
+  - **Smart Cleanup**: Completed downloads are automatically removed from storage with 7-day cleanup for abandoned downloads
+  - **Authentication Support**: Download manager properly handles authentication headers for protected endpoints
+- **🆕 Complete Slide Editing UI Implementation (August 2025)**: Full frontend implementation of AI-assisted slide editing with comprehensive UI components and state management
+  - **Enhanced EditControls Component**: Complete refactor with React Hook Form, Zod validation, and integrated state management
+  - **Form Validation & UX**: Real-time validation, character counts, keyboard shortcuts (Ctrl+E, Ctrl+S, Escape, Ctrl+Z)
+  - **Preview Functionality**: Real-time slide preview with AI-generated improvements before applying changes
+  - **Undo System**: Complete edit history with undo functionality for all editing operations
+  - **Batch Edit Controls**: New component for editing multiple slides simultaneously with selection interface
+  - **Toast Notifications**: Global toast system for success/error feedback using react-hot-toast
+  - **UI Component Library**: Complete shadcn/ui component implementation (Form, Dialog, Select, Button, Input, etc.)
+  - **State Management**: Enhanced Zustand store with optimistic updates and edit history tracking
+  - **Keyboard Shortcuts**: Global keyboard shortcut system for editing actions
+  - **Comprehensive Testing**: Full test suite with React Testing Library and Vitest configuration
+- **🆕 AI-Assisted Slide Editing Backend (August 2025)**: Complete slide editing functionality with AI-powered text and image editing capabilities
   - **Text Editing**: AI-assisted editing of slide titles, bullet points, and speaker notes with context awareness
   - **Image Replacement**: AI-generated image replacement using DALL-E or Stability AI with custom prompts
   - **Batch Operations**: Edit multiple slides simultaneously with comprehensive error handling
@@ -23,7 +40,11 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - Real-time progress tracking during PowerPoint generation (polling-based)
   - Proper route parameters and state management across sections
   - Session-based outline persistence and retrieval
-  - AI-assisted slide editing with context-aware text improvements and image replacement
+  - Complete AI-assisted slide editing with form validation, preview mode, and undo functionality
+  - Batch editing capabilities for multiple slides
+  - Global keyboard shortcuts for efficient editing workflow
+  - Toast notifications for user feedback
+  - Comprehensive error handling and retry mechanisms
 - Strict Pydantic v2 base model with camelCase JSON aliasing (`backend/app/models/base.py`)
 - PRD-aligned domain models:
   - `ChatRequest` (prompt, slideCount, model, …)
@@ -57,7 +78,87 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
   - Download endpoint added: `GET /api/v1/slides/download?jobId=<uuid>` serves generated PPTX with correct headers
   - **Progress Updates**: Polling-based progress system for PowerPoint generation (WebSocket removed for reliability)
 
+## Recent Updates (September 2025)
+
+### Resumable Downloads Implementation ✅
+
+**Problem Solved**: PowerPoint downloads needed to support resume functionality for large files and unreliable network conditions, with proper authentication and error recovery.
+
+**Solution Implemented**:
+1. **Range Request Support**: Implemented HTTP Range headers for resumable downloads
+2. **IndexedDB Persistence**: Automatic chunk persistence every 2 seconds during download
+3. **Crash Recovery**: Downloads automatically resume from the last saved byte after interruption
+4. **Authentication Integration**: Download manager properly passes authentication headers to protected endpoints
+5. **Smart Cleanup**: Automatic removal of completed downloads and 7-day cleanup for abandoned downloads
+
+**Technical Changes**:
+- **Download Manager Enhancement** (`frontend/src/lib/download-manager.ts`):
+  - Added `resumable` option (default: true) to enable Range request support
+  - Implemented IndexedDB for persistent chunk storage
+  - Added automatic resume detection for partial downloads
+  - Integrated authentication header support
+  - Implemented periodic persistence (2-second intervals)
+  - Added cleanup utilities for managing stored downloads
+
+- **Download Button Update** (`frontend/src/components/slides/DownloadButton.tsx`):
+  - Integrated authentication headers from auth store
+  - Enhanced error handling with resume capability
+  - Added proper header propagation to download manager
+
+**Configuration**:
+- **Default Settings**:
+  - `resumable: true` - Enables Range request support
+  - `chunkSize: 1MB` - Default chunk size for range requests
+  - Automatic persistence every 2 seconds
+  - 7-day retention for abandoned downloads
+
+**Result**: PowerPoint downloads are now resilient to network failures, support resume functionality, and properly handle authentication. Large files can be downloaded reliably even on unstable connections, with automatic recovery from interruptions.
+
 ## Recent Updates (August 2025)
+
+### Complete Slide Editing UI Implementation ✅
+
+**Problem Solved**: The slide editing functionality needed a complete frontend implementation with proper form handling, validation, state management, and user experience features.
+
+**Solution Implemented**:
+1. **Enhanced EditControls Component**: Complete refactor using React Hook Form and Zod validation
+2. **Form Validation & UX**: Real-time validation, character counts, and comprehensive error handling
+3. **Preview Functionality**: Real-time slide preview with AI-generated improvements
+4. **Undo System**: Complete edit history with undo functionality for all operations
+5. **Batch Edit Controls**: New component for editing multiple slides simultaneously
+6. **Toast Notifications**: Global toast system for user feedback
+7. **UI Component Library**: Complete shadcn/ui implementation
+8. **State Management**: Enhanced Zustand store with optimistic updates
+9. **Keyboard Shortcuts**: Global keyboard shortcut system
+10. **Comprehensive Testing**: Full test suite with proper configuration
+
+**Technical Changes**:
+- **Frontend Components**:
+  - `frontend/src/components/slides/EditControls.tsx`: Complete refactor with React Hook Form, Zod validation, preview functionality, and undo system
+  - `frontend/src/components/slides/BatchEditControls.tsx`: New component for batch editing with slide selection interface
+  - `frontend/src/components/ui/*`: Complete shadcn/ui component library (Form, Dialog, Select, Button, Input, Textarea, Label, Checkbox)
+  - `frontend/src/providers/ToastProvider.tsx`: Global toast notification system
+  - `frontend/src/hooks/use-edit-shortcuts.ts`: Global keyboard shortcut management
+  - `frontend/src/routes/pages/SlidesPage.tsx`: Integration of all editing components with navigation
+
+- **State Management**:
+  - `frontend/src/stores/slides-store.ts`: Enhanced with editing state, edit history, optimistic updates, and undo functionality
+  - `frontend/src/config/editing.ts`: Configuration for UI behavior, validation limits, and keyboard shortcuts
+
+- **API Integration**:
+  - `frontend/src/hooks/api/slides.ts`: Updated to use raw API client for editing endpoints with proper error handling
+  - `frontend/src/lib/utils.ts`: Utility functions for class name management
+
+- **Testing & Configuration**:
+  - `frontend/vitest.config.ts`: Updated with jsdom environment and path aliases
+  - `frontend/vitest.setup.ts`: Proper test environment setup with global APIs
+  - `frontend/src/components/slides/EditControls.test.tsx`: Comprehensive tests for form validation, preview, and undo functionality
+  - `frontend/src/components/slides/BatchEditControls.test.tsx`: Full test suite for batch editing component
+
+- **Dependencies**:
+  - Added: `react-hook-form`, `@hookform/resolvers`, `zod`, `react-hot-toast`, `class-variance-authority`, `@radix-ui/*` components
+
+**Result**: Complete slide editing UI with professional form handling, real-time validation, preview functionality, undo system, batch editing, keyboard shortcuts, and comprehensive error handling. The user experience is now production-ready with proper feedback and accessibility features.
 
 ### DALL-E as Default Image Generator ✅
 
@@ -222,6 +323,12 @@ This repository contains both the frontend (React + Vite + TypeScript) and backe
 ## Project Structure
 
 - `frontend/` – React 18 + Vite + TypeScript app
+  - `src/components/slides/` – Slide editing components (EditControls, BatchEditControls)
+  - `src/components/ui/` – shadcn/ui component library (Form, Dialog, Select, Button, etc.)
+  - `src/stores/` – Zustand state management with editing state and history
+  - `src/hooks/` – Custom hooks including API integration and keyboard shortcuts
+  - `src/providers/` – Context providers including ToastProvider for notifications
+  - `src/config/` – Configuration files for editing behavior and validation
 - `backend/` – FastAPI app (entry: `backend/app/main.py`)
 
 ## Quick Start
@@ -257,6 +364,11 @@ The application now provides a complete, seamless user experience:
 3. **Refine if Needed**: Ask follow-up questions to improve the outline
 4. **Switch to Slides**: Click "Slides" in the sidebar to see the complete outline
 5. **Edit Slides (Optional)**: Use the "Edit Slide" button to refine titles, bullet points, notes, or replace images with AI assistance
+   - **Form Validation**: Real-time validation with character counts and field requirements
+   - **Preview Mode**: See AI-generated improvements before applying changes
+   - **Undo Functionality**: Undo any edit operation with complete edit history
+   - **Keyboard Shortcuts**: Use Ctrl+E to edit, Ctrl+S to save, Escape to cancel, Ctrl+Z to undo
+   - **Batch Editing**: Select multiple slides and apply edits simultaneously
 6. **Generate PPTX**: Click "Build PowerPoint" button to start generation
 7. **Monitor Progress**: Watch real-time progress updates during generation (polls backend every 2 seconds)
 8. **Download**: When generation completes, click "Download PPTX" button that appears with "✅ PowerPoint ready!" message
@@ -264,11 +376,13 @@ The application now provides a complete, seamless user experience:
 ### **Key Features**
 - ✅ **Session Continuity**: Your chat session and slide outlines persist when switching between sections
 - ✅ **Clear Navigation**: Sidebar automatically includes your current session when navigating to Slides
-- ✅ **AI-Assisted Editing**: Edit slide titles, bullet points, notes, and images with AI assistance for better content
+- ✅ **Complete AI-Assisted Editing**: Professional editing interface with form validation, preview mode, and undo functionality
+- ✅ **Batch Editing**: Edit multiple slides simultaneously with comprehensive selection interface
+- ✅ **Keyboard Shortcuts**: Global shortcuts (Ctrl+E, Ctrl+S, Escape, Ctrl+Z) for efficient editing workflow
 - ✅ **Real-time Progress**: Polling-based system provides live updates during PowerPoint generation
 - ✅ **Manual Download**: Clear download button appears when generation is complete
 - ✅ **Multiple Sessions**: Create and manage multiple chat sessions with different slide outlines
-- ✅ **Error Recovery**: Retry buttons and clear error messages for failed operations
+- ✅ **Error Recovery**: Retry buttons, toast notifications, and clear error messages for failed operations
 - ✅ **Proxy Configuration**: Vite dev server properly proxies API calls to backend
 
 ## Getting Started
@@ -277,6 +391,18 @@ The application now provides a complete, seamless user experience:
 - Node.js 18.19.0 (see `.nvmrc`)
 - Python 3.12.0 (see `backend/.python-version`)
 - Docker Desktop (for dev workflow)
+
+### Frontend Technical Stack (Updated)
+- **React 18** with TypeScript and Vite
+- **State Management**: Zustand v4.5 with Immer and DevTools middleware
+- **Form Handling**: React Hook Form with Zod validation
+- **UI Components**: shadcn/ui component library with Radix UI primitives
+- **Styling**: Tailwind CSS with custom animations
+- **Notifications**: react-hot-toast for global toast notifications
+- **Testing**: Vitest with React Testing Library and jsdom environment
+- **API Client**: OpenAPI generated client with TanStack Query v5
+- **Icons**: Lucide React for consistent iconography
+- **Utilities**: class-variance-authority, clsx, tailwind-merge for styling utilities
 
 ### Install dependencies
 
@@ -493,6 +619,15 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 **Error:** Download fails with 404 error
 - **Solution:** The download URL format has been updated to use path parameters. Ensure you're using the latest version of the application. The correct format is `/api/v1/slides/download/{job_id}`.
 
+**Error:** Download interrupted or failed midway
+- **Solution:** The download manager now supports automatic resume. Simply retry the download and it will continue from where it left off. The system uses IndexedDB to persist downloaded chunks and automatically resumes using HTTP Range requests.
+
+**Error:** Download won't resume after browser restart
+- **Solution:** Downloads persist in IndexedDB across browser restarts. When you retry a download, it should automatically detect the partial download and resume from the last saved byte. Check the browser console for any IndexedDB errors.
+
+**Error:** Authentication errors during download
+- **Solution:** The download manager now properly includes authentication headers. Ensure you're logged in and have a valid session token. If the token expires during download, you'll need to log in again and retry.
+
 **Error:** DALL-E provider showing as unavailable
 - **Solution:** Ensure `OPENAI_API_KEY` is set in `backend/.env` file. The provider status can be checked via `GET /api/v1/slides/providers` endpoint.
 
@@ -500,10 +635,22 @@ PYTHONPATH=$(pwd) RUN_LIVE_LLM=1 OPENROUTER_API_KEY=sk-or-... OPENROUTER_REQUIRE
 - **Solution:** Verify that the backend is running and the `/api/v1/slides/providers` endpoint returns both providers as available. Check browser console for any API errors.
 
 **Error:** Slide editing not working or validation errors
-- **Solution:** Ensure you have a valid `OPENROUTER_API_KEY` set in `backend/.env` file for AI-assisted text editing. The editing functionality requires LLM access for AI-powered improvements. Check browser console for any validation errors or API failures.
+- **Solution:** Ensure you have a valid `OPENROUTER_API_KEY` set in `backend/.env` file for AI-assisted text editing. The editing functionality requires LLM access for AI-powered improvements. Check browser console for any validation errors or API failures. The new editing interface includes form validation, so ensure all required fields are filled correctly.
 
 **Error:** Edit button not appearing in Slides section
-- **Solution:** The edit functionality is integrated into the Slides section. Ensure you're using the latest version of the application and that the backend is running properly. The edit button should appear for each slide in the Slides section.
+- **Solution:** The edit functionality is integrated into the Slides section. Ensure you're using the latest version of the application and that the backend is running properly. The edit button should appear for each slide in the Slides section. The new implementation includes enhanced EditControls with form validation and preview functionality.
+
+**Error:** Form validation errors in editing dialog
+- **Solution:** The new editing interface uses React Hook Form with Zod validation. Ensure all required fields are filled and meet the validation requirements (e.g., content length limits, bullet_index for bullet edits). Check the form for validation messages and character count indicators.
+
+**Error:** Keyboard shortcuts not working
+- **Solution:** The keyboard shortcuts (Ctrl+E, Ctrl+S, Escape, Ctrl+Z) are global and should work when the editing dialog is open. Ensure you're not in an input field when using shortcuts, or use the mouse buttons instead. The shortcuts are managed by the `useEditShortcuts` hook.
+
+**Error:** Toast notifications not appearing
+- **Solution:** The toast notification system requires the `ToastProvider` to be properly configured. Ensure the application is using the latest version with the `ToastProvider` wrapper in `main.tsx`. Toast notifications appear for success and error messages during editing operations.
+
+**Error:** Batch editing not working
+- **Solution:** The batch editing functionality requires selecting slides using the checkboxes in the BatchEditControls component. Ensure you've selected at least one slide and chosen a batch operation from the dropdown. The batch editing interface is separate from individual slide editing.
 
 #### Image Generation Issues
 **Error:** `405 Method Not Allowed` from Stability AI API
@@ -563,6 +710,12 @@ Use the integrated Playwright MCP browser to exercise the app:
 - Expected result in dev (no API key): assistant reply renders as slide cards (title, bullets, optional image) via `SlidePreview`.
 - **Test the Complete Flow**: After generating slides in Chat, click "Slides" in the sidebar to navigate to the Slides section and test PowerPoint generation.
 - **Test Slide Editing**: Use the "Edit Slide" button in the Slides section to test AI-assisted editing of titles, bullet points, notes, and images.
+  - **Form Validation**: Test the new form validation by leaving required fields empty or exceeding character limits
+  - **Preview Mode**: Use the preview functionality to see AI-generated improvements before applying
+  - **Undo Functionality**: Test the undo button after making edits to verify edit history works
+  - **Keyboard Shortcuts**: Test Ctrl+E to edit, Ctrl+S to save, Escape to cancel, Ctrl+Z to undo
+  - **Batch Editing**: Test the batch editing functionality by selecting multiple slides and applying edits
+  - **Toast Notifications**: Verify that success and error messages appear as toast notifications
 - **Note**: The application now uses a polling-based progress system for PowerPoint generation, which is more reliable than the previous WebSocket implementation.
 
 

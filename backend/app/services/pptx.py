@@ -151,6 +151,15 @@ async def process_slides_async(job_id: str, slides: List[SlidePlan], session_id:
         # Update job status to processing
         jobs[job_id]["status"] = "processing"
         
+        # Log the slides being processed
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Processing {len(slides)} slides for job {job_id}")
+        for idx, slide in enumerate(slides):
+            logger.info(f"Slide {idx + 1}: title='{slide.title}', has_image={slide.image is not None}")
+            if slide.image:
+                logger.info(f"  Image URL: {slide.image.url}")
+        
         # Build PowerPoint with progress tracking
         def progress_callback(completed: int, total: int):
             jobs[job_id]["progress"] = completed

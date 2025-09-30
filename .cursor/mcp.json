@@ -14,6 +14,25 @@
 				"AZURE_OPENAI_API_KEY": "YOUR_AZURE_KEY_HERE",
 				"OLLAMA_API_KEY": "YOUR_OLLAMA_API_KEY_HERE"
 			}
+		},
+		"image-downloader": {
+			"command": "npx",
+			"args": ["mcp-image-downloader"],
+			"env": {
+				"DEFAULT_SAVE_PATH": "C:\\Users\\dsuth\\Downloads",
+				"DEFAULT_FORMAT": "jpeg",
+				"DEFAULT_COMPRESS": "true",
+				"DEFAULT_MAX_WIDTH": "1920",
+				"DEFAULT_MAX_HEIGHT": "1080",
+				"DEFAULT_CONCURRENCY": "3"
+			}
+		},
+		"unsplash": {
+			"command": "npx",
+			"args": ["mcp-unsplash"],
+			"env": {
+				"UNSPLASH_ACCESS_KEY": "wWoGcXGfibFrFZtzNnF_CHDaBfon0j3rLhPqf7Y6gfA"
+			}
 		}
 	}
 }

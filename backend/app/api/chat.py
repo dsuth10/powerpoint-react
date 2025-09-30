@@ -98,5 +98,16 @@ async def generate_chat_outline(request: ChatRequest, _: None = Depends(rate_lim
     logger.info(f"Returning {len(slides_out)} slides")
     for i, slide in enumerate(slides_out):
         logger.info(f"Final slide {i+1}: title='{slide.title}', bullets={len(slide.bullets)}, has_image={slide.image is not None}, has_notes={bool(slide.notes)}")
+        if slide.image:
+            logger.info(f"  Image details: url={slide.image.url}, alt={slide.image.alt_text}, provider={slide.image.provider}")
+        
+    # DEBUG: Print the response as it will be serialized
+    print("=" * 80)
+    print("=== CHAT RESPONSE SERIALIZATION ===")
+    response_dict = ChatResponse(slides=slides_out, sessionId=session_id).model_dump()
+    print(f"Response dict: {response_dict}")
+    for idx, slide in enumerate(response_dict.get('slides', [])):
+        print(f"Slide {idx + 1} in response: has 'image' key = {'image' in slide}, value = {slide.get('image')}")
+    print("=" * 80)
 
     return slides_out
